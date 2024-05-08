@@ -9,13 +9,8 @@ E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\MonoMod.Utils.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\MonoMod.RuntimeDetour.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\netstandard.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.AnimationModule.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.AudioModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Unity.Animation.Rigging.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.AIModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.ParticleSystemModule.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.UI.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Unity.TextMeshPro.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Facepunch.Steamworks.Win64.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Unity.InputSystem.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.VFXModule.dll
