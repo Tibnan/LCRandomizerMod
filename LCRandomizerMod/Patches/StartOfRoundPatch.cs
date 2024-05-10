@@ -145,8 +145,11 @@ namespace LCRandomizerMod.Patches
 
                 for (int i = 0; i < Unity.Netcode.NetworkManager.Singleton.ConnectedClientsList.Count; i++)
                 {
-                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
-                    SoundManager.Instance.SetPlayerPitch(Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]), i);
+
+                    //modelValues[i] <= 1 ? Mathf.Lerp(1f, 1.5f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)
+                    
+                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
+                    SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
                 }
 
                 RandomizerModBase.mls.LogInfo("Successfully randomized player stats on level load. Synced values across clients.");
@@ -230,8 +233,8 @@ namespace LCRandomizerMod.Patches
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = defaultPlayerMaskLayer * (uint)modelValues[i];
 
 
-                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
-                    SoundManager.Instance.SetPlayerPitch(Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]), i);
+                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
+                    SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
                 }
             }
         }
