@@ -34,6 +34,8 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("Registering dog handlers: " + "ClientReceivesRandomDogStat " + "ClientReceivesDogID");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesRandomDogStat", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedClient));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogID", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedOnID));
+                //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
+                //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));
             }
             else
             {
@@ -55,6 +57,8 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("Registering dog handlers: " + "ClientReceivesRandomDogStat " + "ClientReceivesDogID");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesRandomDogStat", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedClient));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogID", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedOnID));
+                //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
+                //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));
             }
         }
     }

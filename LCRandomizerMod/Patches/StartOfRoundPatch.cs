@@ -17,6 +17,7 @@ namespace LCRandomizerMod.Patches
     {
         static Vector3 defaultPlayerScale;
         static uint defaultPlayerMaskLayer;
+        const float defaultPlayerPitch = 1f;
 
         static float sprintRand;
         static int healthRand;
@@ -106,7 +107,7 @@ namespace LCRandomizerMod.Patches
                 FastBufferWriter fastBufferModelValueWriter = new FastBufferWriter(sizeof(float) * modelValues.Length, Unity.Collections.Allocator.Temp, -1);
                 for (int i = 0; i < 4; i++)
                 {
-                    modelValues[i] = Convert.ToSingle(new System.Random().Next(1, 15)) / 10;
+                    modelValues[i] = Convert.ToSingle(new System.Random().Next(5, 15)) / 10;
                     fastBufferModelValueWriter.WriteValueSafe<float>(modelValues[i]);
                 }
 
@@ -126,6 +127,28 @@ namespace LCRandomizerMod.Patches
                     GameNetworkManager.Instance.localPlayerController.DamagePlayer(0, true, false, CauseOfDeath.Unknown, 0, false);
                 }
 
+                //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
+
+                //FastBufferWriter fastBufferPitchWriter = new FastBufferWriter(sizeof(float) * 4, Unity.Collections.Allocator.Temp, -1);
+                //float[] pitchValues = new float[4];
+                //for (int i = 0; i < 4; i++)
+                //{
+                //    pitchValues[i] = Convert.ToSingle(new System.Random().Next(5, 30)) / 10;
+                //    fastBufferPitchWriter.WriteValueSafe<float>(pitchValues[i]);
+                //    SoundManager.Instance.SetPlayerPitch(pitchValues[i], i);
+                //}
+
+                //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", fastBufferPitchWriter, NetworkDelivery.Reliable);
+                //fastBufferPitchWriter.Dispose();
+
+                //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
+
+                for (int i = 0; i < Unity.Netcode.NetworkManager.Singleton.ConnectedClientsList.Count; i++)
+                {
+                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
+                    SoundManager.Instance.SetPlayerPitch(Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]), i);
+                }
+
                 RandomizerModBase.mls.LogInfo("Successfully randomized player stats on level load. Synced values across clients.");
             }
             else
@@ -141,6 +164,7 @@ namespace LCRandomizerMod.Patches
             for (int i = 0; i < StartOfRound.Instance.allPlayerObjects.Length; i++)
             {
                 StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = defaultPlayerScale;
+                SoundManager.Instance.SetPlayerPitch(defaultPlayerPitch, i);
             }
         }
 
@@ -204,6 +228,10 @@ namespace LCRandomizerMod.Patches
 
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = defaultPlayerScale * modelValues[i];
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = defaultPlayerMaskLayer * (uint)modelValues[i];
+
+
+                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
+                    SoundManager.Instance.SetPlayerPitch(Mathf.Lerp(0.5f, 15f, 1.5f - modelValues[i]), i);
                 }
             }
         }
@@ -237,10 +265,8 @@ namespace LCRandomizerMod.Patches
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                int deadline;
-                int quota;
-                reader.ReadValueSafe<int>(out deadlineRand); //deadline
-                reader.ReadValueSafe<int>(out quotaRand); //quota
+                reader.ReadValueSafe<int>(out deadlineRand);
+                reader.ReadValueSafe<int>(out quotaRand);
                 RandomizerModBase.mls.LogInfo("Received deadline: " + deadlineRand + " quota: " + quotaRand);
                 
                 TimeOfDay.Instance.timeUntilDeadline = deadlineRand;
@@ -283,5 +309,34 @@ namespace LCRandomizerMod.Patches
                 HUDManager.Instance.DisplayDaysLeft(temp);
             }
         }
+
+        //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
+
+        //public static void SetPitchDataSentByServer(ulong _, FastBufferReader reader)
+        //{
+        //    if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
+        //    {
+        //        for (int i = 0; i < 4; i++)
+        //        {
+        //            float pitch;
+        //            reader.ReadValueSafe<float>(out pitch);
+        //            SoundManager.Instance.SetPlayerPitch(pitch, i);
+        //        }
+        //    }
+        //}
+
+        //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
+
+        //TBD IF INCLUDED IN FINAL VERSION
+
+        //[HarmonyPatch("Update")]
+        //[HarmonyPostfix]
+        //public static void PowerSurgeShipRandomly(StartOfRound __instance)
+        //{
+        //    if (!StartOfRound.Instance.inShipPhase && RoundManager.Instance.currentLevel.currentWeather != LevelWeatherType.Stormy)
+        //    {
+        //        if (new System.Random().Next(1, 10001) == 10000) StartOfRound.Instance.PowerSurgeShip();
+        //    }
+        //}
     }
 }
