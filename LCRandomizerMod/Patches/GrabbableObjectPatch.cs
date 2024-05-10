@@ -12,9 +12,6 @@ namespace LCRandomizerMod.Patches
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class GrabbableObjectPatch
     {
-        static int scrapValue;
-        static ulong reference;
-
         [HarmonyPatch(nameof(GrabbableObject.SetScrapValue))]
         [HarmonyPrefix]
         public static bool SetScrapValue(GrabbableObject __instance, int setValueTo)
@@ -63,8 +60,8 @@ namespace LCRandomizerMod.Patches
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                reader.ReadValueSafe<int>(out scrapValue, default);
-                RandomizerModBase.mls.LogInfo("Got random value: " + scrapValue);
+                reader.ReadValueSafe<int>(out RandomizerValues.scrapValue, default);
+                RandomizerModBase.mls.LogInfo("Got random value: " + RandomizerValues.scrapValue);
             }
         }
 
@@ -72,27 +69,27 @@ namespace LCRandomizerMod.Patches
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                reader.ReadValueSafe<ulong>(out reference, default);
+                reader.ReadValueSafe<ulong>(out RandomizerValues.scrapReference, default);
                 FinalizeValue();
             }
         }
 
         public static void FinalizeValue()
         {
-            RandomizerModBase.mls.LogInfo("Got scrap identifier: " + reference);
-            NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[reference];
+            RandomizerModBase.mls.LogInfo("Got scrap identifier: " + RandomizerValues.scrapReference);
+            NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[RandomizerValues.scrapReference];
             GrabbableObject scrap = networkObject.gameObject.GetComponentInChildren<GrabbableObject>();
 
             RandomizerModBase.mls.LogInfo("Scrap name that was received from server: " + scrap.name);
 
-            scrap.scrapValue = scrapValue;
+            scrap.scrapValue = RandomizerValues.scrapValue;
             ScanNodeProperties componentInChildren = scrap.gameObject.GetComponentInChildren<ScanNodeProperties>();
             if (componentInChildren == null)
             {
                 Debug.LogError("Scan node is missing for item!: " + scrap.gameObject.name);
             }
-            componentInChildren.subText = string.Format("Value: ${0}", scrapValue);
-            componentInChildren.scrapValue = scrapValue;
+            componentInChildren.subText = string.Format("Value: ${0}", RandomizerValues.scrapValue);
+            componentInChildren.scrapValue = RandomizerValues.scrapValue;
         }
     }
 }

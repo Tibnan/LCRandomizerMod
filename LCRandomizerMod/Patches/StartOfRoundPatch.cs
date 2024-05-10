@@ -9,87 +9,77 @@ using UnityEngine;
 using System.Threading.Tasks;
 using Unity.Netcode;
 using System.Runtime.CompilerServices;
+using System.CodeDom.Compiler;
+using UnityEngine.Assertions.Must;
 
 namespace LCRandomizerMod.Patches
 {
     [HarmonyPatch(typeof(StartOfRound))]
     internal class StartOfRoundPatch
     {
-        static Vector3 defaultPlayerScale;
-        static uint defaultPlayerMaskLayer;
-        const float defaultPlayerPitch = 1f;
-
-        static float sprintRand;
-        static int healthRand;
-        static float movementSpeedRand;
-        static float sinkMultiplierRand;
-
-        static int quotaRand;
-        static int deadlineRand;
-
-        static bool firstTimeShow;
-
         [HarmonyPatch(nameof(StartOfRound.StartGame))]
         [HarmonyPostfix]
         public static void RandomizePlayerStatsOnLevelLoadServer(StartOfRound __instance)
         {
-            firstTimeShow = TimeOfDay.Instance.profitQuota == 130;
-            RandomizerModBase.mls.LogInfo("First time? " + firstTimeShow);
+            RandomizerValues.firstTimeShow = TimeOfDay.Instance.profitQuota == 130;
+            RandomizerModBase.mls.LogInfo("First time? " + RandomizerValues.firstTimeShow);
 
             if (Unity.Netcode.NetworkManager.Singleton.IsHost)
             {
+                RandomizerValues.ClearLists();
+
                 //Generate random values
-                sprintRand = Convert.ToSingle(new System.Random().Next(1, 101)) / 10;
-                healthRand = new System.Random().Next(1, 101);
-                movementSpeedRand = new System.Random().Next(30, 101) / 10;
-                sinkMultiplierRand = new System.Random().Next(100, 10000) / 10;
+                RandomizerValues.sprintRand = Convert.ToSingle(new System.Random().Next(1, 101)) / 10;
+                RandomizerValues.healthRand = new System.Random().Next(1, 101);
+                RandomizerValues.movementSpeedRand = new System.Random().Next(30, 101) / 10;
+                RandomizerValues.sinkMultiplierRand = new System.Random().Next(100, 10000) / 10;
 
                 //Generate random deadline and quota values on new save load and sync with clients
                 if (TimeOfDay.Instance.profitQuota == 130)
                 {
-                    deadlineRand = 1080; /*GenerateNewDeadline();*/ //For testing
-                    RandomizerModBase.mls.LogInfo("New deadline time: " + deadlineRand +  " (" + deadlineRand / 1080 + ") days");
-                    quotaRand = 1; /*new System.Random().Next(500, 20000);*/ //For testing
-                    RandomizerModBase.mls.LogInfo("New quota: " + quotaRand);
+                    RandomizerValues.deadlineRand = 1080; /*GenerateNewDeadline();*/ //For testing
+                    RandomizerModBase.mls.LogInfo("New deadline time: " + RandomizerValues.deadlineRand +  " (" + RandomizerValues.deadlineRand / 1080 + ") days");
+                    RandomizerValues.quotaRand = 1; /*new System.Random().Next(500, 20000);*/ //For testing
+                    RandomizerModBase.mls.LogInfo("New quota: " + RandomizerValues.quotaRand);
 
                     RandomizeQuotaVariables();
 
-                    SendQuotaValues(deadlineRand, quotaRand);
+                    SendQuotaValues(RandomizerValues.deadlineRand, RandomizerValues.quotaRand);
 
-                    TimeOfDay.Instance.timeUntilDeadline = deadlineRand;
+                    TimeOfDay.Instance.timeUntilDeadline = RandomizerValues.deadlineRand;
                     int daysUntilDeadline = (int)Mathf.Floor(TimeOfDay.Instance.timeUntilDeadline / TimeOfDay.Instance.totalTime);
                     StartOfRound.Instance.deadlineMonitorText.text = string.Format("DEADLINE:\n{0} Days", daysUntilDeadline);
 
-                    TimeOfDay.Instance.profitQuota = quotaRand;
+                    TimeOfDay.Instance.profitQuota = RandomizerValues.quotaRand;
                     StartOfRound.Instance.profitQuotaMonitorText.text = string.Format("PROFIT QUOTA:\n${0} / ${1}", TimeOfDay.Instance.quotaFulfilled, TimeOfDay.Instance.profitQuota);
                 }
 
                 //Generate random weather values
                 LevelWeatherType[] weatherTypes = Enum.GetValues(typeof(LevelWeatherType)) as LevelWeatherType[];
-                RoundManagerPatch.randomizedWeatherIdx = new System.Random().Next(0, weatherTypes.Length);
-                RoundManagerPatch.randomizedWeatherIdx = 5; //For testing
+                RandomizerValues.randomizedWeatherIdx = new System.Random().Next(0, weatherTypes.Length);
+                RandomizerValues.randomizedWeatherIdx = 5; //For testing
 
-                RandomizerModBase.mls.LogInfo("Randomized weather index: " + RoundManagerPatch.randomizedWeatherIdx);
+                RandomizerModBase.mls.LogInfo("Randomized weather index: " + RandomizerValues.randomizedWeatherIdx);
 
                 FastBufferWriter fastBufferWeatherWriter = new FastBufferWriter(sizeof(int), Unity.Collections.Allocator.Temp, -1);
-                fastBufferWeatherWriter.WriteValueSafe<int>(RoundManagerPatch.randomizedWeatherIdx);
+                fastBufferWeatherWriter.WriteValueSafe<int>(RandomizerValues.randomizedWeatherIdx);
 
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceiveWeatherData", fastBufferWeatherWriter, NetworkDelivery.Reliable);
                 fastBufferWeatherWriter.Dispose();
 
                 //Set values on server
-                GameNetworkManager.Instance.localPlayerController.sprintTime = sprintRand;
-                RandomizerModBase.mls.LogInfo("Set sprint time to: " + sprintRand);
-                GameNetworkManager.Instance.localPlayerController.health = healthRand;
-                RandomizerModBase.mls.LogInfo("Set health to: " + healthRand);
-                GameNetworkManager.Instance.localPlayerController.movementSpeed = movementSpeedRand;
-                RandomizerModBase.mls.LogInfo("Set movement speed to: " + movementSpeedRand);
-                GameNetworkManager.Instance.localPlayerController.sinkingSpeedMultiplier = sinkMultiplierRand;
-                GameNetworkManager.Instance.localPlayerController.sinkingValue = sinkMultiplierRand;
-                RandomizerModBase.mls.LogInfo("Set sinking values to:  " + sinkMultiplierRand);
+                GameNetworkManager.Instance.localPlayerController.sprintTime = RandomizerValues.sprintRand;
+                RandomizerModBase.mls.LogInfo("Set sprint time to: " + RandomizerValues.sprintRand);
+                GameNetworkManager.Instance.localPlayerController.health = RandomizerValues.healthRand;
+                RandomizerModBase.mls.LogInfo("Set health to: " + RandomizerValues.healthRand);
+                GameNetworkManager.Instance.localPlayerController.movementSpeed = RandomizerValues.movementSpeedRand;
+                RandomizerModBase.mls.LogInfo("Set movement speed to: " + RandomizerValues.movementSpeedRand);
+                GameNetworkManager.Instance.localPlayerController.sinkingSpeedMultiplier = RandomizerValues.sinkMultiplierRand;
+                GameNetworkManager.Instance.localPlayerController.sinkingValue = RandomizerValues.sinkMultiplierRand;
+                RandomizerModBase.mls.LogInfo("Set sinking values to:  " + RandomizerValues.sinkMultiplierRand);
 
                 RandomizerModBase.mls.LogInfo("Sending values to clients...");
-                float[] randValues = new float[] { sprintRand, healthRand, movementSpeedRand, sinkMultiplierRand};
+                float[] randValues = new float[] { RandomizerValues.sprintRand, RandomizerValues.healthRand, RandomizerValues.movementSpeedRand, RandomizerValues.sinkMultiplierRand};
 
                 FastBufferWriter fastBufferRvalueWriter = new FastBufferWriter(sizeof(float) * randValues.Length, Unity.Collections.Allocator.Temp, -1);
                 fastBufferRvalueWriter.WriteValueSafe<float>(randValues[0]);
@@ -114,15 +104,15 @@ namespace LCRandomizerMod.Patches
 
                 for (int i = 0; i < Unity.Netcode.NetworkManager.Singleton.ConnectedClientsList.Count; i++)
                 {
-                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = defaultPlayerScale * modelValues[i];
-                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = defaultPlayerMaskLayer * (uint)modelValues[i];
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale * modelValues[i];
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = RandomizerValues.defaultPlayerMaskLayer * (uint)modelValues[i];
                 }
 
                 RandomizerModBase.mls.LogInfo("Sending player model values...");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "SetPlayerModelValues", fastBufferModelValueWriter, NetworkDelivery.Reliable);
                 fastBufferModelValueWriter.Dispose();
 
-                if (healthRand < 20)
+                if (RandomizerValues.healthRand < 20)
                 {
                     GameNetworkManager.Instance.localPlayerController.DamagePlayer(0, true, false, CauseOfDeath.Unknown, 0, false);
                 }
@@ -148,7 +138,7 @@ namespace LCRandomizerMod.Patches
 
                     //modelValues[i] <= 1 ? Mathf.Lerp(1f, 1.5f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)
                     
-                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
+                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
                     SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
                 }
 
@@ -166,8 +156,8 @@ namespace LCRandomizerMod.Patches
         {
             for (int i = 0; i < StartOfRound.Instance.allPlayerObjects.Length; i++)
             {
-                StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = defaultPlayerScale;
-                SoundManager.Instance.SetPlayerPitch(defaultPlayerPitch, i);
+                StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale;
+                SoundManager.Instance.SetPlayerPitch(RandomizerValues.defaultPlayerPitch, i);
             }
         }
 
@@ -184,8 +174,8 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo(item);
             }
 
-            defaultPlayerMaskLayer = __instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask;
-            defaultPlayerScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerBody.localScale;
+            RandomizerValues.defaultPlayerMaskLayer = __instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask;
+            RandomizerValues.defaultPlayerScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerBody.localScale;
         }
 
         public static void SetValuesSentByServer(ulong _, FastBufferReader reader)
@@ -229,11 +219,11 @@ namespace LCRandomizerMod.Patches
                     reader.ReadValueSafe<float>(out modelValues[i]);
                     RandomizerModBase.mls.LogInfo("Read out info: " + modelValues[i]);
 
-                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = defaultPlayerScale * modelValues[i];
-                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = defaultPlayerMaskLayer * (uint)modelValues[i];
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale * modelValues[i];
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = RandomizerValues.defaultPlayerMaskLayer * (uint)modelValues[i];
 
 
-                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
+                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
                     SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
                 }
             }
@@ -268,19 +258,19 @@ namespace LCRandomizerMod.Patches
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                reader.ReadValueSafe<int>(out deadlineRand);
-                reader.ReadValueSafe<int>(out quotaRand);
-                RandomizerModBase.mls.LogInfo("Received deadline: " + deadlineRand + " quota: " + quotaRand);
+                reader.ReadValueSafe<int>(out RandomizerValues.deadlineRand);
+                reader.ReadValueSafe<int>(out RandomizerValues.quotaRand);
+                RandomizerModBase.mls.LogInfo("Received deadline: " + RandomizerValues.deadlineRand + " quota: " + RandomizerValues.quotaRand);
                 
-                TimeOfDay.Instance.timeUntilDeadline = deadlineRand;
+                TimeOfDay.Instance.timeUntilDeadline = RandomizerValues.deadlineRand;
                 int daysUntilDeadline = (int)Mathf.Floor(TimeOfDay.Instance.timeUntilDeadline / TimeOfDay.Instance.totalTime);
                 StartOfRound.Instance.deadlineMonitorText.text = string.Format("DEADLINE:\n{0} Days", daysUntilDeadline);
 
-                if (quotaRand == 0)
+                if (RandomizerValues.quotaRand == 0)
                 {
                     return;
                 }
-                TimeOfDay.Instance.profitQuota = quotaRand;
+                TimeOfDay.Instance.profitQuota = RandomizerValues.quotaRand;
                 StartOfRound.Instance.profitQuotaMonitorText.text = string.Format("PROFIT QUOTA:\n${0} / ${1}", TimeOfDay.Instance.quotaFulfilled, TimeOfDay.Instance.profitQuota);
             }
         }
@@ -291,13 +281,13 @@ namespace LCRandomizerMod.Patches
         {
             RandomizerModBase.mls.LogInfo("Showing first time new deadline!!!!");
 
-            if (firstTimeShow)
+            if (RandomizerValues.firstTimeShow)
             {
-                HUDManager.Instance.DisplayDaysLeft(deadlineRand / 1080);
-                firstTimeShow = false;
+                HUDManager.Instance.DisplayDaysLeft(RandomizerValues.deadlineRand / 1080);
+                RandomizerValues.firstTimeShow = false;
 
                 FastBufferWriter fastBufferFirstTimeShowWriter = new FastBufferWriter(sizeof(int), Unity.Collections.Allocator.Temp, -1);
-                fastBufferFirstTimeShowWriter.WriteValueSafe<int>(deadlineRand / 1080);
+                fastBufferFirstTimeShowWriter.WriteValueSafe<int>(RandomizerValues.deadlineRand / 1080);
 
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesFirstTimeShow", fastBufferFirstTimeShowWriter, NetworkDelivery.Reliable);
             }

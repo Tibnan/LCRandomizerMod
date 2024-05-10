@@ -13,9 +13,6 @@ namespace LCRandomizerMod.Patches
     [HarmonyPatch(typeof(RoundManager))]
     internal class RoundManagerPatch
     {
-        static public int randomizedWeatherIdx;
-        static public float factorySizeMultiplierRand;
-
         [HarmonyPatch(nameof(RoundManager.SpawnScrapInLevel))]
         [HarmonyPrefix]
         public static void RandomizeLevelProperties(RoundManager __instance)
@@ -43,7 +40,7 @@ namespace LCRandomizerMod.Patches
             }
             else
             {
-                __instance.currentLevel.factorySizeMultiplier = factorySizeMultiplierRand;
+                __instance.currentLevel.factorySizeMultiplier = RandomizerValues.factorySizeMultiplierRand;
             }
         }
 
@@ -54,16 +51,16 @@ namespace LCRandomizerMod.Patches
             LevelWeatherType[] weatherTypes = Enum.GetValues(typeof(LevelWeatherType)) as LevelWeatherType[];
             
             __instance.currentLevel.overrideWeather = true;
-            __instance.currentLevel.overrideWeatherType = weatherTypes[randomizedWeatherIdx];
-            __instance.currentLevel.currentWeather = weatherTypes[randomizedWeatherIdx];
+            __instance.currentLevel.overrideWeatherType = weatherTypes[RandomizerValues.randomizedWeatherIdx];
+            __instance.currentLevel.currentWeather = weatherTypes[RandomizerValues.randomizedWeatherIdx];
         }
 
         public static void SetReceivedWeatherData(ulong _, FastBufferReader reader)
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                reader.ReadValueSafe<int>(out randomizedWeatherIdx, default);
-                RandomizerModBase.mls.LogInfo("Received weather data: " + randomizedWeatherIdx);
+                reader.ReadValueSafe<int>(out RandomizerValues.randomizedWeatherIdx, default);
+                RandomizerModBase.mls.LogInfo("Received weather data: " + RandomizerValues.randomizedWeatherIdx);
             }
         }
 
@@ -71,8 +68,8 @@ namespace LCRandomizerMod.Patches
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                reader.ReadValueSafe<float>(out factorySizeMultiplierRand, default);
-                RandomizerModBase.mls.LogInfo("Received factory data: " + factorySizeMultiplierRand);
+                reader.ReadValueSafe<float>(out RandomizerValues.factorySizeMultiplierRand, default);
+                RandomizerModBase.mls.LogInfo("Received factory data: " + RandomizerValues.factorySizeMultiplierRand);
             }
         }
     }
