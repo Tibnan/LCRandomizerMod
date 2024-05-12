@@ -26,6 +26,19 @@ namespace LCRandomizerMod.Patches
 
             if (Unity.Netcode.NetworkManager.Singleton.IsHost)
             {
+                if (RandomizerValues.allItemsListDict.Count == 0)
+                {
+                    foreach (var item in __instance.allItemsList.itemsList)
+                    {
+                        RandomizerValues.allItemsListDict.Add(item.name, item);
+                    }
+
+                    foreach (var item in RandomizerValues.allItemsListDict)
+                    {
+                        RandomizerModBase.mls.LogInfo(item.Key);
+                    }
+                }
+
                 RandomizerValues.ClearLists();
 
                 //Generate random values
@@ -141,6 +154,15 @@ namespace LCRandomizerMod.Patches
                     RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
                     SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
                 }
+
+                RandomizerValues.shipDoorAnimatorSpeed = Convert.ToSingle(new System.Random().Next(1, 15)) / 10;
+                __instance.shipDoorsAnimator.speed = RandomizerValues.shipDoorAnimatorSpeed;
+
+                FastBufferWriter fastBufferShipAnimatorWriter = new FastBufferWriter(sizeof(float), Unity.Collections.Allocator.Temp, -1);
+                fastBufferShipAnimatorWriter.WriteValueSafe<float>(RandomizerValues.shipDoorAnimatorSpeed);
+
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesShipAnimData", fastBufferShipAnimatorWriter, NetworkDelivery.Reliable);
+                fastBufferShipAnimatorWriter.Dispose();
 
                 RandomizerModBase.mls.LogInfo("Successfully randomized player stats on level load. Synced values across clients.");
             }
@@ -300,6 +322,16 @@ namespace LCRandomizerMod.Patches
                 int temp;
                 reader.ReadValueSafe<int>(out temp);
                 HUDManager.Instance.DisplayDaysLeft(temp);
+            }
+        }
+
+        public static void SetShipAnimatorSpeed(ulong _, FastBufferReader reader)
+        {
+            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                reader.ReadValueSafe<float>(out RandomizerValues.shipDoorAnimatorSpeed);
+                RandomizerModBase.mls.LogInfo("Received ship door animator speed: " + RandomizerValues.shipDoorAnimatorSpeed);
+                StartOfRound.Instance.shipDoorsAnimator.speed = RandomizerValues.shipDoorAnimatorSpeed;
             }
         }
 

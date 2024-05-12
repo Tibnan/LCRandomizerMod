@@ -46,6 +46,8 @@ namespace LCRandomizerMod
             harmony.PatchAll(typeof(HUDManagerPatch));
             harmony.PatchAll(typeof(ShotgunItemPatch));
             harmony.PatchAll(typeof(MouthDogAIPatch));
+            harmony.PatchAll(typeof(SandSpiderAIPatch));
+            harmony.PatchAll(typeof(LandminePatch));
 
 
             mls.LogInfo("Patched all base classes.");

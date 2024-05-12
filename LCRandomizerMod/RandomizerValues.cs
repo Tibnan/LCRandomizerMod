@@ -25,6 +25,9 @@ namespace LCRandomizerMod
 
         public static bool firstTimeShow;
 
+        public static float shipDoorAnimatorSpeed;
+        public static Dictionary<string, Item> allItemsListDict = new Dictionary<string, Item>();
+
         //StartOfRoundPatch
 
         //RoundManagerPatch
@@ -36,11 +39,13 @@ namespace LCRandomizerMod
 
         //MouthDogAIPatch
 
-        public static List<float> dogSpeeds = new List<float>();
-        public static int dogEnemyHP;
-        public static List<ulong> dogIDs = new List<ulong>();
+        public static Dictionary<ulong, float> dogSpeedsDict = new Dictionary<ulong, float>();
         public static Vector3 defaultDogScale = new Vector3(1f, 1f, 1f);
-        public static float dogScale;
+
+        public static float dogSpeedClient;
+        public static ulong dogIDClient;
+        public static int dogEnemyHPClient;
+        public static float dogScaleClient;
 
         //MouthDogAIPatch
 
@@ -53,18 +58,20 @@ namespace LCRandomizerMod
 
         //SandSpiderPatch
 
-        public static List<float> spiderSpeedRands = new List<float>();
-        public static int spiderHealthRand;
-        public static List<ulong> spiderID = new List<ulong>();
+        public static Dictionary<ulong, float> spiderSpeedsDict = new Dictionary<ulong, float>();
         public static Vector3 defaultSpiderScale = new Vector3(1f, 1f, 1f);
-        public static float spiderScaleRand;
+
+        public static float spiderSpeedClient;
+        public static ulong spiderIDClient;
+        public static int spiderHealthClient;
+        public static float spiderScaleClient;
 
         //SandSpiderPatch
 
         public static void ClearLists()
         {
-            dogSpeeds.Clear();
-            dogIDs.Clear();
+            dogSpeedsDict.Clear();
+            spiderSpeedsDict.Clear();
         }
     }
 }

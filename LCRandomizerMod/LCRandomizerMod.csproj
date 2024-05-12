@@ -79,6 +79,7 @@
   <ItemGroup>
     <Compile Include="Patches\GrabbableObjectPatch.cs" />
     <Compile Include="Patches\HUDManagerPatch.cs" />
+    <Compile Include="Patches\LandminePatch.cs" />
     <Compile Include="Patches\MouthDogAIPatch.cs" />
     <Compile Include="Patches\PlayerControllerBPatch.cs" />
     <Compile Include="Patches\RoundManagerPatch.cs" />
