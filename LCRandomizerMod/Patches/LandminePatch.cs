@@ -17,17 +17,25 @@ namespace LCRandomizerMod.Patches
         [HarmonyPrefix]
         public static bool RandomlySpawnShotgun(Landmine __instance)
         {
-            if (new System.Random().Next(1, 2) == 1)
+            if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(RandomizerValues.allItemsListDict.GetValueSafe("Shotgun").spawnPrefab, __instance.transform.position, Quaternion.identity, RoundManager.Instance.spawnedScrapContainer);
-                gameObject.GetComponent<GrabbableObject>().fallTime = 0f;
-                gameObject.GetComponent<NetworkObject>().Spawn(false);
-                RandomizerModBase.mls.LogWarning("SPAWNED SHOTGUN");
-                
-                Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[__instance.NetworkObjectId].Despawn(true);
-                return false;
+                if (new System.Random().Next(1, 5) == 4) //SET BEFORE RELEASE
+                {
+                    GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(RandomizerValues.allItemsListDict.GetValueSafe("Shotgun").spawnPrefab, __instance.transform.position, Quaternion.identity, RoundManager.Instance.spawnedScrapContainer);
+                    gameObject.GetComponent<GrabbableObject>().fallTime = 0f;
+                    gameObject.GetComponent<NetworkObject>().Spawn(false);
+                    RandomizerModBase.mls.LogWarning("SPAWNED SHOTGUN");
+
+                    Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[__instance.NetworkObjectId].Despawn(true);
+                    return false;
+                }
+                return true;
             }
-            return true;
+            else
+            {
+                RandomizerModBase.mls.LogInfo("MINE ID: " + __instance.NetworkObjectId);
+                return true;
+            }
         }
     }
 }

@@ -23,7 +23,7 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float dogSpeed = Convert.ToSingle(new System.Random().Next(80, 200)) / 10f;
+                float dogSpeed = Convert.ToSingle(new System.Random().Next(30, 200)) / 10f;
                 float dogEnemyHP = Convert.ToSingle(new System.Random().Next(1, 6));
                 float dogScale = Convert.ToSingle(new System.Random().Next(10, 20)) / 10;
 
@@ -32,21 +32,13 @@ namespace LCRandomizerMod.Patches
 
                 RandomizerValues.dogSpeedsDict.Add(__instance.NetworkObjectId, dogSpeed);
 
-                FastBufferWriter fastBufferStatWriter = new FastBufferWriter(sizeof(float) * 2, Unity.Collections.Allocator.Temp, -1);
+                FastBufferWriter fastBufferStatWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
+                fastBufferStatWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
                 fastBufferStatWriter.WriteValueSafe<float>(dogSpeed);
                 fastBufferStatWriter.WriteValueSafe<float>(dogEnemyHP);
+                fastBufferStatWriter.WriteValueSafe<float>(dogScale);
 
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesRandomDogStat", fastBufferStatWriter, NetworkDelivery.Reliable);
-
-                FastBufferWriter fastBufferRefWriter = new FastBufferWriter(sizeof(ulong), Unity.Collections.Allocator.Temp, -1);
-                fastBufferRefWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
-
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesDogID", fastBufferRefWriter, NetworkDelivery.Reliable);
-
-                FastBufferWriter fastBufferScaleWriter = new FastBufferWriter(sizeof(float), Unity.Collections.Allocator.Temp, -1);
-                fastBufferScaleWriter.WriteValueSafe<float>(dogScale);
-
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesDogScale", fastBufferScaleWriter, NetworkDelivery.Reliable);
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesDogStats", fastBufferStatWriter, NetworkDelivery.Reliable);
             }
         }
 
@@ -57,58 +49,33 @@ namespace LCRandomizerMod.Patches
             if (!__instance.isEnemyDead)
             {
                 __instance.agent.speed = RandomizerValues.dogSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
-
-                //RandomizerModBase.mls.LogInfo("Current dog stats: " + __instance.agent.speed + ", " + __instance.enemyHP);
-                //RandomizerModBase.mls.LogInfo("Dog dictionary length: " + RandomizerValues.dogSpeedsDict.Count);
             }
         }
 
-        public static void SetRandomDogSpeedClient(ulong _, FastBufferReader reader)
+        public static void SetDogValuesSentByServer(ulong _, FastBufferReader reader)
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float enemyHP;
-                reader.ReadValueSafe<float>(out RandomizerValues.dogSpeedClient);
-                reader.ReadValueSafe<float>(out enemyHP);
-                RandomizerValues.dogEnemyHPClient = (int)enemyHP;
+                ulong id;
+                float speed;
+                float health;
+                float scale;
 
-                RandomizerModBase.mls.LogInfo("Received random dog stats: " + RandomizerValues.dogSpeedClient + ", " + enemyHP);
+                reader.ReadValueSafe<ulong>(out id);
+                reader.ReadValueSafe<float>(out speed);
+                reader.ReadValueSafe<float>(out health);
+                reader.ReadValueSafe<float>(out scale);
+
+                RandomizerValues.dogSpeedsDict.Add(id, speed);
+
+                NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
+                MouthDogAI dog = networkObject.gameObject.GetComponentInChildren<MouthDogAI>();
+
+                dog.enemyHP = (int)health;
+                dog.transform.localScale = new Vector3(scale, scale, scale);
+
+                RandomizerModBase.mls.LogInfo("RECEIVED DOG STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }
-        }
-
-        public static void SetRandomDogSpeedOnID(ulong _, FastBufferReader reader)
-        {
-            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
-            {
-                reader.ReadValueSafe<ulong>(out RandomizerValues.dogIDClient);
-                RandomizerModBase.mls.LogInfo("Received dog ID: " + RandomizerValues.dogIDClient);
-            }
-        }
-
-        public static void SetRandomDogScale(ulong _, FastBufferReader reader)
-        {
-            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
-            {
-                reader.ReadValueSafe<float>(out RandomizerValues.dogScaleClient);
-
-                RandomizerModBase.mls.LogInfo("Received dog scale: " + RandomizerValues.dogScaleClient);
-
-                FinalizeValues();
-            }
-        }
-
-        public static void FinalizeValues()
-        {
-            RandomizerValues.dogSpeedsDict.Add(RandomizerValues.dogIDClient, RandomizerValues.dogSpeedClient);
-
-            NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[RandomizerValues.dogIDClient];
-            MouthDogAI dog = networkObject.gameObject.GetComponentInChildren<MouthDogAI>();
-
-            dog.agent.speed = RandomizerValues.dogSpeedsDict.GetValueSafe(RandomizerValues.dogIDClient);
-            dog.enemyHP = RandomizerValues.dogEnemyHPClient;
-            
-            float dogScale = RandomizerValues.dogScaleClient;
-            dog.transform.localScale = new Vector3(dogScale, dogScale, dogScale);
         }
     }
 }

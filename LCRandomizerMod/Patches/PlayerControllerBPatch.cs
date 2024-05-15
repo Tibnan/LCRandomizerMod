@@ -31,17 +31,45 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFactoryData", new CustomMessagingManager.HandleNamedMessageDelegate(RoundManagerPatch.SetReceivedFactoryData));
                 RandomizerModBase.mls.LogInfo("Registering first time deadline show handler: " + "ClientReceivesFirstTimeShow");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFirstTimeShow", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.ShowFirstTimeDeadlineClient));
-                RandomizerModBase.mls.LogInfo("Registering dog handlers: " + "ClientReceivesRandomDogStat " + "ClientReceivesDogID " + "ClientReceivesDogScale");
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesRandomDogStat", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedClient));
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogID", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedOnID));
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogScale", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogScale));
-                RandomizerModBase.mls.LogInfo("Registering spider handlers: " + "ClientReceivesSpiderData " + "ClientReceivesSpiderID");
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderData", new CustomMessagingManager.HandleNamedMessageDelegate(SandSpiderAIPatch.StoreSpiderValuesSentByServer));
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderID", new CustomMessagingManager.HandleNamedMessageDelegate(SandSpiderAIPatch.StoreSpiderID));
+                RandomizerModBase.mls.LogInfo("Registering dog handler: " + "ClientReceivesDogStats");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogStats", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetDogValuesSentByServer));
+                RandomizerModBase.mls.LogInfo("Registering spider handler: " + "ClientReceivesSpiderData ");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderData", new CustomMessagingManager.HandleNamedMessageDelegate(SandSpiderAIPatch.SetSpiderDataSentByServer));
                 RandomizerModBase.mls.LogInfo("Registering ship animator handlers: " + "ClientReceivesShipAnimData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShipAnimData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetShipAnimatorSpeed));
+                RandomizerModBase.mls.LogInfo("Registering giant handler: " + "ClientReceivesGiantData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesGiantData", new CustomMessagingManager.HandleNamedMessageDelegate(ForestGiantAIPatch.SetGiantValuesSentByServer));
+                RandomizerModBase.mls.LogInfo("Registering jetpack handler: " + "ClientReceivesJetpackData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesJetpackData", new CustomMessagingManager.HandleNamedMessageDelegate(JetpackItemPatch.SetJetpackStatsSentByServer));
+                RandomizerModBase.mls.LogInfo("Registering hoarder bug handler: " + "ClientReceivesHoarderBugData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHoarderBugData", new CustomMessagingManager.HandleNamedMessageDelegate(HoarderBugAIPatch.SetBugData));
+                RandomizerModBase.mls.LogInfo("Registering butler handler: " + "ClientReceivesButlerData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesButlerData", new CustomMessagingManager.HandleNamedMessageDelegate(ButlerAIPatch.SetButlerData));
+                RandomizerModBase.mls.LogInfo("Registering jester handler: " + "ClientReceivesJesterData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesJesterData", new CustomMessagingManager.HandleNamedMessageDelegate(JesterAIPatch.SetJesterData));
+                RandomizerModBase.mls.LogInfo("Registering baboon hawk handler: " + "ClientReceivesBaboonData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBaboonData", new CustomMessagingManager.HandleNamedMessageDelegate(BaboonBirdAIPatch.SetBaboonData));
+                RandomizerModBase.mls.LogInfo("Registering blob handler: " + "ClientReceivesBlobData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBlobData", new CustomMessagingManager.HandleNamedMessageDelegate(BlobAIPatch.SetBlobData));
+                RandomizerModBase.mls.LogInfo("Registering crawler handler: " + "ClientReceivesCrawlerData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesCrawlerData", new CustomMessagingManager.HandleNamedMessageDelegate(CrawlerAIPatch.SetCrawlerData));
+                RandomizerModBase.mls.LogInfo("Registering dress girl handler: " + "ClientReceivesDressGirlData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDressGirlData", new CustomMessagingManager.HandleNamedMessageDelegate(DressGirlAIPatch.SetGirlData));
+                RandomizerModBase.mls.LogInfo("Registering mech handlers: " + "ClientReceivesRadMechData" + " ClientReceivesMechScaleArray");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesRadMechData", new CustomMessagingManager.HandleNamedMessageDelegate(RadMechAIPatch.SetMechData));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMechScaleArray", new CustomMessagingManager.HandleNamedMessageDelegate(RadMechAIPatch.SetMechSpawnerScale));
+                RandomizerModBase.mls.LogInfo("Registering nutcracker handler: " + "ClientReceivesNutcrackerData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesNutcrackerData", new CustomMessagingManager.HandleNamedMessageDelegate(NutcrackerAIPatch.SetNutcrackerData));
+                RandomizerModBase.mls.LogInfo("Registering flowerman handler: " + "ClientReceivesFlowermanData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFlowermanData", new CustomMessagingManager.HandleNamedMessageDelegate(FlowermanAIPatch.SetFlowermanStats));
+                RandomizerModBase.mls.LogInfo("Registering puffer handler: " + "ClientReceivesPufferData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPufferData", new CustomMessagingManager.HandleNamedMessageDelegate(PufferAIPatch.SetPufferData));
+                RandomizerModBase.mls.LogInfo("Registering centipede handler: " + "ClientReceivesCentipedeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesCentipedeData", new CustomMessagingManager.HandleNamedMessageDelegate(CentipedeAIPatch.SetCentipedeData));
 
 
+                RandomizerValues.ClearDicts();
+                RandomizerValues.jetpackPropertiesDict.Clear();
                 //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
                 //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));
             }
@@ -62,20 +90,91 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFactoryData", new CustomMessagingManager.HandleNamedMessageDelegate(RoundManagerPatch.SetReceivedFactoryData));
                 RandomizerModBase.mls.LogInfo("Registering first time deadline show handler: " + "ClientReceivesFirstTimeShow");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFirstTimeShow", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.ShowFirstTimeDeadlineClient));
-                RandomizerModBase.mls.LogInfo("Registering dog handlers: " + "ClientReceivesRandomDogStat " + "ClientReceivesDogID " + "ClientReceivesDogScale");
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesRandomDogStat", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedClient));
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogID", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogSpeedOnID));
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogScale", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetRandomDogScale));
-                RandomizerModBase.mls.LogInfo("Registering spider handlers: " + "ClientReceivesSpiderData " + "ClientReceivesSpiderID");
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderData", new CustomMessagingManager.HandleNamedMessageDelegate(SandSpiderAIPatch.StoreSpiderValuesSentByServer));
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderID", new CustomMessagingManager.HandleNamedMessageDelegate(SandSpiderAIPatch.StoreSpiderID));
+                RandomizerModBase.mls.LogInfo("Registering dog handler: " + "ClientReceivesDogStats");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDogStats", new CustomMessagingManager.HandleNamedMessageDelegate(MouthDogAIPatch.SetDogValuesSentByServer));
+                RandomizerModBase.mls.LogInfo("Registering spider handler: " + "ClientReceivesSpiderData ");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderData", new CustomMessagingManager.HandleNamedMessageDelegate(SandSpiderAIPatch.SetSpiderDataSentByServer));
                 RandomizerModBase.mls.LogInfo("Registering ship animator handlers: " + "ClientReceivesShipAnimData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShipAnimData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetShipAnimatorSpeed));
+                RandomizerModBase.mls.LogInfo("Registering jetpack handler: " + "ClientReceivesJetpackData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesJetpackData", new CustomMessagingManager.HandleNamedMessageDelegate(JetpackItemPatch.SetJetpackStatsSentByServer));
+                RandomizerModBase.mls.LogInfo("Registering hoarder bug handler: " + "ClientReceivesHoarderBugData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHoarderBugData", new CustomMessagingManager.HandleNamedMessageDelegate(HoarderBugAIPatch.SetBugData));
+                RandomizerModBase.mls.LogInfo("Registering butler handler: " + "ClientReceivesButlerData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesButlerData", new CustomMessagingManager.HandleNamedMessageDelegate(ButlerAIPatch.SetButlerData));
+                RandomizerModBase.mls.LogInfo("Registering jester handler: " + "ClientReceivesJesterData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesJesterData", new CustomMessagingManager.HandleNamedMessageDelegate(JesterAIPatch.SetJesterData));
+                RandomizerModBase.mls.LogInfo("Registering baboon hawk handler: " + "ClientReceivesBaboonData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBaboonData", new CustomMessagingManager.HandleNamedMessageDelegate(BaboonBirdAIPatch.SetBaboonData));
+                RandomizerModBase.mls.LogInfo("Registering blob handler: " + "ClientReceivesBlobData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBlobData", new CustomMessagingManager.HandleNamedMessageDelegate(BlobAIPatch.SetBlobData));
+                RandomizerModBase.mls.LogInfo("Registering crawler handler: " + "ClientReceivesCrawlerData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesCrawlerData", new CustomMessagingManager.HandleNamedMessageDelegate(CrawlerAIPatch.SetCrawlerData));
+                RandomizerModBase.mls.LogInfo("Registering dress girl handler: " + "ClientReceivesDressGirlData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDressGirlData", new CustomMessagingManager.HandleNamedMessageDelegate(DressGirlAIPatch.SetGirlData));
+                RandomizerModBase.mls.LogInfo("Registering mech handlers: " + "ClientReceivesRadMechData" + " ClientReceivesMechScaleArray");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesRadMechData", new CustomMessagingManager.HandleNamedMessageDelegate(RadMechAIPatch.SetMechData));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMechScaleArray", new CustomMessagingManager.HandleNamedMessageDelegate(RadMechAIPatch.SetMechSpawnerScale));
+                RandomizerModBase.mls.LogInfo("Registering nutcracker handler: " + "ClientReceivesNutcrackerData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesNutcrackerData", new CustomMessagingManager.HandleNamedMessageDelegate(NutcrackerAIPatch.SetNutcrackerData));
+                RandomizerModBase.mls.LogInfo("Registering flowerman handler: " + "ClientReceivesFlowermanData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFlowermanData", new CustomMessagingManager.HandleNamedMessageDelegate(FlowermanAIPatch.SetFlowermanStats));
+                RandomizerModBase.mls.LogInfo("Registering puffer handler: " + "ClientReceivesPufferData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPufferData", new CustomMessagingManager.HandleNamedMessageDelegate(PufferAIPatch.SetPufferData));
+                RandomizerModBase.mls.LogInfo("Registering centipede handler: " + "ClientReceivesCentipedeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesCentipedeData", new CustomMessagingManager.HandleNamedMessageDelegate(CentipedeAIPatch.SetCentipedeData));
 
-
+                RandomizerValues.ClearDicts();
+                RandomizerValues.jetpackPropertiesDict.Clear();
                 //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
                 //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));
             }
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.Crouch))]
+        [HarmonyPostfix]
+        public static void SpawnEnemy(PlayerControllerB __instance)
+        {
+            //TimeOfDay.Instance.currentDayTime = 18000;
+            //TimeOfDay.Instance.totalTime = 18000;
+
+            //if (StartOfRound.Instance.inShipPhase || !Unity.Netcode.NetworkManager.Singleton.IsServer)
+            //{
+            //    return;
+            //}
+            //RandomizerModBase.mls.LogInfo("Should spawn enemy");
+            //EnemyType forestGiant = new EnemyType();
+
+            //using (List<SpawnableEnemyWithRarity>.Enumerator enumerator = StartOfRound.Instance.currentLevel.OutsideEnemies.GetEnumerator())
+            //{
+            //    while (enumerator.MoveNext())
+            //    {
+            //        SpawnableEnemyWithRarity spawnableEnemyWithRarity = enumerator.Current;
+
+            //        if (spawnableEnemyWithRarity.enemyType.enemyPrefab.GetComponent<ForestGiantAI>() != null)
+            //        {
+            //            forestGiant = spawnableEnemyWithRarity.enemyType;
+
+            //            spawnableEnemyWithRarity.rarity = 999;
+            //            RandomizerModBase.mls.LogInfo("Spawning enemy: " + spawnableEnemyWithRarity.enemyType.enemyPrefab.name);
+
+            //            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(spawnableEnemyWithRarity.enemyType.enemyPrefab, __instance.transform.position, Quaternion.identity);
+            //            gameObject.GetComponent<NetworkObject>().Spawn(true);
+            //            break;
+            //        }
+            //        else
+            //        {
+            //            forestGiant = null;
+            //        }
+            //    }
+
+            //    if (forestGiant.enemyPrefab == null)
+            //    {
+            //        RandomizerModBase.mls.LogError("Forest giant not found!!!");
+            //    }
+            //}
+
+            //RoundManager.Instance.SpawnEnemyGameObject(new Vector3(0f, 0f, 0f), 0f, 1, forestGiant);
         }
     }
 }

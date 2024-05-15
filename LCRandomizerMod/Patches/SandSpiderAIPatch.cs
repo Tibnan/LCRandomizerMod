@@ -28,17 +28,13 @@ namespace LCRandomizerMod.Patches
                 __instance.enemyHP = (int)spiderHealthRand;
                 __instance.transform.localScale = new Vector3(spiderScaleRand, spiderScaleRand, spiderScaleRand);
 
-                FastBufferWriter fastBufferSpiderWriter = new FastBufferWriter(sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
+                FastBufferWriter fastBufferSpiderWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
+                fastBufferSpiderWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
                 fastBufferSpiderWriter.WriteValueSafe<float>(spiderSpeedRand);
                 fastBufferSpiderWriter.WriteValueSafe<float>(spiderHealthRand);
                 fastBufferSpiderWriter.WriteValueSafe<float>(spiderScaleRand);
 
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderData", fastBufferSpiderWriter, NetworkDelivery.Reliable);
-
-                FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong), Unity.Collections.Allocator.Temp, -1);
-                fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
-
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderID", fastBufferWriter, NetworkDelivery.Reliable);
             }
         }
 
@@ -53,39 +49,30 @@ namespace LCRandomizerMod.Patches
             }
         }
 
-        public static void StoreSpiderValuesSentByServer(ulong _, FastBufferReader reader)
+        public static void SetSpiderDataSentByServer(ulong _, FastBufferReader reader)
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                reader.ReadValueSafe<float>(out RandomizerValues.spiderSpeedClient);
-                float spiderHealth;
-                reader.ReadValueSafe<float>(out spiderHealth);
-                RandomizerValues.spiderHealthClient = (int)spiderHealth;
-                reader.ReadValueSafe<float>(out RandomizerValues.spiderScaleClient);
+                ulong id;
+                float speed;
+                float health;
+                float scale;
+
+                reader.ReadValueSafe<ulong>(out id);
+                reader.ReadValueSafe<float>(out speed);
+                reader.ReadValueSafe<float>(out health);
+                reader.ReadValueSafe<float>(out scale);
+
+                RandomizerValues.spiderSpeedsDict.Add(id, speed);
+
+                NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
+                SandSpiderAI spider = networkObject.gameObject.GetComponentInChildren<SandSpiderAI>();
+
+                spider.enemyHP = (int)health;
+                spider.transform.localScale = new Vector3(scale, scale, scale);
+
+                RandomizerModBase.mls.LogInfo("RECEIVED SPIDER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }
-        }
-
-        public static void StoreSpiderID(ulong _, FastBufferReader reader)
-        {
-            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
-            {
-                reader.ReadValueSafe<ulong>(out RandomizerValues.spiderIDClient);
-
-                FinalizeValues();
-            }
-        }
-
-        public static void FinalizeValues()
-        {
-            RandomizerValues.spiderSpeedsDict.Add(RandomizerValues.spiderIDClient, RandomizerValues.spiderSpeedClient);
-
-            NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[RandomizerValues.spiderIDClient];
-            SandSpiderAI spider = networkObject.gameObject.GetComponentInChildren<SandSpiderAI>();
-
-            spider.agent.speed = RandomizerValues.spiderSpeedsDict.GetValueSafe(RandomizerValues.spiderIDClient);
-            spider.enemyHP = RandomizerValues.spiderHealthClient;
-
-            spider.transform.localScale = new Vector3(RandomizerValues.spiderScaleClient, RandomizerValues.spiderScaleClient, RandomizerValues.spiderScaleClient);
         }
     }
 }

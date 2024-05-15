@@ -18,7 +18,7 @@ namespace LCRandomizerMod
     public class RandomizerModBase : BaseUnityPlugin
     {
         public const string modName = "Lethal Company Randomizer Mod";
-        public const string modVersion = "0.6.0";
+        public const string modVersion = "0.8.2";
         public const string modGUID = "Tibnan.lcrandomizermod";
 
         private readonly Harmony harmony = new Harmony(modGUID);
@@ -43,11 +43,24 @@ namespace LCRandomizerMod
             harmony.PatchAll(typeof(StartOfRoundPatch));
             harmony.PatchAll(typeof(GrabbableObjectPatch));
             harmony.PatchAll(typeof(TetraChemicalItemPatch));
-            harmony.PatchAll(typeof(HUDManagerPatch));
             harmony.PatchAll(typeof(ShotgunItemPatch));
             harmony.PatchAll(typeof(MouthDogAIPatch));
             harmony.PatchAll(typeof(SandSpiderAIPatch));
             harmony.PatchAll(typeof(LandminePatch));
+            harmony.PatchAll(typeof(ForestGiantAIPatch));
+            harmony.PatchAll(typeof(JetpackItemPatch));
+            harmony.PatchAll(typeof(HoarderBugAIPatch));
+            harmony.PatchAll(typeof(ButlerAIPatch));
+            harmony.PatchAll(typeof(JesterAIPatch));
+            harmony.PatchAll(typeof(BaboonBirdAIPatch));
+            harmony.PatchAll(typeof(BlobAIPatch));
+            harmony.PatchAll(typeof(CrawlerAIPatch));
+            harmony.PatchAll(typeof(DressGirlAIPatch));
+            harmony.PatchAll(typeof(RadMechAIPatch));
+            harmony.PatchAll(typeof(NutcrackerAIPatch));
+            harmony.PatchAll(typeof(FlowermanAIPatch));
+            harmony.PatchAll(typeof(PufferAIPatch));
+            harmony.PatchAll(typeof(CentipedeAIPatch));
 
 
             mls.LogInfo("Patched all base classes.");

@@ -77,15 +77,27 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Patches\BaboonBirdAIPatch.cs" />
+    <Compile Include="Patches\BlobAIPatch.cs" />
+    <Compile Include="Patches\ButlerAIPatch.cs" />
+    <Compile Include="Patches\CrawlerAIPatch.cs" />
+    <Compile Include="Patches\DressGirlAIPatch.cs" />
+    <Compile Include="Patches\FlowermanAIPatch.cs" />
+    <Compile Include="Patches\ForestGiantAIPatch.cs" />
     <Compile Include="Patches\GrabbableObjectPatch.cs" />
-    <Compile Include="Patches\HUDManagerPatch.cs" />
+    <Compile Include="Patches\HoarderBugAIPatch.cs" />
+    <Compile Include="Patches\JesterAIPatch.cs" />
+    <Compile Include="Patches\JetpackItemPatch.cs" />
     <Compile Include="Patches\LandminePatch.cs" />
     <Compile Include="Patches\MouthDogAIPatch.cs" />
+    <Compile Include="Patches\NutcrackerAIPatch.cs" />
     <Compile Include="Patches\PlayerControllerBPatch.cs" />
+    <Compile Include="Patches\RadMechAIPatch.cs" />
     <Compile Include="Patches\RoundManagerPatch.cs" />
     <Compile Include="Patches\SandSpiderAIPatch.cs" />
     <Compile Include="Patches\ShotgunItemPatch.cs" />
     <Compile Include="Patches\StartOfRoundPatch.cs" />
+    <Compile Include="Patches\TerminalPatch.cs" />
     <Compile Include="Patches\TetraChemicalItemPatch.cs" />
     <Compile Include="Patches\TimeOfDayPatch.cs" />
     <Compile Include="Plugin.cs" />
