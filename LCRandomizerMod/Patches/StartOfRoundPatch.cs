@@ -21,18 +21,39 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void RandomizePlayerStatsOnLevelLoadServer(StartOfRound __instance)
         {
+            RandomizerValues.ClearDicts();
+
             RandomizerValues.firstTimeShow = TimeOfDay.Instance.profitQuota == 130;
             RandomizerModBase.mls.LogInfo("First time? " + RandomizerValues.firstTimeShow);
 
             if (Unity.Netcode.NetworkManager.Singleton.IsHost)
             {
-                RandomizerValues.ClearLists();
+                if (RandomizerValues.allItemsListDict.Count == 0)
+                {
+                    foreach (var item in __instance.allItemsList.itemsList)
+                    {
+                        RandomizerValues.allItemsListDict.Add(item.name, item);
+                    }
+
+                    foreach (var item in RandomizerValues.allItemsListDict)
+                    {
+                        RandomizerModBase.mls.LogInfo(item.Key);
+                    }
+                }
 
                 //Generate random values
                 RandomizerValues.sprintRand = Convert.ToSingle(new System.Random().Next(1, 101)) / 10;
                 RandomizerValues.healthRand = new System.Random().Next(1, 101);
                 RandomizerValues.movementSpeedRand = new System.Random().Next(30, 101) / 10;
                 RandomizerValues.sinkMultiplierRand = new System.Random().Next(100, 10000) / 10;
+                RandomizerValues.factorySizeMultiplierRand = new System.Random().Next(2, 5);
+
+
+                FastBufferWriter fastBufferFactoryWriter = new FastBufferWriter(sizeof(float), Unity.Collections.Allocator.Temp, -1);
+
+                fastBufferFactoryWriter.WriteValueSafe<float>(RandomizerValues.factorySizeMultiplierRand);
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesFactoryData", fastBufferFactoryWriter, NetworkDelivery.Reliable);
+                fastBufferFactoryWriter.Dispose();
 
                 //Generate random deadline and quota values on new save load and sync with clients
                 if (TimeOfDay.Instance.profitQuota == 130)
@@ -57,7 +78,7 @@ namespace LCRandomizerMod.Patches
                 //Generate random weather values
                 LevelWeatherType[] weatherTypes = Enum.GetValues(typeof(LevelWeatherType)) as LevelWeatherType[];
                 RandomizerValues.randomizedWeatherIdx = new System.Random().Next(0, weatherTypes.Length);
-                RandomizerValues.randomizedWeatherIdx = 5; //For testing
+                /*RandomizerValues.randomizedWeatherIdx = 5;*/ //For testing
 
                 RandomizerModBase.mls.LogInfo("Randomized weather index: " + RandomizerValues.randomizedWeatherIdx);
 
@@ -71,6 +92,10 @@ namespace LCRandomizerMod.Patches
                 GameNetworkManager.Instance.localPlayerController.sprintTime = RandomizerValues.sprintRand;
                 RandomizerModBase.mls.LogInfo("Set sprint time to: " + RandomizerValues.sprintRand);
                 GameNetworkManager.Instance.localPlayerController.health = RandomizerValues.healthRand;
+                foreach (GameObject playerObj in __instance.allPlayerObjects)
+                {
+                    playerObj.GetComponent<PlayerControllerB>().health = RandomizerValues.healthRand;
+                }
                 RandomizerModBase.mls.LogInfo("Set health to: " + RandomizerValues.healthRand);
                 GameNetworkManager.Instance.localPlayerController.movementSpeed = RandomizerValues.movementSpeedRand;
                 RandomizerModBase.mls.LogInfo("Set movement speed to: " + RandomizerValues.movementSpeedRand);
@@ -142,6 +167,15 @@ namespace LCRandomizerMod.Patches
                     SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
                 }
 
+                RandomizerValues.shipDoorAnimatorSpeed = Convert.ToSingle(new System.Random().Next(1, 15)) / 10;
+                __instance.shipDoorsAnimator.speed = RandomizerValues.shipDoorAnimatorSpeed;
+
+                FastBufferWriter fastBufferShipAnimatorWriter = new FastBufferWriter(sizeof(float), Unity.Collections.Allocator.Temp, -1);
+                fastBufferShipAnimatorWriter.WriteValueSafe<float>(RandomizerValues.shipDoorAnimatorSpeed);
+
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesShipAnimData", fastBufferShipAnimatorWriter, NetworkDelivery.Reliable);
+                fastBufferShipAnimatorWriter.Dispose();
+
                 RandomizerModBase.mls.LogInfo("Successfully randomized player stats on level load. Synced values across clients.");
             }
             else
@@ -156,6 +190,7 @@ namespace LCRandomizerMod.Patches
         {
             for (int i = 0; i < StartOfRound.Instance.allPlayerObjects.Length; i++)
             {
+                RandomizerValues.ClearDicts();
                 StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale;
                 SoundManager.Instance.SetPlayerPitch(RandomizerValues.defaultPlayerPitch, i);
             }
@@ -192,6 +227,10 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("VALUES RECEIVED FROM SERVER: " + randValues[0] + ", " + randValues[1] + ", " + randValues[2] + ", " + randValues[3]);
                 GameNetworkManager.Instance.localPlayerController.sprintTime = randValues[0];
                 GameNetworkManager.Instance.localPlayerController.health = (int)randValues[1];
+                foreach (GameObject playerObj in StartOfRound.Instance.allPlayerObjects)
+                {
+                    playerObj.GetComponent<PlayerControllerB>().health = (int)randValues[1];
+                }
                 GameNetworkManager.Instance.localPlayerController.movementSpeed = randValues[2];
                 GameNetworkManager.Instance.localPlayerController.sinkingSpeedMultiplier = randValues[3];
                 GameNetworkManager.Instance.localPlayerController.sinkingValue = randValues[3];
@@ -300,6 +339,16 @@ namespace LCRandomizerMod.Patches
                 int temp;
                 reader.ReadValueSafe<int>(out temp);
                 HUDManager.Instance.DisplayDaysLeft(temp);
+            }
+        }
+
+        public static void SetShipAnimatorSpeed(ulong _, FastBufferReader reader)
+        {
+            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                reader.ReadValueSafe<float>(out RandomizerValues.shipDoorAnimatorSpeed);
+                RandomizerModBase.mls.LogInfo("Received ship door animator speed: " + RandomizerValues.shipDoorAnimatorSpeed);
+                StartOfRound.Instance.shipDoorsAnimator.speed = RandomizerValues.shipDoorAnimatorSpeed;
             }
         }
 
