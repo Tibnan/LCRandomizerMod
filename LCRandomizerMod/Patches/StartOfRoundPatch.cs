@@ -21,7 +21,7 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void RandomizePlayerStatsOnLevelLoadServer(StartOfRound __instance)
         {
-            RandomizerValues.ClearDicts();
+            //RandomizerValues.ClearDicts();
 
             RandomizerValues.firstTimeShow = TimeOfDay.Instance.profitQuota == 130;
             RandomizerModBase.mls.LogInfo("First time? " + RandomizerValues.firstTimeShow);
@@ -188,11 +188,26 @@ namespace LCRandomizerMod.Patches
         [HarmonyPrefix]
         public static void ResetPlayers()
         {
-            for (int i = 0; i < StartOfRound.Instance.allPlayerObjects.Length; i++)
+            RandomizerValues.ClearDicts();
+            RandomizerValues.spawnedMechCount = 0;
+            RandomizerValues.mapRandomizedInTerminal = false;
+
+            foreach (SelectableLevel level in StartOfRound.Instance.levels)
             {
-                RandomizerValues.ClearDicts();
-                StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale;
-                SoundManager.Instance.SetPlayerPitch(RandomizerValues.defaultPlayerPitch, i);
+                
+            }
+
+            try
+            {
+                for (int i = 0; i < StartOfRound.Instance.allPlayerObjects.Length; i++)
+                {
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale;
+                    SoundManager.Instance.SetPlayerPitch(RandomizerValues.defaultPlayerPitch, i);
+                }
+            }
+            catch (Exception ex)
+            {
+                return;
             }
         }
 
@@ -350,6 +365,18 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("Received ship door animator speed: " + RandomizerValues.shipDoorAnimatorSpeed);
                 StartOfRound.Instance.shipDoorsAnimator.speed = RandomizerValues.shipDoorAnimatorSpeed;
             }
+        }
+
+        [HarmonyPatch(nameof(StartOfRound.ChangeLevelServerRpc))]
+        [HarmonyPrefix]
+        public static bool ChangeLevelOverride(StartOfRound __instance)
+        {
+            if (RandomizerValues.mapRandomizedInTerminal && StartOfRound.Instance.inShipPhase)
+            {
+                HUDManager.Instance.AddTextToChatOnServer("<color=red>You have already randomized the map, you can't route to a new planet until you go down.</color>", -1);
+                RandomizerModBase.mls.LogInfo("RANDOMIZED STATE: " + RandomizerValues.mapRandomizedInTerminal);
+            }
+            return !RandomizerValues.mapRandomizedInTerminal;
         }
 
         //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS

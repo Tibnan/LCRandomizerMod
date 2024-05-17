@@ -49,6 +49,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows" />
+    <Reference Include="System.Windows.Forms">
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -80,9 +84,13 @@
     <Compile Include="Patches\BaboonBirdAIPatch.cs" />
     <Compile Include="Patches\BlobAIPatch.cs" />
     <Compile Include="Patches\ButlerAIPatch.cs" />
+    <Compile Include="Patches\CentipedeAIPatch.cs" />
     <Compile Include="Patches\CrawlerAIPatch.cs" />
+    <Compile Include="Patches\DoublewingAIPatch.cs" />
     <Compile Include="Patches\DressGirlAIPatch.cs" />
+    <Compile Include="Patches\ExtensionLadderItemPatch.cs" />
     <Compile Include="Patches\FlowermanAIPatch.cs" />
+    <Compile Include="Patches\FlowerSnakeEnemyPatch.cs" />
     <Compile Include="Patches\ForestGiantAIPatch.cs" />
     <Compile Include="Patches\GrabbableObjectPatch.cs" />
     <Compile Include="Patches\HoarderBugAIPatch.cs" />
@@ -92,10 +100,13 @@
     <Compile Include="Patches\MouthDogAIPatch.cs" />
     <Compile Include="Patches\NutcrackerAIPatch.cs" />
     <Compile Include="Patches\PlayerControllerBPatch.cs" />
+    <Compile Include="Patches\PufferAIPatch.cs" />
     <Compile Include="Patches\RadMechAIPatch.cs" />
+    <Compile Include="Patches\RedLocustBeesPatch.cs" />
     <Compile Include="Patches\RoundManagerPatch.cs" />
     <Compile Include="Patches\SandSpiderAIPatch.cs" />
     <Compile Include="Patches\ShotgunItemPatch.cs" />
+    <Compile Include="Patches\SpringManAIPatch.cs" />
     <Compile Include="Patches\StartOfRoundPatch.cs" />
     <Compile Include="Patches\TerminalPatch.cs" />
     <Compile Include="Patches\TetraChemicalItemPatch.cs" />

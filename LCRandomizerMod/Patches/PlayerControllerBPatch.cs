@@ -66,9 +66,17 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPufferData", new CustomMessagingManager.HandleNamedMessageDelegate(PufferAIPatch.SetPufferData));
                 RandomizerModBase.mls.LogInfo("Registering centipede handler: " + "ClientReceivesCentipedeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesCentipedeData", new CustomMessagingManager.HandleNamedMessageDelegate(CentipedeAIPatch.SetCentipedeData));
+                RandomizerModBase.mls.LogInfo("Registering flower snake handler: " + "ClientReceivesFlowerSnakeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFlowerSnakeData", new CustomMessagingManager.HandleNamedMessageDelegate(FlowerSnakeEnemyPatch.SetFlowerSnakeStats));
+                RandomizerModBase.mls.LogInfo("Registering spring man handler: " + "ClientReceivesSpringManData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpringManData", new CustomMessagingManager.HandleNamedMessageDelegate(SpringManAIPatch.SetSpringManStats));
+                RandomizerModBase.mls.LogInfo("Registering doublewing handler: " + "ClientReceivesDoublewingData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoublewingData", new CustomMessagingManager.HandleNamedMessageDelegate(DoublewingAIPatch.SetDoublewingData));
+                RandomizerModBase.mls.LogInfo("Registering bee handler: " + "ClientReceivesBeeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
 
-
-                RandomizerValues.ClearDicts();
+                StartOfRoundPatch.ResetPlayers();
+                //RandomizerValues.ClearDicts();
                 RandomizerValues.jetpackPropertiesDict.Clear();
                 //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
                 //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));
@@ -123,8 +131,17 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPufferData", new CustomMessagingManager.HandleNamedMessageDelegate(PufferAIPatch.SetPufferData));
                 RandomizerModBase.mls.LogInfo("Registering centipede handler: " + "ClientReceivesCentipedeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesCentipedeData", new CustomMessagingManager.HandleNamedMessageDelegate(CentipedeAIPatch.SetCentipedeData));
+                RandomizerModBase.mls.LogInfo("Registering flower snake handler: " + "ClientReceivesFlowerSnakeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFlowerSnakeData", new CustomMessagingManager.HandleNamedMessageDelegate(FlowerSnakeEnemyPatch.SetFlowerSnakeStats));
+                RandomizerModBase.mls.LogInfo("Registering spring man handler: " + "ClientReceivesSpringManData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpringManData", new CustomMessagingManager.HandleNamedMessageDelegate(SpringManAIPatch.SetSpringManStats));
+                RandomizerModBase.mls.LogInfo("Registering doublewing handler: " + "ClientReceivesDoublewingData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoublewingData", new CustomMessagingManager.HandleNamedMessageDelegate(DoublewingAIPatch.SetDoublewingData));
+                RandomizerModBase.mls.LogInfo("Registering bee handler: " + "ClientReceivesBeeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
 
-                RandomizerValues.ClearDicts();
+                StartOfRoundPatch.ResetPlayers();
+                //RandomizerValues.ClearDicts();
                 RandomizerValues.jetpackPropertiesDict.Clear();
                 //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
                 //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));

@@ -145,6 +145,42 @@ namespace LCRandomizerMod
 
         //CentipedeAIPatch
 
+        //FlowerSnakeEnemyPatch
+
+        public static Dictionary<ulong, float> flowerSnakeSpeedsDict = new Dictionary<ulong, float>();
+
+        //FlowerSnakeEnemyPatch
+
+        //SpringManAIPatch
+
+        public static Dictionary<ulong, float> springManSpeedsDict = new Dictionary<ulong, float>();
+
+        //SpringManAIPatch
+
+        //DoublewingAIPatch
+
+        public static Dictionary<ulong, float> doublewingSpeedsDict = new Dictionary<ulong, float>();
+
+        //DoublewingAIPatch
+
+        //RedLocustBessPatch
+
+        public static Dictionary<ulong, float> redLocustSpeedsDict = new Dictionary<ulong, float>();
+
+        //RedLocustBeesPatch
+
+        //ExtensionLadderPatch
+
+        public static bool isRandomized = false;
+
+        //ExtensionLadderPatch
+
+        //TerminalPatch
+
+        public static bool mapRandomizedInTerminal = false;
+
+        //TerminalPatch
+
         public static void ClearDicts()
         {
             dogSpeedsDict.Clear();
@@ -162,6 +198,10 @@ namespace LCRandomizerMod
             flowermanSpeedsDict.Clear();
             pufferSpeedsDict.Clear();
             centipedeSpeedsDict.Clear();
+            flowerSnakeSpeedsDict.Clear();
+            springManSpeedsDict.Clear();
+            doublewingSpeedsDict.Clear();
+            redLocustSpeedsDict.Clear();
         }
     }
 }

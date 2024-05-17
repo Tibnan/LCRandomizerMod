@@ -1,20 +1,20 @@
-﻿using HarmonyLib;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using HarmonyLib;
 using Unity.Netcode;
 using UnityEngine;
 
 namespace LCRandomizerMod.Patches
 {
-    [HarmonyPatch(typeof(JesterAI))]
-    internal class JesterAIPatch
+    [HarmonyPatch(typeof(RedLocustBees))]
+    internal class RedLocustBeesPatch
     {
-        [HarmonyPatch(nameof(JesterAI.Start))]
+        [HarmonyPatch(nameof(RedLocustBees.Start))]
         [HarmonyPostfix]
-        public static void StatOverride(JesterAI __instance)
+        public static void StatOverride(RedLocustBees __instance)
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
@@ -22,7 +22,7 @@ namespace LCRandomizerMod.Patches
                 float health = Convert.ToSingle(new System.Random().Next(1, 11));
                 float scale = Convert.ToSingle(new System.Random().Next(5, 21)) / 10;
 
-                RandomizerValues.jesterSpeedsDict.Add(__instance.NetworkObjectId, speed);
+                RandomizerValues.redLocustSpeedsDict.Add(__instance.NetworkObjectId, speed);
 
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
@@ -33,22 +33,22 @@ namespace LCRandomizerMod.Patches
                 fastBufferWriter.WriteValueSafe<float>(health);
                 fastBufferWriter.WriteValueSafe<float>(scale);
 
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesJesterData", fastBufferWriter, NetworkDelivery.Reliable);
-                fastBufferWriter.Dispose(); 
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", fastBufferWriter, NetworkDelivery.Reliable);
+                fastBufferWriter.Dispose();
             }
         }
 
-        [HarmonyPatch(nameof(JesterAI.Update))]
+        [HarmonyPatch(nameof(RedLocustBees.Update))]
         [HarmonyPostfix]
-        public static void SpeedOverride(JesterAI __instance)
+        public static void SpeedOverride(RedLocustBees __instance)
         {
             if (!__instance.isEnemyDead)
             {
-                __instance.agent.speed = RandomizerValues.jesterSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+                __instance.agent.speed = RandomizerValues.redLocustSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
             }
         }
 
-        public static void SetJesterData(ulong _, FastBufferReader reader)
+        public static void SetBeeStats(ulong _, FastBufferReader reader)
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
@@ -62,14 +62,14 @@ namespace LCRandomizerMod.Patches
                 reader.ReadValueSafe<float>(out health);
                 reader.ReadValueSafe<float>(out scale);
 
-                RandomizerValues.jesterSpeedsDict.Add(id, speed);
+                RandomizerValues.redLocustSpeedsDict.Add(id, speed);
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
-                JesterAI jester = networkObject.gameObject.GetComponentInChildren<JesterAI>();
-                jester.enemyHP = (int)health;
-                jester.transform.localScale = new Vector3(scale, scale, scale);
+                RedLocustBees bee = networkObject.gameObject.GetComponentInChildren<RedLocustBees>();
+                bee.enemyHP = (int)health;
+                bee.transform.localScale = new Vector3(scale, scale, scale);
 
-                RandomizerModBase.mls.LogInfo("RECEIVED JESTER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
+                RandomizerModBase.mls.LogInfo("RECEIVED BEE STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }
         }
     }
