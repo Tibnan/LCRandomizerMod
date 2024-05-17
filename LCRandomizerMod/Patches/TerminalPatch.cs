@@ -5,52 +5,60 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using System.Windows.Forms;
+using System.Diagnostics.Eventing.Reader;
 
 namespace LCRandomizerMod.Patches
 {
-    //[HarmonyPatch(typeof(Terminal))]
-    //internal class TerminalPatch
-    //{
-    //    [HarmonyPatch(nameof(Terminal.SetItemSales))]
-    //    [HarmonyPrefix]
-    //    public static void ItemSalesOverride(Terminal __instance)
-    //    {
-    //        if (__instance.itemSalesPercentages == null || __instance.itemSalesPercentages.Length == 0)
-    //        {
-    //            __instance.itemSalesPercentages = new int[__instance.buyableItemsList.Length];
-    //            for (int i = 0; i < __instance.itemSalesPercentages.Length; i++)
-    //            {
-    //                Debug.Log(string.Format("Item sales percentages #{0}: {1}", i, __instance.itemSalesPercentages[i]));
-    //                __instance.itemSalesPercentages[i] = 100;
-    //            }
-    //        }
-    //        System.Random random = new System.Random(StartOfRound.Instance.randomMapSeed + 90);
-    //        int num = Mathf.Clamp(random.Next(-10, 5), 0, 5);
-    //        if (num <= 0)
-    //        {
-    //            return;
-    //        }
-    //        List<int> list = new List<int>();
-    //        for (int i = 0; i < __instance.buyableItemsList.Length; i++)
-    //        {
-    //            list.Add(i);
-    //            __instance.itemSalesPercentages[i] = 100;
-    //        }
-    //        int num2 = 0;
-    //        while (num2 < num && list.Count > 0)
-    //        {
-    //            int num3 = random.Next(0, list.Count);
-    //            int maxValue = Mathf.Clamp(__instance.buyableItemsList[num3].highestSalePercentage, 0, 90);
-    //            int num4 = 100 - random.Next(0, maxValue);
-    //            num4 = RoundToNearestTen(num4);
-    //            __instance.itemSalesPercentages[num3] = num4;
-    //            list.RemoveAt(num3);
-    //            num2++;
-    //        }
-    //    }
+    [HarmonyPatch(typeof(Terminal))]
+    internal class TerminalPatch
+    {
+        [HarmonyPatch(nameof(Terminal.OnSubmit))]
+        [HarmonyPrefix]
+        public static bool CheckForRandom(Terminal __instance)
+        {
+            if (!RandomizerValues.mapRandomizedInTerminal && StartOfRound.Instance.inShipPhase)
+            {
+                RandomizerModBase.mls.LogInfo("PARSED SENTENCE:");
+                RandomizerModBase.mls.LogInfo(__instance.screenText.text.Substring(__instance.screenText.text.Length - __instance.textAdded).ToLower());
 
-    //    private static int RoundToNearestTen(int i)
-    //    {
-    //        return (int)Math.Round((double)i / 10.0) * 10;
-    //    }
+                if (__instance.screenText.text.Substring(__instance.screenText.text.Length - __instance.textAdded).Contains("random"))
+                {
+                    int num = new System.Random().Next(1, 13);
+
+                    while (num == 11)
+                    {
+                        num = new System.Random().Next(1, 13);
+                    }
+
+                    StartOfRound.Instance.ChangeLevelServerRpc(num, __instance.groupCredits);
+                    __instance.screenText.text = "";
+                    __instance.QuitTerminal();
+                    RandomizerValues.mapRandomizedInTerminal = true;
+
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                if (StartOfRound.Instance.inShipPhase)
+                {
+                    RandomizerModBase.mls.LogInfo("RANDOMIZED STATE: " + RandomizerValues.mapRandomizedInTerminal);
+                    HUDManager.Instance.AddTextToChatOnServer("<color=red>You are only allowed to randomize once per round start.</color>", -1);
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(nameof(Terminal.LoadNewNode))]
+        [HarmonyPrefix]
+        public static bool CheckForAlreadyRandomized(Terminal __instance)
+        {
+            return !RandomizerValues.mapRandomizedInTerminal;
+        }
+    }
 }

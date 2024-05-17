@@ -9,12 +9,12 @@ using UnityEngine;
 
 namespace LCRandomizerMod.Patches
 {
-    [HarmonyPatch(typeof(JesterAI))]
-    internal class JesterAIPatch
+    [HarmonyPatch(typeof(DoublewingAI))]
+    internal class DoublewingAIPatch
     {
-        [HarmonyPatch(nameof(JesterAI.Start))]
+        [HarmonyPatch(nameof(DoublewingAI.Start))]
         [HarmonyPostfix]
-        public static void StatOverride(JesterAI __instance)
+        public static void StatOverride(DoublewingAI __instance)
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
@@ -22,7 +22,7 @@ namespace LCRandomizerMod.Patches
                 float health = Convert.ToSingle(new System.Random().Next(1, 11));
                 float scale = Convert.ToSingle(new System.Random().Next(5, 21)) / 10;
 
-                RandomizerValues.jesterSpeedsDict.Add(__instance.NetworkObjectId, speed);
+                RandomizerValues.doublewingSpeedsDict.Add(__instance.NetworkObjectId, speed);
 
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
@@ -33,22 +33,22 @@ namespace LCRandomizerMod.Patches
                 fastBufferWriter.WriteValueSafe<float>(health);
                 fastBufferWriter.WriteValueSafe<float>(scale);
 
-                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesJesterData", fastBufferWriter, NetworkDelivery.Reliable);
-                fastBufferWriter.Dispose(); 
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesDoublewingData", fastBufferWriter, NetworkDelivery.Reliable);
+                fastBufferWriter.Dispose();
             }
         }
 
-        [HarmonyPatch(nameof(JesterAI.Update))]
+        [HarmonyPatch(nameof(DoublewingAI.Update))]
         [HarmonyPostfix]
-        public static void SpeedOverride(JesterAI __instance)
+        public static void SpeedOverride(DoublewingAI __instance)
         {
             if (!__instance.isEnemyDead)
             {
-                __instance.agent.speed = RandomizerValues.jesterSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+                __instance.agent.speed = RandomizerValues.doublewingSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
             }
         }
 
-        public static void SetJesterData(ulong _, FastBufferReader reader)
+        public static void SetDoublewingData(ulong _, FastBufferReader reader)
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
@@ -62,14 +62,14 @@ namespace LCRandomizerMod.Patches
                 reader.ReadValueSafe<float>(out health);
                 reader.ReadValueSafe<float>(out scale);
 
-                RandomizerValues.jesterSpeedsDict.Add(id, speed);
+                RandomizerValues.doublewingSpeedsDict.Add(id, speed);
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
-                JesterAI jester = networkObject.gameObject.GetComponentInChildren<JesterAI>();
-                jester.enemyHP = (int)health;
-                jester.transform.localScale = new Vector3(scale, scale, scale);
+                DoublewingAI doublewing = networkObject.gameObject.GetComponentInChildren<DoublewingAI>();
+                doublewing.enemyHP = (int)health;
+                doublewing.transform.localScale = new Vector3(scale, scale, scale);
 
-                RandomizerModBase.mls.LogInfo("RECEIVED JESTER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
+                RandomizerModBase.mls.LogInfo("RECEIVED DOUBLEWING STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }
         }
     }

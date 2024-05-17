@@ -61,6 +61,12 @@ namespace LCRandomizerMod
             harmony.PatchAll(typeof(FlowermanAIPatch));
             harmony.PatchAll(typeof(PufferAIPatch));
             harmony.PatchAll(typeof(CentipedeAIPatch));
+            harmony.PatchAll(typeof(FlowerSnakeEnemyPatch));
+            harmony.PatchAll(typeof(SpringManAIPatch));
+            harmony.PatchAll(typeof(DoublewingAIPatch));
+            harmony.PatchAll(typeof(RedLocustBeesPatch));
+            harmony.PatchAll(typeof(ExtensionLadderItemPatch));
+            harmony.PatchAll(typeof(TerminalPatch));
 
 
             mls.LogInfo("Patched all base classes.");

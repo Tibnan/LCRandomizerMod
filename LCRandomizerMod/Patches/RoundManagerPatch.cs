@@ -92,7 +92,7 @@ namespace LCRandomizerMod.Patches
                             }
                         case LevelObjectRandomization.None:
                             {
-                                return;
+                                break;
                             }
                     }
                 }
