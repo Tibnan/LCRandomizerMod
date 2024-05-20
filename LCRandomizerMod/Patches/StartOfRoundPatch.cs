@@ -3,6 +3,7 @@ using HarmonyLib;
 using System;
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections;
 
 namespace LCRandomizerMod.Patches
 {
@@ -52,7 +53,7 @@ namespace LCRandomizerMod.Patches
                 {
                     RandomizerValues.deadlineRand = GenerateNewDeadline(); //For testing
                     RandomizerModBase.mls.LogInfo("New deadline time: " + RandomizerValues.deadlineRand +  " (" + RandomizerValues.deadlineRand / 1080 + ") days");
-                    RandomizerValues.quotaRand = new System.Random().Next(500, 20000); //For testing
+                    RandomizerValues.quotaRand = new System.Random().Next(500, 2001); //For testing
                     RandomizerModBase.mls.LogInfo("New quota: " + RandomizerValues.quotaRand);
 
                     RandomizeQuotaVariables();
@@ -69,7 +70,7 @@ namespace LCRandomizerMod.Patches
 
                 //Generate random weather values
                 LevelWeatherType[] weatherTypes = Enum.GetValues(typeof(LevelWeatherType)) as LevelWeatherType[];
-                RandomizerValues.randomizedWeatherIdx = new System.Random().Next(0, weatherTypes.Length);
+                RandomizerValues.randomizedWeatherIdx = __instance.currentLevel.levelID == 3 ? 0 : new System.Random().Next(0, weatherTypes.Length);
                 /*RandomizerValues.randomizedWeatherIdx = 5;*/ //For testing
 
                 RandomizerModBase.mls.LogInfo("Randomized weather index: " + RandomizerValues.randomizedWeatherIdx);
@@ -122,7 +123,7 @@ namespace LCRandomizerMod.Patches
                 for (int i = 0; i < Unity.Netcode.NetworkManager.Singleton.ConnectedClientsList.Count; i++)
                 {
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale * modelValues[i];
-                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = RandomizerValues.defaultPlayerMaskLayer * (uint)modelValues[i];
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale * modelValues[i];
                 }
 
                 RandomizerModBase.mls.LogInfo("Sending player model values...");
@@ -189,6 +190,7 @@ namespace LCRandomizerMod.Patches
                 for (int i = 0; i < StartOfRound.Instance.allPlayerObjects.Length; i++)
                 {
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale;
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale;
                     SoundManager.Instance.SetPlayerPitch(RandomizerValues.defaultPlayerPitch, i);
                 }
             }
@@ -213,6 +215,9 @@ namespace LCRandomizerMod.Patches
 
             RandomizerValues.defaultPlayerMaskLayer = __instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask;
             RandomizerValues.defaultPlayerScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerBody.localScale;
+            RandomizerValues.defaultPlayerHeadScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().playerGlobalHead.localScale;
+            RandomizerValues.defaultPlayerBillboardScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().usernameBillboard.localScale;
+            RandomizerValues.defaultPlayerBillboardPos = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().usernameBillboard.position;
         }
 
         public static void SetValuesSentByServer(ulong _, FastBufferReader reader)
@@ -261,7 +266,7 @@ namespace LCRandomizerMod.Patches
                     RandomizerModBase.mls.LogInfo("Read out info: " + modelValues[i]);
 
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale * modelValues[i];
-                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask = RandomizerValues.defaultPlayerMaskLayer * (uint)modelValues[i];
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale * modelValues[i];
 
 
                     RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
@@ -391,7 +396,10 @@ namespace LCRandomizerMod.Patches
         //{
         //    if (!StartOfRound.Instance.inShipPhase && RoundManager.Instance.currentLevel.currentWeather != LevelWeatherType.Stormy)
         //    {
-        //        if (new System.Random().Next(1, 10001) == 10000) StartOfRound.Instance.PowerSurgeShip();
+        //        if (new System.Random().Next(1, 10001) == 10000)
+        //        {
+        //            StartOfRound.Instance.PowerSurgeShip();
+        //        }
         //    }
         //}
     }
