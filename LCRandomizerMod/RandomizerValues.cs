@@ -11,6 +11,9 @@ namespace LCRandomizerMod
         public static Vector3 defaultPlayerScale;
         public static uint defaultPlayerMaskLayer;
         public const float defaultPlayerPitch = 1f;
+        public static Vector3 defaultPlayerHeadScale;
+        public static Vector3 defaultPlayerBillboardScale;
+        public static Vector3 defaultPlayerBillboardPos;
 
         public static float sprintRand;
         public static int healthRand;
