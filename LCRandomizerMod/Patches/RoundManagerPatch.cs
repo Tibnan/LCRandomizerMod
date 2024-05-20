@@ -1,11 +1,6 @@
-﻿using BepInEx;
-using BepInEx.Logging;
-using HarmonyLib;
+﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -14,8 +9,8 @@ namespace LCRandomizerMod.Patches
     [HarmonyPatch(typeof(RoundManager))]
     internal class RoundManagerPatch
     {
-        private enum LevelObjectRandomization { None, Landmine, Turret, SpikeRoofTrap }
-        private enum EnemySpawnRandomization { None, Flowerman, Nutcracker, RadMech, Crawler, DressGirl, BaboonBird, Jester, Butler, HoarderBug, ForestGiant, MouthDog, SandSpider, Blob }
+        private protected enum LevelObjectRandomization { None, Landmine, Turret, SpikeRoofTrap }
+        private protected enum EnemySpawnRandomization { None, Flowerman, Nutcracker, RadMech, Crawler, DressGirl, BaboonBird, Jester, Butler, HoarderBug, ForestGiant, MouthDog, SandSpider, Blob }
 
         [HarmonyPatch(nameof(RoundManager.SpawnScrapInLevel))]
         [HarmonyPrefix]
@@ -46,63 +41,84 @@ namespace LCRandomizerMod.Patches
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
                 LevelObjectRandomization[] objRand = Enum.GetValues(typeof(LevelObjectRandomization)) as LevelObjectRandomization[];
-                LevelObjectRandomization randomizedObject = objRand[new System.Random().Next(0, objRand.Length)];
 
-                foreach (SpawnableMapObject spawnableMapObject in __instance.currentLevel.spawnableMapObjects)
+                List<LevelObjectRandomization> alreadyRandomizedObject = new List<LevelObjectRandomization>();
+
+                do
                 {
-                    switch (randomizedObject)
-                    {
-                        case LevelObjectRandomization.Landmine:
-                            {
-                                if (spawnableMapObject.prefabToSpawn.GetComponentInChildren<Landmine>() != null)
-                                {
-                                    spawnableMapObject.numberToSpawn = new AnimationCurve(new Keyframe[]
-                                    {
-                                        new Keyframe(0f, Convert.ToSingle(new System.Random().Next(0, 70))),
-                                        new Keyframe(1f, 25f)
-                                    });
+                    LevelObjectRandomization randomizedObject = objRand[new System.Random().Next(0, objRand.Length)];
 
-                                    RandomizerModBase.mls.LogError("FOUND LANDMINE");
-                                }
-                                break;
-                            }
-                        case LevelObjectRandomization.Turret:
-                            {
-                                if (spawnableMapObject.prefabToSpawn.GetComponentInChildren<Turret>() != null)
+                    foreach (SpawnableMapObject spawnableMapObject in __instance.currentLevel.spawnableMapObjects)
+                    {
+                        switch (randomizedObject)
+                        {
+                            case LevelObjectRandomization.Landmine:
                                 {
-                                    spawnableMapObject.numberToSpawn = new AnimationCurve(new Keyframe[]
+                                    if (spawnableMapObject.prefabToSpawn.GetComponentInChildren<Landmine>() != null)
                                     {
-                                        new Keyframe(0f, Convert.ToSingle(new System.Random().Next(0, 10))),
+                                        spawnableMapObject.numberToSpawn = new AnimationCurve(new Keyframe[]
+                                        {
+                                        new Keyframe(0f, Convert.ToSingle(new System.Random().Next(0, 51))),
                                         new Keyframe(1f, 25f)
-                                    });
+                                        });
+
+                                        alreadyRandomizedObject.Add(randomizedObject);
+                                        RandomizerModBase.mls.LogError("Randomized landmines.");
+                                    }
+                                    break;
                                 }
-                                break;
-                            }
-                        case LevelObjectRandomization.SpikeRoofTrap:
-                            {
-                                if (spawnableMapObject.prefabToSpawn.GetComponent<SpikeRoofTrap>() != null)
+                            case LevelObjectRandomization.Turret:
                                 {
-                                    spawnableMapObject.numberToSpawn = new AnimationCurve(new Keyframe[]
+                                    if (spawnableMapObject.prefabToSpawn.GetComponentInChildren<Turret>() != null)
                                     {
-                                        new Keyframe(0f, Convert.ToSingle(new System.Random().Next(0, 10))),
+                                        spawnableMapObject.numberToSpawn = new AnimationCurve(new Keyframe[]
+                                        {
+                                        new Keyframe(0f, Convert.ToSingle(new System.Random().Next(0, 11))),
                                         new Keyframe(1f, 25f)
-                                    });
+                                        });
+
+                                        alreadyRandomizedObject.Add(randomizedObject);
+                                        RandomizerModBase.mls.LogError("Randomized turrets.");
+                                    }
+                                    break;
                                 }
-                                break;
-                            }
-                        case LevelObjectRandomization.None:
-                            {
-                                break;
-                            }
+                            case LevelObjectRandomization.SpikeRoofTrap:
+                                {
+                                    if (spawnableMapObject.prefabToSpawn.GetComponent<SpikeRoofTrap>() != null)
+                                    {
+                                        spawnableMapObject.numberToSpawn = new AnimationCurve(new Keyframe[]
+                                        {
+                                        new Keyframe(0f, Convert.ToSingle(new System.Random().Next(0, 11))),
+                                        new Keyframe(1f, 25f)
+                                        });
+
+                                        alreadyRandomizedObject.Add(randomizedObject);
+                                        RandomizerModBase.mls.LogError("Randomized turrets.");
+                                    }
+                                    break;
+                                }
+                            case LevelObjectRandomization.None:
+                                {
+                                    RandomizerModBase.mls.LogError("No level object randomized beyond this point.");
+                                    goto EndObjectLoop;
+                                }
+                        }
                     }
-                }
+                } while (new System.Random().Next(0, 5) != 4 || alreadyRandomizedObject.Count == objRand.Length);
+
+                EndObjectLoop:
 
                 List<EnemySpawnRandomization> alreadyRandomized = new List<EnemySpawnRandomization>();
                 EnemySpawnRandomization[] enemyTypeArray = Enum.GetValues(typeof(EnemySpawnRandomization)) as EnemySpawnRandomization[];
                 do
                 {
                     EnemySpawnRandomization enemyToRandomize = enemyTypeArray[new System.Random().Next(0, enemyTypeArray.Length)];
-                    if (enemyToRandomize == EnemySpawnRandomization.None || alreadyRandomized.Contains(enemyToRandomize))
+                    if (enemyToRandomize == EnemySpawnRandomization.None)
+                    {
+                        goto EndLoop;
+                    }
+
+                    if (alreadyRandomized.Contains(enemyToRandomize))
                     {
                         RandomizerModBase.mls.LogError("Enemy to randomize: " + enemyToRandomize + ", list already contains it so continuing...");
                         continue;
@@ -118,6 +134,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized Baboon bird. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.BaboonBird);
                                     }
                                     break;
@@ -128,6 +152,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized Blob. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.Blob);
                                     }
                                     break;
@@ -138,6 +170,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized Butler. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.Butler);
                                     }
                                     break;
@@ -148,6 +188,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized Crawler. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.Crawler);
                                     }
                                     break;
@@ -158,6 +206,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized DressGirl. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.DressGirl);
                                     }
                                     break;
@@ -168,6 +224,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized Flowerman. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.Flowerman);
                                     }
                                     break;
@@ -178,6 +242,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized ForestGiant. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.ForestGiant);
                                     }
                                     break;
@@ -188,6 +260,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized HoarderBug. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.HoarderBug);
                                     }
                                     break;
@@ -198,6 +278,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized Jester. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.Jester);
                                     }
                                     break;
@@ -208,6 +296,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized MouthDog. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.MouthDog);
                                     }
                                     break;
@@ -218,6 +314,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized Nutcracker. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.Nutcracker);
                                     }
                                     break;
@@ -228,6 +332,14 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized RadMech. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.RadMech);
                                     }
                                     break;
@@ -238,13 +350,30 @@ namespace LCRandomizerMod.Patches
                                     {
                                         spawnableEnemyWithRarity.rarity = new System.Random().Next(0, 101);
                                         RandomizerModBase.mls.LogInfo("Randomized SandSpider. Rarity: " + spawnableEnemyWithRarity.rarity);
+
+                                        //spawnableEnemyWithRarity.enemyType.MaxCount = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.PowerLevel = new System.Random().Next(4, 20);
+                                        //spawnableEnemyWithRarity.enemyType.probabilityCurve = new AnimationCurve(new Keyframe[]
+                                        //{
+                                        //new Keyframe(0f, Convert.ToSingle(new System.Random().Next(100, 101))),
+                                        //new Keyframe(1f, 25f)
+                                        //});
                                         alreadyRandomized.Add(EnemySpawnRandomization.SandSpider);
                                     }
                                     break;
                                 }
                         }
                     }
-                } while ((new System.Random().Next(1, 16) != 15) || alreadyRandomized.Count == enemyTypeArray.Length);
+                } while ((new System.Random().Next(0, 15) != 14) || alreadyRandomized.Count == enemyTypeArray.Length);
+
+                EndLoop:
+                RandomizerModBase.mls.LogInfo("No enemies were randomized beyond this point.");
+                __instance.currentMaxInsidePower = new System.Random().Next(0, 2000);
+                //__instance.currentDaytimeEnemyPower = new System.Random().Next(0, 2000);
+                //__instance.currentEnemyPower = new System.Random().Next(0, 2000);
+                __instance.currentMaxOutsidePower = new System.Random().Next(0, 2000);
+                RandomizerModBase.mls.LogError("MaxInsidePower: " + __instance.currentMaxInsidePower + " MaxOutsidePower: " + __instance.currentMaxOutsidePower);
+                return;
             }
             else
             {

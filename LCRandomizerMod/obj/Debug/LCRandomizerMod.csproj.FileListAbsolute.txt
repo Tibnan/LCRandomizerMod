@@ -106,4 +106,3 @@ E:\Projects\LCRandomizerMod\LCRandomizerMod\obj\Debug\LCRandomizerMod.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\obj\Debug\LCRandomizerMod.pdb
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.AssetBundleModule.xml
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\LethalLib.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\System.Windows.Forms.dll

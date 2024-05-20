@@ -1,16 +1,8 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using UnityEngine;
-using System.Threading.Tasks;
 using Unity.Netcode;
-using System.Runtime.CompilerServices;
-using System.CodeDom.Compiler;
-using UnityEngine.Assertions.Must;
 
 namespace LCRandomizerMod.Patches
 {
@@ -58,9 +50,9 @@ namespace LCRandomizerMod.Patches
                 //Generate random deadline and quota values on new save load and sync with clients
                 if (TimeOfDay.Instance.profitQuota == 130)
                 {
-                    RandomizerValues.deadlineRand = 1080; /*GenerateNewDeadline();*/ //For testing
+                    RandomizerValues.deadlineRand = GenerateNewDeadline(); //For testing
                     RandomizerModBase.mls.LogInfo("New deadline time: " + RandomizerValues.deadlineRand +  " (" + RandomizerValues.deadlineRand / 1080 + ") days");
-                    RandomizerValues.quotaRand = 1; /*new System.Random().Next(500, 20000);*/ //For testing
+                    RandomizerValues.quotaRand = new System.Random().Next(500, 20000); //For testing
                     RandomizerModBase.mls.LogInfo("New quota: " + RandomizerValues.quotaRand);
 
                     RandomizeQuotaVariables();
@@ -191,11 +183,6 @@ namespace LCRandomizerMod.Patches
             RandomizerValues.ClearDicts();
             RandomizerValues.spawnedMechCount = 0;
             RandomizerValues.mapRandomizedInTerminal = false;
-
-            foreach (SelectableLevel level in StartOfRound.Instance.levels)
-            {
-                
-            }
 
             try
             {
@@ -367,17 +354,17 @@ namespace LCRandomizerMod.Patches
             }
         }
 
-        [HarmonyPatch(nameof(StartOfRound.ChangeLevelServerRpc))]
-        [HarmonyPrefix]
-        public static bool ChangeLevelOverride(StartOfRound __instance)
-        {
-            if (RandomizerValues.mapRandomizedInTerminal && StartOfRound.Instance.inShipPhase)
-            {
-                HUDManager.Instance.AddTextToChatOnServer("<color=red>You have already randomized the map, you can't route to a new planet until you go down.</color>", -1);
-                RandomizerModBase.mls.LogInfo("RANDOMIZED STATE: " + RandomizerValues.mapRandomizedInTerminal);
-            }
-            return !RandomizerValues.mapRandomizedInTerminal;
-        }
+        //[HarmonyPatch(nameof(StartOfRound.ChangeLevelServerRpc))]
+        //[HarmonyPrefix]
+        //public static bool ChangeLevelOverride(StartOfRound __instance)
+        //{
+        //    if (RandomizerValues.mapRandomizedInTerminal && StartOfRound.Instance.inShipPhase)
+        //    {
+        //        HUDManager.Instance.AddTextToChatOnServer("<color=red>You have already randomized the map, you can't route to a new planet until you go down.</color>", -1);
+        //        RandomizerModBase.mls.LogInfo("RANDOMIZED STATE: " + RandomizerValues.mapRandomizedInTerminal);
+        //    }
+        //    return !RandomizerValues.mapRandomizedInTerminal;
+        //}
 
         //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
 

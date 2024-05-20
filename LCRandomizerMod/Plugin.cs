@@ -1,16 +1,7 @@
-﻿using System;
-using BepInEx;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using BepInEx;
 using HarmonyLib;
 using BepInEx.Logging;
-using GameNetcodeStuff;
 using LCRandomizerMod.Patches;
-using UnityEngine;
-using System.Reflection;
-using System.IO;
 
 namespace LCRandomizerMod
 {
@@ -18,7 +9,7 @@ namespace LCRandomizerMod
     public class RandomizerModBase : BaseUnityPlugin
     {
         public const string modName = "Lethal Company Randomizer Mod";
-        public const string modVersion = "0.8.2";
+        public const string modVersion = "0.9.1";
         public const string modGUID = "Tibnan.lcrandomizermod";
 
         private readonly Harmony harmony = new Harmony(modGUID);

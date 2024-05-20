@@ -1,9 +1,6 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
-using System;
-using System.Collections.Generic;
 using Unity.Netcode;
-using UnityEngine;
 
 namespace LCRandomizerMod.Patches
 {
@@ -74,6 +71,9 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoublewingData", new CustomMessagingManager.HandleNamedMessageDelegate(DoublewingAIPatch.SetDoublewingData));
                 RandomizerModBase.mls.LogInfo("Registering bee handler: " + "ClientReceivesBeeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
+                RandomizerModBase.mls.LogInfo("Registering terminal switch handlers: " + "TerminalRandomizationUsed" + "ServerInvokeTerminalSwitch");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeTerminalSwitch", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SendTerminalSwitchToClients));
 
                 StartOfRoundPatch.ResetPlayers();
                 //RandomizerValues.ClearDicts();
@@ -139,6 +139,8 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoublewingData", new CustomMessagingManager.HandleNamedMessageDelegate(DoublewingAIPatch.SetDoublewingData));
                 RandomizerModBase.mls.LogInfo("Registering bee handler: " + "ClientReceivesBeeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
+                RandomizerModBase.mls.LogInfo("Registering terminal switch handler: " + "TerminalRandomizationUsed");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
 
                 StartOfRoundPatch.ResetPlayers();
                 //RandomizerValues.ClearDicts();
