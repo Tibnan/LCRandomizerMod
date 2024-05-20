@@ -1,9 +1,5 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -20,7 +16,7 @@ namespace LCRandomizerMod.Patches
             {
                 float speed = Convert.ToSingle(new System.Random().Next(20, 200)) / 10f;
                 float health = Convert.ToSingle(new System.Random().Next(1, 11));
-                float scale = Convert.ToSingle(new System.Random().Next(5, 21)) / 10;
+                float scale = Convert.ToSingle(new System.Random().Next(5, 31)) / 10;
 
                 RandomizerValues.flowerSnakeSpeedsDict.Add(__instance.NetworkObjectId, speed);
 

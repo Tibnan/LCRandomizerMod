@@ -1,16 +1,7 @@
 ﻿using HarmonyLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Unity.Netcode;
-using System.Reflection;
-using System.Reflection.Emit;
-using UnityEngine.AI;
-using System.CodeDom.Compiler;
-using Unity.Profiling;
 
 namespace LCRandomizerMod.Patches
 {

@@ -1,10 +1,5 @@
 ﻿using HarmonyLib;
-using System;
 using UnityEngine;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Netcode;
 
 namespace LCRandomizerMod.Patches
@@ -20,7 +15,16 @@ namespace LCRandomizerMod.Patches
             {
                 if (!__instance.isInShipRoom)
                 {
-                    int rndVal = new System.Random().Next(new System.Random().Next(1, 20), new System.Random().Next(100, 501));
+                    int rndVal;
+
+                    if (TimeOfDay.Instance.timesFulfilledQuota > 0)
+                    {
+                        rndVal = new System.Random().Next(new System.Random().Next(1, 20), new System.Random().Next(100, 501)) * TimeOfDay.Instance.timesFulfilledQuota;
+                    }
+                    else
+                    {
+                        rndVal = new System.Random().Next(new System.Random().Next(1, 20), new System.Random().Next(100, 501));
+                    }
 
                     setValueTo = rndVal;
                     __instance.scrapValue = setValueTo;
