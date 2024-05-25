@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using System;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -30,6 +31,29 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("MINE ID: " + __instance.NetworkObjectId);
                 return true;
             }
+        }
+
+        [HarmonyPatch("Start")]
+        [HarmonyPostfix]
+        public static void SizeOverride(Landmine __instance)
+        {
+            if (Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                float scale = Convert.ToSingle(new System.Random().Next(5, 31)) / 10;
+                __instance.transform.localScale = new Vector3(scale, scale, scale);
+
+                FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float), Unity.Collections.Allocator.Temp, -1);
+
+                fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
+                fastBufferWriter.WriteValueSafe<float>(scale);
+
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesMineData", fastBufferWriter, NetworkDelivery.Reliable);
+            }
+        }
+
+        public static void SetMineSizeClient(ulong _, FastBufferReader reader)
+        {
+
         }
     }
 }

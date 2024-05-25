@@ -1,5 +1,10 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
 using Unity.Netcode;
 
 namespace LCRandomizerMod.Patches
@@ -74,12 +79,71 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("Registering terminal switch handlers: " + "TerminalRandomizationUsed" + "ServerInvokeTerminalSwitch");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeTerminalSwitch", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SendTerminalSwitchToClients));
+                RandomizerModBase.mls.LogInfo("Registering mine size handler: " + "ClientReceivesMineData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMineData", new CustomMessagingManager.HandleNamedMessageDelegate(LandminePatch.SetMineSizeClient));
+                RandomizerModBase.mls.LogInfo("Registering knife and shovel damage handlers: " + "ClientReceivesKnifeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesKnifeData", new CustomMessagingManager.HandleNamedMessageDelegate(KnifeItemPatch.SetKnifeData));
+                RandomizerModBase.mls.LogInfo("Registering server item data request handler: " + "ServerReceivesItemDataRequest");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesItemDataRequest", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.ServerBeginItemDataTransfer));
+                RandomizerModBase.mls.LogInfo("Registering shovel damage handler: " + "ClientReceivesShovelData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShovelData", new CustomMessagingManager.HandleNamedMessageDelegate(ShovelPatch.SetShovelData));
 
+                if (ES3.FileExists(GameNetworkManager.Instance.currentSaveFileName))
+                {
+                    try
+                    {
+                        RandomizerValues.keysToLoad = ES3.Load("keysToLoad", GameNetworkManager.Instance.currentSaveFileName) as string;
+                        if (RandomizerValues.keysToLoad == "")
+                        {
+                            goto ResetAndEnd;
+                        }
+                        string[] keys = RandomizerValues.keysToLoad.Split(',');
+
+                        foreach (string key in keys)
+                        {
+                            switch (key)
+                            {
+                                case "knifeStatsDict":
+                                    {
+                                        RandomizerValues.knifeDamageDict = ES3.Load("knifeStatsDict", GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
+                                        break;
+                                    }
+                                case "jetpackDict":
+                                    {
+                                        RandomizerValues.jetpackPropertiesDict = ES3.Load("jetpackDict", GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, Tuple<float, float>>;
+                                        break;
+                                    }
+                                case "shovelStatsDict":
+                                    {
+                                        RandomizerValues.shovelDamageDict = ES3.Load("shovelStatsDict", GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
+                                        break;
+                                    }
+                            }
+                        }
+                        RandomizerModBase.mls.LogInfo("Loaded dictionaries.");
+                    }
+                    catch (Exception ex)
+                    {
+                        RandomizerModBase.mls.LogError("Exception caught during custom value deserialization. " + ex.Message);
+                    }
+                }
+                else
+                {
+                    RandomizerModBase.mls.LogWarning("Save file not found.");
+                    goto ResetAndEnd;
+                }
+
+                var runnableTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => typeof(ICustomValue).IsAssignableFrom(t) && !t.IsInterface);
+
+                foreach (var type in runnableTypes)
+                {
+                    var instance = (ICustomValue)Activator.CreateInstance(type);
+                    instance.ReloadStats();
+                }
+
+                ResetAndEnd:
                 StartOfRoundPatch.ResetPlayers();
-                //RandomizerValues.ClearDicts();
-                RandomizerValues.jetpackPropertiesDict.Clear();
-                //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
-                //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));
+                //RandomizerValues.jetpackPropertiesDict.Clear();
             }
             else
             {
@@ -141,59 +205,45 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
                 RandomizerModBase.mls.LogInfo("Registering terminal switch handler: " + "TerminalRandomizationUsed");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
+                RandomizerModBase.mls.LogInfo("Registering mine size handler: " + "ClientReceivesMineData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMineData", new CustomMessagingManager.HandleNamedMessageDelegate(LandminePatch.SetMineSizeClient));
+                RandomizerModBase.mls.LogInfo("Registering knife and shovel damage handlers: " + "ClientReceivesKnifeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesKnifeData", new CustomMessagingManager.HandleNamedMessageDelegate(KnifeItemPatch.SetKnifeData));
+                RandomizerModBase.mls.LogInfo("Registering client sync handler: " + "DeclareClientAsSynced");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "DeclareClientAsSynced", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.SetClientAsSynced));
+                RandomizerModBase.mls.LogInfo("Registering shovel damage handler: " + "ClientReceivesShovelData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShovelData", new CustomMessagingManager.HandleNamedMessageDelegate(ShovelPatch.SetShovelData));
 
                 StartOfRoundPatch.ResetPlayers();
-                //RandomizerValues.ClearDicts();
-                RandomizerValues.jetpackPropertiesDict.Clear();
-                //RandomizerModBase.mls.LogInfo("Registering pitch data handler: " + "ClientReceivesPitchData");
-                //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetPitchDataSentByServer));
+
+                RequestItemDataOnSpawn();
+
+                //RandomizerValues.jetpackPropertiesDict.Clear();
             }
         }
 
-        [HarmonyPatch(nameof(PlayerControllerB.Crouch))]
-        [HarmonyPostfix]
-        public static void SpawnEnemy(PlayerControllerB __instance)
+        public static void RequestItemDataOnSpawn()
         {
-            //TimeOfDay.Instance.currentDayTime = 18000;
-            //TimeOfDay.Instance.totalTime = 18000;
+            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "ServerReceivesItemDataRequest", 0UL, new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1), NetworkDelivery.Reliable);
+        }
 
-            //if (StartOfRound.Instance.inShipPhase || !Unity.Netcode.NetworkManager.Singleton.IsServer)
-            //{
-            //    return;
-            //}
-            //RandomizerModBase.mls.LogInfo("Should spawn enemy");
-            //EnemyType forestGiant = new EnemyType();
+        public static void ServerBeginItemDataTransfer(ulong sender, FastBufferReader __)
+        {
+            var runnableTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => typeof(ICustomValue).IsAssignableFrom(t) && !t.IsInterface);
 
-            //using (List<SpawnableEnemyWithRarity>.Enumerator enumerator = StartOfRound.Instance.currentLevel.OutsideEnemies.GetEnumerator())
-            //{
-            //    while (enumerator.MoveNext())
-            //    {
-            //        SpawnableEnemyWithRarity spawnableEnemyWithRarity = enumerator.Current;
+            foreach (var type in runnableTypes)
+            {
+                var instance = (ICustomValue)Activator.CreateInstance(type);
+                instance.SyncStatsWithClients();
+            }
 
-            //        if (spawnableEnemyWithRarity.enemyType.enemyPrefab.GetComponent<ForestGiantAI>() != null)
-            //        {
-            //            forestGiant = spawnableEnemyWithRarity.enemyType;
+            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "DeclareClientAsSynced", sender, new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1), NetworkDelivery.Reliable);
+        }
 
-            //            spawnableEnemyWithRarity.rarity = 999;
-            //            RandomizerModBase.mls.LogInfo("Spawning enemy: " + spawnableEnemyWithRarity.enemyType.enemyPrefab.name);
-
-            //            GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(spawnableEnemyWithRarity.enemyType.enemyPrefab, __instance.transform.position, Quaternion.identity);
-            //            gameObject.GetComponent<NetworkObject>().Spawn(true);
-            //            break;
-            //        }
-            //        else
-            //        {
-            //            forestGiant = null;
-            //        }
-            //    }
-
-            //    if (forestGiant.enemyPrefab == null)
-            //    {
-            //        RandomizerModBase.mls.LogError("Forest giant not found!!!");
-            //    }
-            //}
-
-            //RoundManager.Instance.SpawnEnemyGameObject(new Vector3(0f, 0f, 0f), 0f, 1, forestGiant);
+        public static void SetClientAsSynced(ulong _, FastBufferReader reader)
+        {
+            RandomizerValues.isClientSynced = true;
+            RandomizerModBase.mls.LogInfo("Client synced. " + RandomizerValues.isClientSynced);
         }
     }
 }
