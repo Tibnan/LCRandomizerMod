@@ -104,19 +104,20 @@ namespace LCRandomizerMod.Patches
                 try
                 {
                     ES3.Save("shovelStatsDict", RandomizerValues.shovelDamageDict, GameNetworkManager.Instance.currentSaveFileName);
-                    if (RandomizerValues.keysToLoad == "")
+                    
+                    if (!RandomizerValues.keysToLoad.Contains("shovelStatsDict"))
                     {
-                        RandomizerValues.keysToLoad = "shovelStatsDict";
-                    }
-                    else
-                    {
-                        RandomizerValues.keysToLoad += ",shovelStatsDict";
+                        RandomizerValues.keysToLoad.Add("shovelStatsDict");
                     }
                 }
                 catch (Exception ex)
                 {
                     RandomizerModBase.mls.LogError("Exception caught during custom value serialization. [Shovel] " + ex.Message);
                 }
+            }
+            else if (RandomizerValues.keysToLoad.Contains("shovelStatsDict"))
+            {
+                RandomizerValues.keysToLoad.Remove("shovelStatsDict");
             }
         }
     }

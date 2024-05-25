@@ -92,14 +92,13 @@ namespace LCRandomizerMod.Patches
                 {
                     try
                     {
-                        RandomizerValues.keysToLoad = ES3.Load("keysToLoad", GameNetworkManager.Instance.currentSaveFileName) as string;
-                        if (RandomizerValues.keysToLoad == "")
+                        RandomizerValues.keysToLoad = ES3.Load("keysToLoad", GameNetworkManager.Instance.currentSaveFileName) as List<string>;
+                        if (RandomizerValues.keysToLoad.Count == 0)
                         {
                             goto ResetAndEnd;
                         }
-                        string[] keys = RandomizerValues.keysToLoad.Split(',');
 
-                        foreach (string key in keys)
+                        foreach (string key in RandomizerValues.keysToLoad)
                         {
                             switch (key)
                             {
