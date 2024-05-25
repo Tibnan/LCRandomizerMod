@@ -53,7 +53,19 @@ namespace LCRandomizerMod.Patches
 
         public static void SetMineSizeClient(ulong _, FastBufferReader reader)
         {
+            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                ulong id;
+                float scale;
 
+                reader.ReadValueSafe<ulong>(out id);
+                reader.ReadValueSafe<float>(out scale);
+
+                NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
+                Landmine landmine = networkObject.gameObject.GetComponentInChildren<Landmine>();
+
+                landmine.transform.localScale = new Vector3(scale, scale, scale);
+            }
         }
     }
 }

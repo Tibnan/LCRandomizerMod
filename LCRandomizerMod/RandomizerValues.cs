@@ -10,7 +10,7 @@ namespace LCRandomizerMod
         //Mod specific
 
         public static bool isClientSynced = false;
-        public static string keysToLoad = "";
+        public static List<string> keysToLoad = new List<string>();
 
         //Mod specific
 

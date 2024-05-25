@@ -102,19 +102,19 @@ namespace LCRandomizerMod.Patches
                 try
                 {
                     ES3.Save("knifeStatsDict", RandomizerValues.knifeDamageDict, GameNetworkManager.Instance.currentSaveFileName);
-                    if (RandomizerValues.keysToLoad == "")
+                    if (!RandomizerValues.keysToLoad.Contains("knifeStatsDict"))
                     {
-                        RandomizerValues.keysToLoad = "knifeStatsDict";
-                    }
-                    else
-                    {
-                        RandomizerValues.keysToLoad += ",knifeStatsDict";
+                        RandomizerValues.keysToLoad.Add("knifeStatsDict");
                     }
                 }
                 catch (Exception ex)
                 {
                     RandomizerModBase.mls.LogError("Exception caught during custom value serialization. [KnifeItem] " + ex.Message);
                 }
+            }
+            else if (RandomizerValues.keysToLoad.Contains("knifeStatsDict"))
+            {
+                RandomizerValues.keysToLoad.Remove("knifeStatsDict");
             }
         }
     }

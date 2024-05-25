@@ -133,18 +133,19 @@ namespace LCRandomizerMod.Patches
                 try
                 {
                     ES3.Save("jetpackDict", RandomizerValues.jetpackPropertiesDict, GameNetworkManager.Instance.currentSaveFileName);
-                    if (RandomizerValues.keysToLoad == "")
+                    if (!RandomizerValues.keysToLoad.Contains("jetpackDict"))
                     {
-                        RandomizerValues.keysToLoad = "jetpackDict";
+                        RandomizerValues.keysToLoad.Add("jetpackDict");
                     }
-                    else
-                    {
-                        RandomizerValues.keysToLoad += ",jetpackDict";
-                    }
+
                 } catch (Exception ex)
                 {
                     RandomizerModBase.mls.LogError("Exception caught during custom value serialization. [JetpackItem] " + ex.Message);
                 }
+            }
+            else if (RandomizerValues.keysToLoad.Contains("jetpackDict"))
+            {
+                RandomizerValues.keysToLoad.Remove("jetpackDict");
             }
         }
     }
