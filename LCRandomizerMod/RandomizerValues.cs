@@ -202,7 +202,7 @@ namespace LCRandomizerMod
 
         //ShovelPatch
 
-        public static void ClearDicts()
+        public static void ClearDicts(bool deleteAll)
         {
             dogSpeedsDict.Clear();
             spiderSpeedsDict.Clear();
@@ -223,6 +223,13 @@ namespace LCRandomizerMod
             springManSpeedsDict.Clear();
             doublewingSpeedsDict.Clear();
             redLocustSpeedsDict.Clear();
+
+            if (deleteAll)
+            {
+                knifeDamageDict.Clear();
+                shovelDamageDict.Clear();
+                jetpackPropertiesDict.Clear();
+            }
         }
     }
 }

@@ -40,6 +40,8 @@ namespace LCRandomizerMod.Patches
                 reader.ReadValueSafe(out id);
                 reader.ReadValueSafe(out damage);
 
+                if (RandomizerValues.shovelDamageDict.ContainsKey(id)) return;
+
                 RandomizerValues.shovelDamageDict.Add(id, damage);
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
@@ -116,7 +118,6 @@ namespace LCRandomizerMod.Patches
                     RandomizerModBase.mls.LogError("Exception caught during custom value serialization. [Shovel] " + ex.Message);
                 }
             }
-            RandomizerValues.shovelDamageDict.Clear();
         }
     }
 }

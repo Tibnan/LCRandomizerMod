@@ -105,17 +105,17 @@ namespace LCRandomizerMod.Patches
                             {
                                 case "knifeStatsDict":
                                     {
-                                        RandomizerValues.knifeDamageDict = ES3.Load("knifeStatsDict", GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
+                                        RandomizerValues.knifeDamageDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
                                         break;
                                     }
                                 case "jetpackDict":
                                     {
-                                        RandomizerValues.jetpackPropertiesDict = ES3.Load("jetpackDict", GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, Tuple<float, float>>;
+                                        RandomizerValues.jetpackPropertiesDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, Tuple<float, float>>;
                                         break;
                                     }
                                 case "shovelStatsDict":
                                     {
-                                        RandomizerValues.shovelDamageDict = ES3.Load("shovelStatsDict", GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
+                                        RandomizerValues.shovelDamageDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
                                         break;
                                     }
                             }

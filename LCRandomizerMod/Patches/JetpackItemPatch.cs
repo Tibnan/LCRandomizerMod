@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
@@ -128,6 +129,7 @@ namespace LCRandomizerMod.Patches
         {
             if (RandomizerValues.jetpackPropertiesDict.Count > 0)
             {
+                RandomizerModBase.mls.LogWarning(String.Format("Saving {0} jetpack entries", RandomizerValues.jetpackPropertiesDict.Count));
                 try
                 {
                     ES3.Save("jetpackDict", RandomizerValues.jetpackPropertiesDict, GameNetworkManager.Instance.currentSaveFileName);
@@ -144,7 +146,6 @@ namespace LCRandomizerMod.Patches
                     RandomizerModBase.mls.LogError("Exception caught during custom value serialization. [JetpackItem] " + ex.Message);
                 }
             }
-            RandomizerValues.jetpackPropertiesDict.Clear();
         }
     }
 }

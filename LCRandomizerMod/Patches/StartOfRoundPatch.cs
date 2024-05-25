@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections;
+using System.Collections.Generic;
 
 namespace LCRandomizerMod.Patches
 {
@@ -181,9 +182,11 @@ namespace LCRandomizerMod.Patches
         [HarmonyPrefix]
         public static void ResetPlayers()
         {
-            RandomizerValues.ClearDicts();
+            RandomizerValues.ClearDicts(false);
             RandomizerValues.spawnedMechCount = 0;
             RandomizerValues.mapRandomizedInTerminal = false;
+
+            ClearOrphanedDicts();
 
             try
             {
@@ -357,6 +360,53 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("Received ship door animator speed: " + RandomizerValues.shipDoorAnimatorSpeed);
                 StartOfRound.Instance.shipDoorsAnimator.speed = RandomizerValues.shipDoorAnimatorSpeed;
             }
+        }
+
+        private static void ClearOrphanedDicts()
+        {
+            List<ulong> dictsToRemove = new List<ulong>();
+
+            foreach (ulong id in RandomizerValues.jetpackPropertiesDict.Keys)
+            {
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<JetpackItem>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.jetpackPropertiesDict.Remove(id);
+            }
+            dictsToRemove.Clear();
+
+            foreach (ulong id in RandomizerValues.knifeDamageDict.Keys)
+            {
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<KnifeItem>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.knifeDamageDict.Remove(id);
+            }
+            dictsToRemove.Clear();
+
+            foreach (ulong id in RandomizerValues.shovelDamageDict.Keys)
+            {
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<Shovel>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.shovelDamageDict.Remove(id);
+            }
+            dictsToRemove.Clear();
         }
 
         //[HarmonyPatch(nameof(StartOfRound.ChangeLevelServerRpc))]
