@@ -78,6 +78,7 @@
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ICustomValue.cs" />
     <Compile Include="Patches\BaboonBirdAIPatch.cs" />
     <Compile Include="Patches\BlobAIPatch.cs" />
     <Compile Include="Patches\ButlerAIPatch.cs" />
@@ -89,10 +90,12 @@
     <Compile Include="Patches\FlowermanAIPatch.cs" />
     <Compile Include="Patches\FlowerSnakeEnemyPatch.cs" />
     <Compile Include="Patches\ForestGiantAIPatch.cs" />
+    <Compile Include="Patches\GameNetworkManagerPatch.cs" />
     <Compile Include="Patches\GrabbableObjectPatch.cs" />
     <Compile Include="Patches\HoarderBugAIPatch.cs" />
     <Compile Include="Patches\JesterAIPatch.cs" />
     <Compile Include="Patches\JetpackItemPatch.cs" />
+    <Compile Include="Patches\KnifeItemPatch.cs" />
     <Compile Include="Patches\LandminePatch.cs" />
     <Compile Include="Patches\MouthDogAIPatch.cs" />
     <Compile Include="Patches\NutcrackerAIPatch.cs" />
@@ -103,6 +106,7 @@
     <Compile Include="Patches\RoundManagerPatch.cs" />
     <Compile Include="Patches\SandSpiderAIPatch.cs" />
     <Compile Include="Patches\ShotgunItemPatch.cs" />
+    <Compile Include="Patches\ShovelPatch.cs" />
     <Compile Include="Patches\SpringManAIPatch.cs" />
     <Compile Include="Patches\StartOfRoundPatch.cs" />
     <Compile Include="Patches\TerminalPatch.cs" />

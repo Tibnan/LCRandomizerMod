@@ -1,11 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace LCRandomizerMod
 {
     internal static class RandomizerValues
     {
+        //Mod specific
+
+        public static bool isClientSynced = false;
+        public static string keysToLoad = "";
+
+        //Mod specific
+
         //StartOfRoundPatch
 
         public static Vector3 defaultPlayerScale;
@@ -67,6 +75,7 @@ namespace LCRandomizerMod
 
         //JetpackItemPatch
 
+        //public static Tuple<float, float> jetpackProperties; 
         public static Dictionary<ulong, Tuple<float, float>> jetpackPropertiesDict = new Dictionary<ulong, Tuple<float, float>>();
 
         //JetpackItemPatch
@@ -180,6 +189,18 @@ namespace LCRandomizerMod
         public static bool mapRandomizedInTerminal = false;
 
         //TerminalPatch
+
+        //KnifeItemPatch
+
+        public static Dictionary<ulong, int> knifeDamageDict = new Dictionary<ulong, int>();
+        
+        //KnifeItemPatch
+
+        //ShovelPatch
+
+        public static Dictionary<ulong, int> shovelDamageDict = new Dictionary<ulong, int>();
+
+        //ShovelPatch
 
         public static void ClearDicts()
         {

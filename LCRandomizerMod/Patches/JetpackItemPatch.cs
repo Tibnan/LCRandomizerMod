@@ -1,11 +1,14 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace LCRandomizerMod.Patches
 {
     [HarmonyPatch(typeof(JetpackItem))]
-    internal class JetpackItemPatch
+    internal class JetpackItemPatch : ICustomValue
     {
         [HarmonyPatch(nameof(JetpackItem.EquipItem))]
         [HarmonyPostfix]
@@ -13,6 +16,8 @@ namespace LCRandomizerMod.Patches
         {
             if (!RandomizerValues.jetpackPropertiesDict.ContainsKey(__instance.NetworkObjectId) && Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
+                RandomizerModBase.mls.LogInfo("ID: " + __instance.NetworkObjectId);
+
                 float jetpackAccel = Convert.ToSingle(new System.Random().Next(10, 301)) / 10f;
                 float jetpackDecel = Convert.ToSingle(new System.Random().Next(10, 301)) / 10f;
 
@@ -28,7 +33,7 @@ namespace LCRandomizerMod.Patches
 
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesJetpackData", fastBufferWriter, NetworkDelivery.Reliable);
 
-                HUDManager.Instance.AddTextToChatOnServer("<color=red>WARNING: Jetpack stat saving is not yet implemented! They will behave differently each time you restart the server.</color>", -1);
+                //HUDManager.Instance.AddTextToChatOnServer("<color=red>WARNING: Jetpack stat saving is not yet implemented! They will behave differently each time you restart the server.</color>", -1);
             }
         }
 
@@ -61,6 +66,85 @@ namespace LCRandomizerMod.Patches
 
                 RandomizerModBase.mls.LogInfo("RECEIVED JETPACK STATS: " + id + ", " + acc + ", " + dec);
             }
+        }
+
+        //[HarmonyPatch(nameof(JetpackItem.Update))]
+        //[HarmonyPostfix]
+        //public static void X(JetpackItem __instance)
+        //{
+        //    RandomizerModBase.mls.LogInfo("Stats: " + __instance.jetpackAcceleration + " " + __instance.jetpackDeaccelleration);
+        //    RandomizerModBase.mls.LogInfo("DICT1 Stats: " + RandomizerValues.jetpackPropertiesDict.ElementAt(0).Value.Item1 + " " + RandomizerValues.jetpackPropertiesDict.ElementAt(0).Value.Item2);
+        //    RandomizerModBase.mls.LogInfo("DICT2 Stats: " + RandomizerValues.jetpackPropertiesDict.ElementAt(1).Value.Item1 + " " + RandomizerValues.jetpackPropertiesDict.ElementAt(1).Value.Item2);
+        //}
+
+        public void ReloadStats()
+        {
+            if (RandomizerValues.jetpackPropertiesDict.Count > 0)
+            {
+                int idx = 0;
+                RandomizerModBase.mls.LogInfo(String.Format("Reloading {0} jetpack stat from dictionary. ", RandomizerValues.jetpackPropertiesDict.Count));
+                List<Tuple<float, float>> temp = RandomizerValues.jetpackPropertiesDict.Values.ToList();
+                RandomizerValues.jetpackPropertiesDict.Clear();
+
+                List<UnityEngine.Object> jetpacksInLevel = GameObject.FindObjectsByType(typeof(JetpackItem), FindObjectsSortMode.None).ToList();
+
+                foreach (UnityEngine.Object obj in jetpacksInLevel)
+                {
+                    JetpackItem jetpack = (JetpackItem)obj;
+
+                    RandomizerModBase.mls.LogInfo(jetpack.NetworkObjectId);
+
+                    if (idx >= temp.Count) break;
+
+                    jetpack.jetpackAcceleration = temp.ElementAt(idx).Item1;
+                    jetpack.jetpackDeaccelleration = temp.ElementAt(idx).Item2;
+
+                    RandomizerValues.jetpackPropertiesDict.Add(jetpack.NetworkObjectId, new Tuple<float, float>(temp.ElementAt(idx).Item1, temp.ElementAt(idx).Item2));
+                    idx++;
+                }
+
+                RandomizerModBase.mls.LogInfo("Reloaded jetpack stats from dictionary.");
+            }
+            else
+            {
+                RandomizerModBase.mls.LogInfo("No jetpack stats to reload.");
+            }
+        }
+
+        public void SyncStatsWithClients()
+        {
+            foreach (KeyValuePair<ulong, Tuple<float, float>> pair in RandomizerValues.jetpackPropertiesDict)
+            {
+                FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 2, Unity.Collections.Allocator.Temp, -1);
+                writer.WriteValueSafe<ulong>(pair.Key);
+                writer.WriteValueSafe<float>(pair.Value.Item1);
+                writer.WriteValueSafe<float>(pair.Value.Item2);
+
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesJetpackData", writer, NetworkDelivery.Reliable);
+            }
+        }
+
+        public void SaveOnExit()
+        {
+            if (RandomizerValues.jetpackPropertiesDict.Count > 0)
+            {
+                try
+                {
+                    ES3.Save("jetpackDict", RandomizerValues.jetpackPropertiesDict, GameNetworkManager.Instance.currentSaveFileName);
+                    if (RandomizerValues.keysToLoad == "")
+                    {
+                        RandomizerValues.keysToLoad = "jetpackDict";
+                    }
+                    else
+                    {
+                        RandomizerValues.keysToLoad += ",jetpackDict";
+                    }
+                } catch (Exception ex)
+                {
+                    RandomizerModBase.mls.LogError("Exception caught during custom value serialization. [JetpackItem] " + ex.Message);
+                }
+            }
+            RandomizerValues.jetpackPropertiesDict.Clear();
         }
     }
 }
