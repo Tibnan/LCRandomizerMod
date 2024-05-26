@@ -368,7 +368,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in RandomizerValues.jetpackPropertiesDict.Keys)
             {
-                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<JetpackItem>().isInShipRoom)
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
                     dictsToRemove.Add(id);
                 }
@@ -382,7 +382,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in RandomizerValues.knifeDamageDict.Keys)
             {
-                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<KnifeItem>().isInShipRoom)
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
                     dictsToRemove.Add(id);
                 }
@@ -396,7 +396,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in RandomizerValues.shovelDamageDict.Keys)
             {
-                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<Shovel>().isInShipRoom)
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
                     dictsToRemove.Add(id);
                 }
@@ -405,6 +405,20 @@ namespace LCRandomizerMod.Patches
             foreach (ulong id in dictsToRemove)
             {
                 RandomizerValues.shovelDamageDict.Remove(id);
+            }
+            dictsToRemove.Clear();
+
+            foreach (ulong id in RandomizerValues.boomboxPitchDict.Keys)
+            {
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.boomboxPitchDict.Remove(id);
             }
             dictsToRemove.Clear();
         }

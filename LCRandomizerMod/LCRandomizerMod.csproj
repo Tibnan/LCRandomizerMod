@@ -81,6 +81,7 @@
     <Compile Include="ICustomValue.cs" />
     <Compile Include="Patches\BaboonBirdAIPatch.cs" />
     <Compile Include="Patches\BlobAIPatch.cs" />
+    <Compile Include="Patches\BoomboxItemPatch.cs" />
     <Compile Include="Patches\ButlerAIPatch.cs" />
     <Compile Include="Patches\CentipedeAIPatch.cs" />
     <Compile Include="Patches\CrawlerAIPatch.cs" />
@@ -107,11 +108,14 @@
     <Compile Include="Patches\SandSpiderAIPatch.cs" />
     <Compile Include="Patches\ShotgunItemPatch.cs" />
     <Compile Include="Patches\ShovelPatch.cs" />
+    <Compile Include="Patches\SpikeRoofTrapPatch.cs" />
     <Compile Include="Patches\SpringManAIPatch.cs" />
     <Compile Include="Patches\StartOfRoundPatch.cs" />
     <Compile Include="Patches\TerminalPatch.cs" />
     <Compile Include="Patches\TetraChemicalItemPatch.cs" />
     <Compile Include="Patches\TimeOfDayPatch.cs" />
+    <Compile Include="Patches\TurretPatch.cs" />
+    <Compile Include="Patches\WhoopieCushionItemPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RandomizerValues.cs" />

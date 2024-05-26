@@ -202,6 +202,12 @@ namespace LCRandomizerMod
 
         //ShovelPatch
 
+        //BoomboxItemPatch
+
+        public static Dictionary<ulong, float> boomboxPitchDict = new Dictionary<ulong, float>();
+
+        //BoomboxItemPatch
+
         public static void ClearDicts(bool deleteAll)
         {
             dogSpeedsDict.Clear();
@@ -229,6 +235,7 @@ namespace LCRandomizerMod
                 knifeDamageDict.Clear();
                 shovelDamageDict.Clear();
                 jetpackPropertiesDict.Clear();
+                boomboxPitchDict.Clear();
             }
         }
     }
