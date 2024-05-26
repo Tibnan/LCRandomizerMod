@@ -87,6 +87,14 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesItemDataRequest", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.ServerBeginItemDataTransfer));
                 RandomizerModBase.mls.LogInfo("Registering shovel damage handler: " + "ClientReceivesShovelData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShovelData", new CustomMessagingManager.HandleNamedMessageDelegate(ShovelPatch.SetShovelData));
+                RandomizerModBase.mls.LogInfo("Registering turret handler: " + "ClientReceivesTurretData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesTurretData", new CustomMessagingManager.HandleNamedMessageDelegate(TurretPatch.SetTurretStats));
+                RandomizerModBase.mls.LogInfo("Registering boombox handlers: " + "ClientReceivesBoomboxPitch" + " ClientReceivesBoomboxMChange" + " ServerInvokeMusicChange");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBoomboxPitch", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.SetBoomboxPitch));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBoomboxMChange", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.ClientChangeMusic));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeMusicChange", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.ServerReceivesMusicChangeRequest));
+                RandomizerModBase.mls.LogInfo("Registering spike roof trap handler: " + "ClientReceivesSpikeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpikeData", new CustomMessagingManager.HandleNamedMessageDelegate(SpikeRoofTrapPatch.SetSpikeStats));
 
                 if (ES3.FileExists(GameNetworkManager.Instance.currentSaveFileName))
                 {
@@ -115,6 +123,11 @@ namespace LCRandomizerMod.Patches
                                 case "shovelStatsDict":
                                     {
                                         RandomizerValues.shovelDamageDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
+                                        break;
+                                    }
+                                case "boomboxStatsDict":
+                                    {
+                                        RandomizerValues.boomboxPitchDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, float>;
                                         break;
                                     }
                             }
@@ -212,6 +225,14 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "DeclareClientAsSynced", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.SetClientAsSynced));
                 RandomizerModBase.mls.LogInfo("Registering shovel damage handler: " + "ClientReceivesShovelData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShovelData", new CustomMessagingManager.HandleNamedMessageDelegate(ShovelPatch.SetShovelData));
+                RandomizerModBase.mls.LogInfo("Registering turret handler: " + "ClientReceivesTurretData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesTurretData", new CustomMessagingManager.HandleNamedMessageDelegate(TurretPatch.SetTurretStats));
+                RandomizerModBase.mls.LogInfo("Registering boombox handlers: " + "ClientReceivesBoomboxPitch" + " ClientReceivesBoomboxMChange" + " ServerInvokeMusicChange");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBoomboxPitch", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.SetBoomboxPitch));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBoomboxMChange", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.ClientChangeMusic));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeMusicChange", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.ServerReceivesMusicChangeRequest));
+                RandomizerModBase.mls.LogInfo("Registering spike roof trap handler: " + "ClientReceivesSpikeData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpikeData", new CustomMessagingManager.HandleNamedMessageDelegate(SpikeRoofTrapPatch.SetSpikeStats));
 
                 StartOfRoundPatch.ResetPlayers();
 
