@@ -79,8 +79,9 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("Registering terminal switch handlers: " + "TerminalRandomizationUsed" + "ServerInvokeTerminalSwitch");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeTerminalSwitch", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SendTerminalSwitchToClients));
-                RandomizerModBase.mls.LogInfo("Registering mine size handler: " + "ClientReceivesMineData");
+                RandomizerModBase.mls.LogInfo("Registering mine handlers: " + "ClientReceivesMineData " + "ClientHandlePlayerExploded");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMineData", new CustomMessagingManager.HandleNamedMessageDelegate(LandminePatch.SetMineSizeClient));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientHandlePlayerExploded", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.KillLocalPlayerByExp));
                 RandomizerModBase.mls.LogInfo("Registering knife and shovel damage handlers: " + "ClientReceivesKnifeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesKnifeData", new CustomMessagingManager.HandleNamedMessageDelegate(KnifeItemPatch.SetKnifeData));
                 RandomizerModBase.mls.LogInfo("Registering server item data request handler: " + "ServerReceivesItemDataRequest");
@@ -95,9 +96,17 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeMusicChange", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.ServerReceivesMusicChangeRequest));
                 RandomizerModBase.mls.LogInfo("Registering spike roof trap handler: " + "ClientReceivesSpikeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpikeData", new CustomMessagingManager.HandleNamedMessageDelegate(SpikeRoofTrapPatch.SetSpikeStats));
+                RandomizerModBase.mls.LogInfo("Registering whoopie cushion handler: " + "ClientReceivesWhoopieCData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesWhoopieCData", new CustomMessagingManager.HandleNamedMessageDelegate(WhoopieCushionItemPatch.SetPitchClientAndExplode));
 
                 if (ES3.FileExists(GameNetworkManager.Instance.currentSaveFileName))
                 {
+                    if (!ES3.KeyExists("keysToLoad", GameNetworkManager.Instance.currentSaveFileName))
+                    {
+                        RandomizerModBase.mls.LogWarning("Master key not found within save file. Is your save corrupt? Skipping load.");
+                        goto ResetAndEnd;
+                    }
+
                     try
                     {
                         RandomizerValues.keysToLoad = ES3.Load("keysToLoad", GameNetworkManager.Instance.currentSaveFileName) as List<string>;
@@ -217,8 +226,9 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
                 RandomizerModBase.mls.LogInfo("Registering terminal switch handler: " + "TerminalRandomizationUsed");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
-                RandomizerModBase.mls.LogInfo("Registering mine size handler: " + "ClientReceivesMineData");
+                RandomizerModBase.mls.LogInfo("Registering mine handlers: " + "ClientReceivesMineData " + "ClientHandlePlayerExploded");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMineData", new CustomMessagingManager.HandleNamedMessageDelegate(LandminePatch.SetMineSizeClient));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientHandlePlayerExploded", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.KillLocalPlayerByExp));
                 RandomizerModBase.mls.LogInfo("Registering knife and shovel damage handlers: " + "ClientReceivesKnifeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesKnifeData", new CustomMessagingManager.HandleNamedMessageDelegate(KnifeItemPatch.SetKnifeData));
                 RandomizerModBase.mls.LogInfo("Registering client sync handler: " + "DeclareClientAsSynced");
@@ -233,6 +243,8 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeMusicChange", new CustomMessagingManager.HandleNamedMessageDelegate(BoomboxItemPatch.ServerReceivesMusicChangeRequest));
                 RandomizerModBase.mls.LogInfo("Registering spike roof trap handler: " + "ClientReceivesSpikeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpikeData", new CustomMessagingManager.HandleNamedMessageDelegate(SpikeRoofTrapPatch.SetSpikeStats));
+                RandomizerModBase.mls.LogInfo("Registering whoopie cushion handler: " + "ClientReceivesWhoopieCData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesWhoopieCData", new CustomMessagingManager.HandleNamedMessageDelegate(WhoopieCushionItemPatch.SetPitchClientAndExplode));
 
                 StartOfRoundPatch.ResetPlayers();
 
@@ -265,5 +277,18 @@ namespace LCRandomizerMod.Patches
             RandomizerValues.isClientSynced = true;
             RandomizerModBase.mls.LogInfo("Client synced. " + RandomizerValues.isClientSynced);
         }
+
+        public static void KillLocalPlayerByExp(ulong _, FastBufferReader __)
+        {
+            PlayerControllerB player = GameNetworkManager.Instance.localPlayerController;
+            player.KillPlayer(player.velocityLastFrame, true, CauseOfDeath.Blast);
+        }
+
+        //[HarmonyPatch("Update")]
+        //[HarmonyPostfix]
+        //public static void Log(PlayerControllerB __instance)
+        //{
+        //    RandomizerModBase.mls.LogInfo(__instance.health);
+        //}
     }
 }

@@ -25,6 +25,7 @@ namespace LCRandomizerMod.Patches
                 __instance.rotationSpeed = rotSpeed;
                 __instance.rotationRange = rotAngle;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
+                //__instance.turretRod.localScale = new Vector3(scale, scale, scale);
 
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float), Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -48,6 +49,7 @@ namespace LCRandomizerMod.Patches
                 Turret turret = networkObject.gameObject.GetComponentInChildren<Turret>();
 
                 turret.transform.localScale = new Vector3(scale, scale, scale);
+                //turret.turretRod.localScale = new Vector3(scale, scale, scale);
             }
         }
     }
