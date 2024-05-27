@@ -12,6 +12,8 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void SpeedOverride(SpringManAI __instance)
         {
+            RandomizerValues.defaultColliderPos = __instance.mainCollider.transform.position;
+
             if (!RandomizerValues.springManSpeedsDict.ContainsKey(__instance.NetworkObjectId))
             {
                 if (Unity.Netcode.NetworkManager.Singleton.IsServer)
@@ -24,6 +26,8 @@ namespace LCRandomizerMod.Patches
 
                     __instance.enemyHP = (int)health;
                     __instance.transform.localScale = new Vector3(scale, scale, scale);
+
+                    __instance.mainCollider.enabled = false;
 
                     FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                     fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -38,7 +42,16 @@ namespace LCRandomizerMod.Patches
 
             if (!__instance.isEnemyDead)
             {
-                __instance.agent.speed = RandomizerValues.springManSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+
+                if (Traverse.Create(__instance).Field("stoppingMovement").GetValue<bool>())
+                {
+                    __instance.agent.speed = 0f;
+                }
+                else
+                {
+                    __instance.agent.speed = RandomizerValues.springManSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+                }
+
             }
         }
 
@@ -62,6 +75,10 @@ namespace LCRandomizerMod.Patches
                 SpringManAI springMan = networkObject.gameObject.GetComponentInChildren<SpringManAI>();
                 springMan.enemyHP = (int)health;
                 springMan.transform.localScale = new Vector3(scale, scale, scale);
+
+                springMan.mainCollider.transform.position = RandomizerValues.defaultColliderPos;
+
+                springMan.agent.transform.localScale = new Vector3(scale*100, scale*100, scale *100);
 
                 RandomizerModBase.mls.LogInfo("RECEIVED SPRINGMAN STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

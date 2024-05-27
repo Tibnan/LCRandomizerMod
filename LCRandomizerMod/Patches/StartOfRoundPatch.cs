@@ -37,7 +37,7 @@ namespace LCRandomizerMod.Patches
 
                 //Generate random values
                 RandomizerValues.sprintRand = Convert.ToSingle(new System.Random().Next(1, 101)) / 10;
-                RandomizerValues.healthRand = new System.Random().Next(1, 101);
+                RandomizerValues.healthRand = new System.Random().Next(1, 201);
                 RandomizerValues.movementSpeedRand = new System.Random().Next(30, 101) / 10;
                 RandomizerValues.sinkMultiplierRand = new System.Random().Next(100, 10000) / 10;
                 RandomizerValues.factorySizeMultiplierRand = new System.Random().Next(2, 5);
@@ -116,7 +116,7 @@ namespace LCRandomizerMod.Patches
                 FastBufferWriter fastBufferModelValueWriter = new FastBufferWriter(sizeof(float) * modelValues.Length, Unity.Collections.Allocator.Temp, -1);
                 for (int i = 0; i < 4; i++)
                 {
-                    modelValues[i] = Convert.ToSingle(new System.Random().Next(5, 15)) / 10;
+                    modelValues[i] = Convert.ToSingle(new System.Random().Next(5, 16)) / 10;
                     fastBufferModelValueWriter.WriteValueSafe<float>(modelValues[i]);
                 }
 
@@ -157,8 +157,9 @@ namespace LCRandomizerMod.Patches
 
                     //modelValues[i] <= 1 ? Mathf.Lerp(1f, 1.5f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)
                     
-                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
-                    SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
+                    RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 13f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
+                    SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 13f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1-(modelValues[i] - 1f) * 2), i);
+                    //SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1 - (modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1 - (modelValues[i] - 1f) * 2), i);
                 }
 
                 RandomizerValues.shipDoorAnimatorSpeed = Convert.ToSingle(new System.Random().Next(1, 15)) / 10;

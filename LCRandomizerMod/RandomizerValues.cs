@@ -163,6 +163,7 @@ namespace LCRandomizerMod
         //SpringManAIPatch
 
         public static Dictionary<ulong, float> springManSpeedsDict = new Dictionary<ulong, float>();
+        public static Vector3 defaultColliderPos;
 
         //SpringManAIPatch
 

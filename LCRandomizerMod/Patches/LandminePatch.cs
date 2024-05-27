@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using GameNetcodeStuff;
+using HarmonyLib;
 using System;
 using Unity.Netcode;
 using UnityEngine;
@@ -24,7 +25,32 @@ namespace LCRandomizerMod.Patches
                     Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[__instance.NetworkObjectId].Despawn(true);
                     return false;
                 }
-                return true;
+                else
+                {
+                    foreach (PlayerControllerB playerControllerB in StartOfRound.Instance.allPlayerScripts)
+                    {
+                        float dist = Vector3.Distance(__instance.transform.position, playerControllerB.transform.position);
+                        RandomizerModBase.mls.LogError("MINE HAS EXPLODED. DISTANCE TO: " + playerControllerB.playerUsername + " IS: " + dist);
+
+                        if (dist < 3f)
+                        {
+                            if (playerControllerB == GameNetworkManager.Instance.localPlayerController)
+                            {
+                                playerControllerB.KillPlayer(playerControllerB.velocityLastFrame, true, CauseOfDeath.Blast);
+                                continue;
+                            }
+
+                            FastBufferWriter writer = new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1);
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "ClientHandlePlayerExploded", playerControllerB.actualClientId, writer, NetworkDelivery.Reliable);
+                            playerControllerB.KillPlayer(playerControllerB.velocityLastFrame, true, CauseOfDeath.Blast);
+                        }
+                    }
+
+                    //PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
+                    //localPlayer.KillPlayer(localPlayer.velocityLastFrame, true, CauseOfDeath.Blast);
+
+                    return true;
+                }
             }
             else
             {

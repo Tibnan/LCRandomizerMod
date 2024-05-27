@@ -14,9 +14,11 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float speed = Convert.ToSingle(new System.Random().Next(20, 200)) / 10f;
+                float speed = Convert.ToSingle(new System.Random().Next(20, 201)) / 10f;
                 float health = Convert.ToSingle(new System.Random().Next(1, 11));
-                float scale = Convert.ToSingle(new System.Random().Next(5, 21)) / 10;
+                float scale = Convert.ToSingle(new System.Random().Next(1, 131)) / 100;
+
+                RandomizerModBase.mls.LogError("SCALE!!!" + scale);
 
                 RandomizerValues.hoarderBugSpeedsDict.Add(__instance.NetworkObjectId, speed);
 
