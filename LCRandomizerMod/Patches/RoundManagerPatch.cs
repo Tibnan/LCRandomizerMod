@@ -48,6 +48,11 @@ namespace LCRandomizerMod.Patches
                 {
                     LevelObjectRandomization randomizedObject = objRand[new System.Random().Next(0, objRand.Length)];
 
+                    if (alreadyRandomizedObject.Contains(randomizedObject))
+                    {
+                        continue;
+                    }
+
                     foreach (SpawnableMapObject spawnableMapObject in __instance.currentLevel.spawnableMapObjects)
                     {
                         switch (randomizedObject)
@@ -368,10 +373,10 @@ namespace LCRandomizerMod.Patches
 
                 EndLoop:
                 RandomizerModBase.mls.LogInfo("No enemies were randomized beyond this point.");
-                __instance.currentMaxInsidePower = new System.Random().Next(0, 2000);
+                //__instance.currentMaxInsidePower = new System.Random().Next(0, 2000);
                 //__instance.currentDaytimeEnemyPower = new System.Random().Next(0, 2000);
                 //__instance.currentEnemyPower = new System.Random().Next(0, 2000);
-                __instance.currentMaxOutsidePower = new System.Random().Next(0, 2000);
+                //__instance.currentMaxOutsidePower = new System.Random().Next(0, 2000);
                 RandomizerModBase.mls.LogError("MaxInsidePower: " + __instance.currentMaxInsidePower + " MaxOutsidePower: " + __instance.currentMaxOutsidePower);
                 return;
             }
@@ -420,38 +425,42 @@ namespace LCRandomizerMod.Patches
 
         [HarmonyPatch(nameof(RoundManager.SyncNestSpawnPositionsClientRpc))]
         [HarmonyPostfix]
-        public static void SyncMechSpawnNestScales(RoundManager __instance)
+        public static void SyncMechSpawnNestScales(ref NetworkObjectReference[] nestObjects)
         {
-            if (Unity.Netcode.NetworkManager.Singleton.IsServer)
-            {
-                EnemyAINestSpawnObject[] array = RoundManager.Instance.enemyNestSpawnObjects.ToArray();
+            //if (Unity.Netcode.NetworkManager.Singleton.IsServer)
+            //{
+            //    for (int i = 0; i < nestObjects.Length; i++)
+            //    {
+            //        NetworkObject networkObject;
+            //        FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float), Unity.Collections.Allocator.Temp, -1);
+            //        if (nestObjects[i].TryGet(out networkObject, null))
+            //        {
+            //            EnemyAINestSpawnObject component = networkObject.GetComponent<EnemyAINestSpawnObject>();
+            //            if (component != null)
+            //            {
+            //                if (component.enemyType.name == "RadMech")
+            //                {
+            //                    float scale = Convert.ToSingle(new System.Random().Next(1, 31)) / 10;
+            //                    component.transform.localScale = new Vector3(scale, scale, scale);
 
-                for (int i = 0; i < array.Length; i++)
-                {
-                    FastBufferWriter fastBufferMechScaleWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float), Unity.Collections.Allocator.Temp, -1);
-                    if (array[i].enemyType.name == "RadMech")
-                    {
-                        float scale = Convert.ToSingle(new System.Random().Next(1, 31)) / 10;
-                        array[i].gameObject.transform.localScale = new Vector3(scale, scale, scale);
-                        RandomizerValues.spawnedMechScales.Add(scale);
+            //                    RandomizerValues.spawnedMechScales.Add(scale);
 
-                        NetworkObject networkObject;
-                        array[i].TryGetComponent<NetworkObject>(out networkObject);
-                        if (networkObject == null)
-                        {
-                            RandomizerModBase.mls.LogError("COULDN'T GET NETWORK OBJECT!!!");
-                            RandomizerModBase.mls.LogError("COULDN'T GET NETWORK OBJECT!!!");
-                            RandomizerModBase.mls.LogError("COULDN'T GET NETWORK OBJECT!!!");
-                        }
+            //                    RandomizerModBase.mls.LogError("SCALING");
 
-                        fastBufferMechScaleWriter.WriteValueSafe<ulong>(networkObject.NetworkObjectId);
-                        fastBufferMechScaleWriter.WriteValueSafe<float>(scale);
+            //                    fastBufferWriter.WriteValueSafe<ulong>(networkObject.NetworkObjectId);
+            //                    fastBufferWriter.WriteValueSafe<float>(scale);
 
-                        Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesMechScaleArray", fastBufferMechScaleWriter, NetworkDelivery.Reliable);
-                        fastBufferMechScaleWriter.Dispose();
-                    }
-                }
-            }
+            //                    Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesMechScaleArray", fastBufferWriter, NetworkDelivery.Reliable);
+            //                }
+            //            }
+            //            else
+            //            {
+            //                RandomizerModBase.mls.LogError("Component was null");
+            //                continue;
+            //            }
+            //        }
+            //    }
+            //}
         }
     }
 }

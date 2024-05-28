@@ -14,14 +14,18 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float dogSpeed = Convert.ToSingle(new System.Random().Next(30, 200)) / 10f;
+                float dogSpeed = Convert.ToSingle(new System.Random().Next(30, 201)) / 10f;
                 float dogEnemyHP = Convert.ToSingle(new System.Random().Next(1, 6));
-                float dogScale = Convert.ToSingle(new System.Random().Next(10, 20)) / 10;
+                float dogScale = Convert.ToSingle(new System.Random().Next(5, 401)) / 100;
 
                 __instance.enemyHP = (int)dogEnemyHP;
                 __instance.transform.localScale = new Vector3(dogScale, dogScale, dogScale);
 
                 RandomizerValues.dogSpeedsDict.Add(__instance.NetworkObjectId, dogSpeed);
+
+                __instance.creatureAnimator.speed = dogSpeed / 10;
+
+                __instance.creatureSFX.pitch = Mathf.Lerp(10f, 0.001f, Mathf.InverseLerp(0.05f, 4f, dogScale));
 
                 FastBufferWriter fastBufferStatWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferStatWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -64,6 +68,11 @@ namespace LCRandomizerMod.Patches
 
                 dog.enemyHP = (int)health;
                 dog.transform.localScale = new Vector3(scale, scale, scale);
+
+
+                dog.creatureAnimator.speed = speed / 10;
+
+                dog.creatureSFX.pitch = Mathf.Lerp(10f, 0.001f, Mathf.InverseLerp(0.05f, 4f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED DOG STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

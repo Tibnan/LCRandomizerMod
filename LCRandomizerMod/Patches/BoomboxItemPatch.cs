@@ -66,7 +66,10 @@ namespace LCRandomizerMod.Patches
                 reader.ReadValueSafe<ulong>(out id);
                 reader.ReadValueSafe<float>(out pitch);
 
-                RandomizerValues.boomboxPitchDict.Add(id, pitch);
+                if (!RandomizerValues.boomboxPitchDict.ContainsKey(id))
+                {
+                    RandomizerValues.boomboxPitchDict.Add(id, pitch);
+                }
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
                 BoomboxItem boombox = networkObject.gameObject.GetComponentInChildren<BoomboxItem>();

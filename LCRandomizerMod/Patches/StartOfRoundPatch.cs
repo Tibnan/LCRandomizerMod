@@ -186,6 +186,7 @@ namespace LCRandomizerMod.Patches
             RandomizerValues.ClearDicts(false);
             RandomizerValues.spawnedMechCount = 0;
             RandomizerValues.mapRandomizedInTerminal = false;
+            RandomizerValues.spawnedMechScales.Clear();
 
             ClearOrphanedDicts();
 
