@@ -16,12 +16,14 @@ namespace LCRandomizerMod.Patches
             {
                 float speed = Convert.ToSingle(new System.Random().Next(20, 200)) / 10f;
                 float health = Convert.ToSingle(new System.Random().Next(1, 11));
-                float scale = Convert.ToSingle(new System.Random().Next(5, 21)) / 10;
+                float scale = Convert.ToSingle(new System.Random().Next(5, 31)) / 10;
 
                 RandomizerValues.jesterSpeedsDict.Add(__instance.NetworkObjectId, speed);
 
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
+                __instance.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 3f, scale));
+                __instance.farAudio.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 3f, scale));
 
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -64,6 +66,8 @@ namespace LCRandomizerMod.Patches
                 JesterAI jester = networkObject.gameObject.GetComponentInChildren<JesterAI>();
                 jester.enemyHP = (int)health;
                 jester.transform.localScale = new Vector3(scale, scale, scale);
+                jester.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 3f, scale));
+                jester.farAudio.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 3f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED JESTER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

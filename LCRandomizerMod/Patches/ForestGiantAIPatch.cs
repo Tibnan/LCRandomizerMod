@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using Unity.Netcode;
+using UnityEngine;
 
 namespace LCRandomizerMod.Patches
 {
@@ -13,14 +14,17 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float giantSpeed = Convert.ToSingle(new System.Random().Next(20, 200)) / 10f;
+                float giantSpeed = Convert.ToSingle(new System.Random().Next(20, 141)) / 10f;
                 float giantHealth = Convert.ToSingle(new System.Random().Next(1, 11));
-                float giantScale = Convert.ToSingle(new System.Random().Next(5, 21)) / 10;
+                float giantScale = Convert.ToSingle(new System.Random().Next(5, 401)) / 100;
 
                 RandomizerValues.giantSpeedsDict.Add(__instance.NetworkObjectId, giantSpeed);
 
                 __instance.enemyHP = (int)giantHealth;
                 __instance.transform.localScale = new UnityEngine.Vector3(giantScale, giantScale, giantScale);
+
+                __instance.creatureAnimator.speed = giantSpeed / 10;
+                __instance.creatureSFX.pitch = Mathf.Lerp(3f, 0.1f, Mathf.InverseLerp(0.05f, 4f, giantScale));
 
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -66,6 +70,9 @@ namespace LCRandomizerMod.Patches
 
                 forestGiant.enemyHP = (int)health;
                 forestGiant.transform.localScale = new UnityEngine.Vector3(scale, scale, scale);
+
+                forestGiant.creatureAnimator.speed = speed / 10;
+                forestGiant.creatureSFX.pitch = Mathf.Lerp(3f, 0.1f, Mathf.InverseLerp(0.05f, 4f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED GIANT STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

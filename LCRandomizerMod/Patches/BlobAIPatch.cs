@@ -14,9 +14,9 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float speed = Convert.ToSingle(new System.Random().Next(10, 121)) / 10f;
+                float speed = Convert.ToSingle(new System.Random().Next(5, 71)) / 10f;
                 float health = Convert.ToSingle(new System.Random().Next(1, 11));
-                float scale = Convert.ToSingle(new System.Random().Next(2, 13)) / 10;
+                float scale = Convert.ToSingle(new System.Random().Next(5, 131)) / 100;
 
                 RandomizerValues.blobSpeedsDict.Add(__instance.NetworkObjectId, speed);
 

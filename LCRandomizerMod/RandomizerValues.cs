@@ -163,7 +163,6 @@ namespace LCRandomizerMod
         //SpringManAIPatch
 
         public static Dictionary<ulong, float> springManSpeedsDict = new Dictionary<ulong, float>();
-        public static Vector3 defaultColliderPos;
 
         //SpringManAIPatch
 
@@ -188,6 +187,7 @@ namespace LCRandomizerMod
         //TerminalPatch
 
         public static bool mapRandomizedInTerminal = false;
+        public static Vector3 defaultTerminalScale;
 
         //TerminalPatch
 
@@ -230,6 +230,7 @@ namespace LCRandomizerMod
             springManSpeedsDict.Clear();
             doublewingSpeedsDict.Clear();
             redLocustSpeedsDict.Clear();
+            spawnedMechScales.Clear();
 
             if (deleteAll)
             {

@@ -24,6 +24,8 @@ namespace LCRandomizerMod.Patches
 
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
+                __instance.creatureAnimator.speed = speed / 10f;
+                __instance.creatureSFX.pitch = Mathf.Lerp(2f, 0.5f, Mathf.Lerp(0.01f, 1.3f, scale));
 
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -42,7 +44,11 @@ namespace LCRandomizerMod.Patches
         {
             if (!__instance.isEnemyDead)
             {
+                float scale = __instance.transform.localScale.x;
+
                 __instance.agent.speed = RandomizerValues.hoarderBugSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+
+                __instance.creatureVoice.pitch = Mathf.Lerp(2f, 0.5f, Mathf.Lerp(0.01f, 1.3f, scale));
             }
         }
 
@@ -66,6 +72,8 @@ namespace LCRandomizerMod.Patches
                 HoarderBugAI hoarderBug = networkObject.gameObject.GetComponentInChildren<HoarderBugAI>();
                 hoarderBug.enemyHP = (int)health;
                 hoarderBug.transform.localScale = new Vector3(scale, scale, scale);
+                hoarderBug.creatureAnimator.speed = speed / 10f;
+                hoarderBug.creatureSFX.pitch = Mathf.Lerp(2f, 0.5f, Mathf.Lerp(0.01f, 1.3f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED BUG STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

@@ -65,7 +65,7 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float scale = Convert.ToSingle(new System.Random().Next(5, 31)) / 10;
+                float scale = Convert.ToSingle(new System.Random().Next(5, 41)) / 10;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
 
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float), Unity.Collections.Allocator.Temp, -1);

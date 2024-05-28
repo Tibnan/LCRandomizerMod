@@ -17,13 +17,15 @@ namespace LCRandomizerMod.Patches
             {
                 __instance.maxWebTrapsToPlace = new System.Random().Next(4, 14);
                 float spiderHealthRand = new System.Random().Next(1, 7);
-                float spiderSpeedRand = Convert.ToSingle(new System.Random().Next(40, 81)) / 10;
-                float spiderScaleRand = Convert.ToSingle(new System.Random().Next(5, 21)) / 10;
+                float spiderSpeedRand = Convert.ToSingle(new System.Random().Next(35, 101)) / 10;
+                float spiderScaleRand = Convert.ToSingle(new System.Random().Next(1, 31)) / 10;
 
                 RandomizerValues.spiderSpeedsDict.Add(__instance.NetworkObjectId, spiderSpeedRand);
 
                 __instance.enemyHP = (int)spiderHealthRand;
                 __instance.transform.localScale = new Vector3(spiderScaleRand, spiderScaleRand, spiderScaleRand);
+                __instance.creatureAnimator.speed = spiderSpeedRand / 10f;
+                __instance.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, spiderScaleRand));
 
                 FastBufferWriter fastBufferSpiderWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferSpiderWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -67,9 +69,21 @@ namespace LCRandomizerMod.Patches
 
                 spider.enemyHP = (int)health;
                 spider.transform.localScale = new Vector3(scale, scale, scale);
+                spider.creatureAnimator.speed = speed / 10f;
 
                 RandomizerModBase.mls.LogInfo("RECEIVED SPIDER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }
+        }
+
+        [HarmonyPatch(nameof(SandSpiderAI.MoveLegsProcedurally))]
+        [HarmonyPostfix]
+        public static void SoundOverride(SandSpiderAI __instance)
+        {
+            __instance.footstepAudio.Stop();
+
+            float scale = __instance.transform.localScale.x;
+            __instance.footstepAudio.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, scale));
+            __instance.footstepAudio.PlayOneShot(__instance.footstepSFX[UnityEngine.Random.Range(0, __instance.footstepSFX.Length)], UnityEngine.Random.Range(0.1f, 1f));
         }
     }
 }
