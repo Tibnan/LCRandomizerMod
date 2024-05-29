@@ -189,6 +189,8 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpiderData", new CustomMessagingManager.HandleNamedMessageDelegate(SandSpiderAIPatch.SetSpiderDataSentByServer));
                 RandomizerModBase.mls.LogInfo("Registering ship animator handlers: " + "ClientReceivesShipAnimData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShipAnimData", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.SetShipAnimatorSpeed));
+                RandomizerModBase.mls.LogInfo("Registering giant handler: " + "ClientReceivesGiantData");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesGiantData", new CustomMessagingManager.HandleNamedMessageDelegate(ForestGiantAIPatch.SetGiantValuesSentByServer));
                 RandomizerModBase.mls.LogInfo("Registering jetpack handler: " + "ClientReceivesJetpackData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesJetpackData", new CustomMessagingManager.HandleNamedMessageDelegate(JetpackItemPatch.SetJetpackStatsSentByServer));
                 RandomizerModBase.mls.LogInfo("Registering hoarder bug handler: " + "ClientReceivesHoarderBugData");
@@ -231,7 +233,8 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientHandlePlayerExploded", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.KillLocalPlayerByExp));
                 RandomizerModBase.mls.LogInfo("Registering knife and shovel damage handlers: " + "ClientReceivesKnifeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesKnifeData", new CustomMessagingManager.HandleNamedMessageDelegate(KnifeItemPatch.SetKnifeData));
-                RandomizerModBase.mls.LogInfo("Registering client sync handler: " + "DeclareClientAsSynced");
+                RandomizerModBase.mls.LogInfo("Registering client sync handler: " + "DeclareClientAsSynced" + " ClientReceivesTerminalState");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesTerminalState", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SetTerminalState));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "DeclareClientAsSynced", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.SetClientAsSynced));
                 RandomizerModBase.mls.LogInfo("Registering shovel damage handler: " + "ClientReceivesShovelData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesShovelData", new CustomMessagingManager.HandleNamedMessageDelegate(ShovelPatch.SetShovelData));
@@ -268,6 +271,11 @@ namespace LCRandomizerMod.Patches
                 var instance = (ICustomValue)Activator.CreateInstance(type);
                 instance.SyncStatsWithClients();
             }
+
+            FastBufferWriter writer = new FastBufferWriter(sizeof(bool), Unity.Collections.Allocator.Temp, -1);
+            writer.WriteValueSafe<bool>(RandomizerValues.mapRandomizedInTerminal);
+
+            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "ClientReceivesTerminalState", sender, writer, NetworkDelivery.Reliable);
 
             Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "DeclareClientAsSynced", sender, new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1), NetworkDelivery.Reliable);
         }

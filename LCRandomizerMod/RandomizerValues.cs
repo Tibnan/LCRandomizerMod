@@ -56,6 +56,7 @@ namespace LCRandomizerMod
 
         public static int scrapValue;
         public static ulong scrapReference;
+        public static float scrapWeight;
 
         //GrabbableObjectPatch
 

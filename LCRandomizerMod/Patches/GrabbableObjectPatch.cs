@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 using Unity.Netcode;
+using System;
 
 namespace LCRandomizerMod.Patches
 {
@@ -15,6 +16,7 @@ namespace LCRandomizerMod.Patches
             {
                 if (!__instance.isInShipRoom)
                 {
+                    //float weight = Convert.ToSingle(new System.Random().Next(50, 151)) / 100;
                     int rndVal;
 
                     if (TimeOfDay.Instance.timesFulfilledQuota > 0)
@@ -37,10 +39,15 @@ namespace LCRandomizerMod.Patches
                     }
                     componentInChildren.subText = string.Format("Value: ${0}", setValueTo);
                     componentInChildren.scrapValue = setValueTo;
-                    RandomizerModBase.mls.LogInfo("Set scrap value of: " + __instance.name + " to: " + setValueTo + " sending over network...");
 
-                    FastBufferWriter fastBufferWriterScrapValue = new FastBufferWriter(sizeof(int), Unity.Collections.Allocator.Temp, -1);
+                    //__instance.itemProperties.weight = weight;
+
+                    RandomizerModBase.mls.LogInfo("Set scrap value of: " + __instance.name + " to: " + setValueTo + " sending over network...");
+                    //RandomizerModBase.mls.LogInfo("Set scrap value of: " + __instance.name + " to: " + setValueTo + " and assigned weight of: " + weight + " sending over network...");
+
+                    FastBufferWriter fastBufferWriterScrapValue = new FastBufferWriter(sizeof(int) + sizeof(float), Unity.Collections.Allocator.Temp, -1);
                     fastBufferWriterScrapValue.WriteValueSafe<int>(rndVal);
+                    //fastBufferWriterScrapValue.WriteValueSafe<float>(weight);
                     Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "SetScrapValueTo", fastBufferWriterScrapValue, NetworkDelivery.Reliable);
                     fastBufferWriterScrapValue.Dispose();
                     RandomizerModBase.mls.LogInfo("Sent value of " + rndVal + " to clients");
@@ -65,7 +72,8 @@ namespace LCRandomizerMod.Patches
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
                 reader.ReadValueSafe<int>(out RandomizerValues.scrapValue, default);
-                RandomizerModBase.mls.LogInfo("Got random value: " + RandomizerValues.scrapValue);
+                //reader.ReadValueSafe<float>(out RandomizerValues.scrapWeight, default);
+                RandomizerModBase.mls.LogInfo("Got random value: " + RandomizerValues.scrapValue + " and weight: " + RandomizerValues.scrapWeight);
             }
         }
 
@@ -94,6 +102,9 @@ namespace LCRandomizerMod.Patches
             }
             componentInChildren.subText = string.Format("Value: ${0}", RandomizerValues.scrapValue);
             componentInChildren.scrapValue = RandomizerValues.scrapValue;
+
+           //RandomizerModBase.mls.LogInfo("Got weight: " + RandomizerValues.scrapWeight);
+            //scrap.itemProperties.weight = RandomizerValues.scrapWeight;
         }
     }
 }

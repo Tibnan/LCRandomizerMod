@@ -85,7 +85,8 @@ namespace LCRandomizerMod.Patches
                 radMech.enemyHP = (int)health;
                 radMech.transform.localScale = new Vector3(scale, scale, scale);
 
-                radMech.creatureAnimator.speed = speed / 10f;
+                //CHECK FOR NRE!!!
+                //radMech.creatureAnimator.speed = speed / 10f;
                 radMech.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, scale));
                 radMech.creatureVoice.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, scale));
                 radMech.LocalLRADAudio.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, scale));

@@ -26,6 +26,7 @@ namespace LCRandomizerMod.Patches
                 __instance.transform.localScale = new Vector3(spiderScaleRand, spiderScaleRand, spiderScaleRand);
                 __instance.creatureAnimator.speed = spiderSpeedRand / 10f;
                 __instance.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, spiderScaleRand));
+                __instance.creatureVoice.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, spiderScaleRand));
 
                 FastBufferWriter fastBufferSpiderWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferSpiderWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
@@ -66,10 +67,14 @@ namespace LCRandomizerMod.Patches
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
                 SandSpiderAI spider = networkObject.gameObject.GetComponentInChildren<SandSpiderAI>();
-
+                //CHECK FOR NRE!!! + ADD PITCH
+                
                 spider.enemyHP = (int)health;
                 spider.transform.localScale = new Vector3(scale, scale, scale);
-                spider.creatureAnimator.speed = speed / 10f;
+
+                spider.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, scale));
+                spider.creatureVoice.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, scale));
+                //spider.creatureAnimator.speed = speed / 10f;
 
                 RandomizerModBase.mls.LogInfo("RECEIVED SPIDER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

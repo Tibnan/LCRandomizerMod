@@ -23,6 +23,10 @@ namespace LCRandomizerMod.Patches
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
 
+                __instance.creatureAnimator.speed = speed / 10f;
+                __instance.creatureSFX.pitch = Mathf.Lerp(3f, 0.001f, Mathf.InverseLerp(0.5f, 2f, scale));
+                __instance.creatureVoice.pitch = Mathf.Lerp(3f, 0.001f, Mathf.InverseLerp(0.5f, 2f, scale));
+
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
                 fastBufferWriter.WriteValueSafe<float>(speed);
@@ -40,7 +44,13 @@ namespace LCRandomizerMod.Patches
         {
             if (!__instance.isEnemyDead)
             {
-                __instance.agent.speed = RandomizerValues.pufferSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+                if (Traverse.Create(__instance).Field("inPuffingAnimation").GetValue<bool>())
+                {
+                    __instance.agent.speed = 0f;
+                }else
+                {
+                    __instance.agent.speed = RandomizerValues.pufferSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+                }
             }
         }
 
@@ -64,6 +74,10 @@ namespace LCRandomizerMod.Patches
                 PufferAI puffer = networkObject.gameObject.GetComponentInChildren<PufferAI>();
                 puffer.enemyHP = (int)health;
                 puffer.transform.localScale = new Vector3(scale, scale, scale);
+
+                //puffer.creatureAnimator.speed = speed / 10f;
+                puffer.creatureSFX.pitch = Mathf.Lerp(3f, 0.001f, Mathf.InverseLerp(0.5f, 2f, scale));
+                puffer.creatureVoice.pitch = Mathf.Lerp(3f, 0.001f, Mathf.InverseLerp(0.5f, 2f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED PUFFER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

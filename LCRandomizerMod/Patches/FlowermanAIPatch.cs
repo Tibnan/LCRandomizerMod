@@ -23,6 +23,17 @@ namespace LCRandomizerMod.Patches
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
 
+                __instance.creatureAnimator.speed = speed / 10;
+                __instance.creatureSFX.pitch = Mathf.Lerp(2f, 0.5f, Mathf.Lerp(0.5f, 2f, scale));
+                if (__instance.creatureVoice != null)
+                {
+                    __instance.creatureVoice.pitch = Mathf.Lerp(2f, 0.5f, Mathf.Lerp(0.5f, 2f, scale));
+                }
+                else
+                {
+                    RandomizerModBase.mls.LogError("creatureVoice is null!");
+                }
+
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
                 fastBufferWriter.WriteValueSafe<float>(speed);
@@ -61,8 +72,15 @@ namespace LCRandomizerMod.Patches
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
                 FlowermanAI flowerman = networkObject.gameObject.GetComponentInChildren<FlowermanAI>();
+
                 flowerman.enemyHP = (int)health;
                 flowerman.transform.localScale = new Vector3(scale, scale, scale);
+
+                //CHECK FOR NRE!!!
+                //flowerman.creatureAnimator.speed = speed / 10;
+                flowerman.creatureSFX.pitch = Mathf.Lerp(2f, 0.5f, Mathf.Lerp(0.5f, 2f, scale));
+                flowerman.creatureVoice.pitch = Mathf.Lerp(2f, 0.5f, Mathf.Lerp(0.5f, 2f, scale));
+                
 
                 RandomizerModBase.mls.LogInfo("RECEIVED FLOWERMAN STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }
