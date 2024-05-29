@@ -3,7 +3,6 @@ using HarmonyLib;
 using System;
 using UnityEngine;
 using Unity.Netcode;
-using System.Collections;
 using System.Collections.Generic;
 
 namespace LCRandomizerMod.Patches
@@ -156,7 +155,8 @@ namespace LCRandomizerMod.Patches
                 {
 
                     //modelValues[i] <= 1 ? Mathf.Lerp(1f, 1.5f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)
-                    
+
+
                     RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 13f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
                     SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 13f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1-(modelValues[i] - 1f) * 2), i);
                     //SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1 - (modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1 - (modelValues[i] - 1f) * 2), i);
@@ -273,6 +273,9 @@ namespace LCRandomizerMod.Patches
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale * modelValues[i];
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale * modelValues[i];
 
+                    //RandomizerModBase.mls.LogInfo("Setting player pitch: " + Mathf.Lerp(3f, 0.7f, Mathf.InverseLerp(0.5f, 1.5f, modelValues[i])) + " for player: " + i + " with size multiplier: " + modelValues[i]);
+                    //SoundManager.Instance.SetPlayerPitch(Mathf.Lerp(3f, 0.7f, Mathf.InverseLerp(0.5f, 1.5f, modelValues[i])), i);
+
 
                     RandomizerModBase.mls.LogInfo("Setting player pitch: " + (modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2)) + " for player: " + i + " with size multiplier: " + modelValues[i] + " isServer? " + Unity.Netcode.NetworkManager.Singleton.IsServer);
                     SoundManager.Instance.SetPlayerPitch(modelValues[i] <= 1 ? Mathf.Lerp(1f, 15f, 1-(modelValues[i] - 0.5f) * 2) : Mathf.Lerp(0.5f, 1f, 1-(modelValues[i] - 1f) * 2), i);
@@ -370,7 +373,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in RandomizerValues.jetpackPropertiesDict.Keys)
             {
-                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
                     dictsToRemove.Add(id);
                 }
@@ -384,7 +387,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in RandomizerValues.knifeDamageDict.Keys)
             {
-                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
                     dictsToRemove.Add(id);
                 }
@@ -398,7 +401,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in RandomizerValues.shovelDamageDict.Keys)
             {
-                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
                     dictsToRemove.Add(id);
                 }
@@ -412,7 +415,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in RandomizerValues.boomboxPitchDict.Keys)
             {
-                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
                     dictsToRemove.Add(id);
                 }

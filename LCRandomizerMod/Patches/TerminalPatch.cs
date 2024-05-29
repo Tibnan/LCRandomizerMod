@@ -25,12 +25,14 @@ namespace LCRandomizerMod.Patches
                     {
                         num = new System.Random().Next(1, 13);
 
-                        if (TimeOfDay.Instance.timeUntilDeadline < 1080)
+                        if (TimeOfDay.Instance.daysUntilDeadline < 1 || TimeOfDay.Instance.timeUntilDeadline < 1080)
                         {
                             num = 3;
                             break;
                         }
                     }
+
+                    RandomizerModBase.mls.LogError("TIME UNTIL DEADLINE: " + TimeOfDay.Instance.timeUntilDeadline + " DAYS UNTIL DEADLINE: " + TimeOfDay.Instance.daysUntilDeadline + " switching to level: " + (num == 3 ? "company" : num.ToString()));
 
                     StartOfRound.Instance.ChangeLevelServerRpc(num, __instance.groupCredits);
                     __instance.screenText.text = "";
@@ -117,6 +119,15 @@ namespace LCRandomizerMod.Patches
         public static void SaveDefaultScale(Terminal __instance)
         {
             RandomizerValues.defaultTerminalScale = __instance.placeableObject.parentObject.transform.localScale;
+        }
+        
+        public static void SetTerminalState(ulong _, FastBufferReader reader)
+        {
+            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                reader.ReadValueSafe<bool>(out RandomizerValues.mapRandomizedInTerminal);
+                RandomizerModBase.mls.LogInfo("Terminal state now: " + RandomizerValues.mapRandomizedInTerminal);
+            }
         }
     }
 }

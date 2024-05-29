@@ -23,6 +23,10 @@ namespace LCRandomizerMod.Patches
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
 
+                __instance.creatureAnimator.speed = speed / 10;
+                __instance.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 2f, scale));
+                __instance.creatureVoice.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 2f, scale));
+
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
                 fastBufferWriter.WriteValueSafe<float>(speed);
@@ -64,6 +68,10 @@ namespace LCRandomizerMod.Patches
                 CentipedeAI centipede = networkObject.gameObject.GetComponentInChildren<CentipedeAI>();
                 centipede.enemyHP = (int)health;
                 centipede.transform.localScale = new Vector3(scale, scale, scale);
+
+                centipede.creatureAnimator.speed = speed / 10;
+                centipede.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 2f, scale));
+                centipede.creatureVoice.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.5f, 2f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED CENTIPEDE STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

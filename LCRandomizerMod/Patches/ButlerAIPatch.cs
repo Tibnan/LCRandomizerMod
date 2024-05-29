@@ -23,6 +23,10 @@ namespace LCRandomizerMod.Patches
                 __instance.enemyHP = (int)health;
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
 
+                __instance.creatureAnimator.speed = speed / 10;
+                __instance.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.05f, 3f, scale));
+                __instance.creatureVoice.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.05f, 3f, scale));
+
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
                 fastBufferWriter.WriteValueSafe<ulong>(__instance.NetworkObjectId);
                 fastBufferWriter.WriteValueSafe<float>(speed);
@@ -64,6 +68,10 @@ namespace LCRandomizerMod.Patches
                 ButlerEnemyAI butler = networkObject.gameObject.GetComponentInChildren<ButlerEnemyAI>();
                 butler.enemyHP = (int)health;
                 butler.transform.localScale = new Vector3(scale, scale, scale);
+
+                butler.creatureAnimator.speed = speed / 10;
+                butler.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.05f, 3f, scale));
+                butler.creatureVoice.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.05f, 3f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED BUTLER STATS: " + id + ", " + speed + ", " + health + ", " + scale);
             }

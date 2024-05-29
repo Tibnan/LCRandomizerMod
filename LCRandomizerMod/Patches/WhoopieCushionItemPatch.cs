@@ -13,7 +13,7 @@ namespace LCRandomizerMod.Patches
     internal class WhoopieCushionItemPatch
     {
         [HarmonyPatch(nameof(WhoopieCushionItem.FartWithDebounce))]
-        [HarmonyPostfix]
+        [HarmonyPrefix]
         public static void PitchOverride(WhoopieCushionItem __instance)
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)

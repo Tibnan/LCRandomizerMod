@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -11,6 +12,8 @@ namespace LCRandomizerMod.Patches
     {
         private protected enum LevelObjectRandomization { None, Landmine, Turret, SpikeRoofTrap }
         private protected enum EnemySpawnRandomization { None, Flowerman, Nutcracker, RadMech, Crawler, DressGirl, BaboonBird, Jester, Butler, HoarderBug, ForestGiant, MouthDog, SandSpider, Blob }
+        
+        private protected static Predicate<EnemyAINestSpawnObject> isMechSpawner = MechSpawnerPredicate;
 
         [HarmonyPatch(nameof(RoundManager.SpawnScrapInLevel))]
         [HarmonyPrefix]
@@ -373,10 +376,10 @@ namespace LCRandomizerMod.Patches
 
                 EndLoop:
                 RandomizerModBase.mls.LogInfo("No enemies were randomized beyond this point.");
-                //__instance.currentMaxInsidePower = new System.Random().Next(0, 2000);
+                __instance.currentMaxInsidePower = new System.Random().Next(0, 2000);
                 //__instance.currentDaytimeEnemyPower = new System.Random().Next(0, 2000);
                 //__instance.currentEnemyPower = new System.Random().Next(0, 2000);
-                //__instance.currentMaxOutsidePower = new System.Random().Next(0, 2000);
+                __instance.currentMaxOutsidePower = new System.Random().Next(0, 2000);
                 RandomizerModBase.mls.LogError("MaxInsidePower: " + __instance.currentMaxInsidePower + " MaxOutsidePower: " + __instance.currentMaxOutsidePower);
                 return;
             }
@@ -423,44 +426,27 @@ namespace LCRandomizerMod.Patches
             }
         }
 
-        [HarmonyPatch(nameof(RoundManager.SyncNestSpawnPositionsClientRpc))]
+        [HarmonyPatch(nameof(RoundManager.PredictAllOutsideEnemies))]
         [HarmonyPostfix]
-        public static void SyncMechSpawnNestScales(ref NetworkObjectReference[] nestObjects)
+        public static void SyncMechSpawnNestScales()
         {
-            //if (Unity.Netcode.NetworkManager.Singleton.IsServer)
-            //{
-            //    for (int i = 0; i < nestObjects.Length; i++)
-            //    {
-            //        NetworkObject networkObject;
-            //        FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float), Unity.Collections.Allocator.Temp, -1);
-            //        if (nestObjects[i].TryGet(out networkObject, null))
-            //        {
-            //            EnemyAINestSpawnObject component = networkObject.GetComponent<EnemyAINestSpawnObject>();
-            //            if (component != null)
-            //            {
-            //                if (component.enemyType.name == "RadMech")
-            //                {
-            //                    float scale = Convert.ToSingle(new System.Random().Next(1, 31)) / 10;
-            //                    component.transform.localScale = new Vector3(scale, scale, scale);
+            if (Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                for (int i = 0; i < RoundManager.Instance.enemyNestSpawnObjects.Count; i++)
+                {
+                    if (isMechSpawner(RoundManager.Instance.enemyNestSpawnObjects.ElementAt(i)))
+                    {
+                        float scale = Convert.ToSingle(new System.Random().Next(1, 31)) / 10;
+                        RandomizerModBase.mls.LogError("SCALING");
+                        RoundManager.Instance.enemyNestSpawnObjects.ElementAt(i).transform.localScale = new Vector3(scale, scale, scale);
+                    }
+                }
+            }
+        }
 
-            //                    RandomizerValues.spawnedMechScales.Add(scale);
-
-            //                    RandomizerModBase.mls.LogError("SCALING");
-
-            //                    fastBufferWriter.WriteValueSafe<ulong>(networkObject.NetworkObjectId);
-            //                    fastBufferWriter.WriteValueSafe<float>(scale);
-
-            //                    Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesMechScaleArray", fastBufferWriter, NetworkDelivery.Reliable);
-            //                }
-            //            }
-            //            else
-            //            {
-            //                RandomizerModBase.mls.LogError("Component was null");
-            //                continue;
-            //            }
-            //        }
-            //    }
-            //}
+        private static bool MechSpawnerPredicate(EnemyAINestSpawnObject spawner)
+        {
+            return spawner != null && spawner.enemyType != null && spawner.enemyType.enemyName == "RadMech";
         }
     }
 }

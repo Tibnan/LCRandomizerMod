@@ -74,7 +74,7 @@ namespace LCRandomizerMod.Patches
                 NutcrackerEnemyAI nutcracker = networkObject.gameObject.GetComponentInChildren<NutcrackerEnemyAI>();
                 nutcracker.enemyHP = (int)health;
                 nutcracker.transform.localScale = new Vector3(scale, scale, scale);
-                nutcracker.creatureAnimator.speed = speed / 10;
+                //nutcracker.creatureAnimator.speed = speed / 10;
                 nutcracker.creatureSFX.pitch = Mathf.Lerp(3f, 0.01f, Mathf.InverseLerp(0.1f, 3f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED NUTCRACKER STATS: " + id + ", " + speed + ", " + health + ", " + scale);

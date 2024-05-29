@@ -33,7 +33,6 @@ namespace LCRandomizerMod.Patches
                 fastBufferWriter.WriteValueSafe<float>(giantScale);
 
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesGiantData", fastBufferWriter, NetworkDelivery.Reliable);
-                fastBufferWriter.Dispose();
 
                 RandomizerModBase.mls.LogError("FOREST GIANT SPAWN");
             }
@@ -63,6 +62,8 @@ namespace LCRandomizerMod.Patches
                 reader.ReadValueSafe<float>(out health);
                 reader.ReadValueSafe<float>(out scale);
 
+                RandomizerModBase.mls.LogError("Read data");
+
                 RandomizerValues.giantSpeedsDict.Add(id, speed);
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
@@ -71,7 +72,7 @@ namespace LCRandomizerMod.Patches
                 forestGiant.enemyHP = (int)health;
                 forestGiant.transform.localScale = new UnityEngine.Vector3(scale, scale, scale);
 
-                forestGiant.creatureAnimator.speed = speed / 10;
+                //forestGiant.creatureAnimator.speed = speed / 10;
                 forestGiant.creatureSFX.pitch = Mathf.Lerp(3f, 0.1f, Mathf.InverseLerp(0.05f, 4f, scale));
 
                 RandomizerModBase.mls.LogInfo("RECEIVED GIANT STATS: " + id + ", " + speed + ", " + health + ", " + scale);
