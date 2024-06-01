@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
+using System.Data;
 
 namespace LCRandomizerMod.Patches
 {
@@ -19,7 +20,13 @@ namespace LCRandomizerMod.Patches
             RandomizerValues.firstTimeShow = TimeOfDay.Instance.profitQuota == 130;
             RandomizerModBase.mls.LogInfo("First time? " + RandomizerValues.firstTimeShow);
 
-            if (Unity.Netcode.NetworkManager.Singleton.IsHost)
+            if (!RandomizerValues.audioDictLoaded)
+            {
+                FastBufferWriter writer = new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1);
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "LoadAudioDicts", writer, NetworkDelivery.Reliable);
+            }
+
+            if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
                 if (RandomizerValues.allItemsListDict.Count == 0)
                 {
@@ -116,6 +123,7 @@ namespace LCRandomizerMod.Patches
                 for (int i = 0; i < 4; i++)
                 {
                     modelValues[i] = Convert.ToSingle(new System.Random().Next(5, 16)) / 10;
+                    modelValues[i] = 0.5f;
                     fastBufferModelValueWriter.WriteValueSafe<float>(modelValues[i]);
                 }
 
@@ -354,6 +362,27 @@ namespace LCRandomizerMod.Patches
                 int temp;
                 reader.ReadValueSafe<int>(out temp);
                 HUDManager.Instance.DisplayDaysLeft(temp);
+
+                if (!RandomizerValues.audioDictLoaded)
+                {
+                    foreach (AudioClip clip in Resources.FindObjectsOfTypeAll<AudioClip>())
+                    {
+                        if (clip == null) continue;
+
+                        if (!RandomizerValues.audioDict.ContainsKey(clip.name))
+                        {
+                            RandomizerValues.audioDict.Add(clip.name, clip);
+                        }
+                    }
+                    RandomizerValues.audioDictLoaded = true;
+                }
+
+                foreach (KeyValuePair<string, AudioClip> pair in RandomizerValues.audioDict)
+                {
+                    RandomizerModBase.mls.LogInfo(pair.Key);
+                }
+
+                RandomizerModBase.mls.LogError("DICT COUNT: " + RandomizerValues.audioDict.Count);
             }
         }
 
@@ -426,6 +455,29 @@ namespace LCRandomizerMod.Patches
                 RandomizerValues.boomboxPitchDict.Remove(id);
             }
             dictsToRemove.Clear();
+        }
+
+        public static void LoadAudioDict(ulong _, FastBufferReader __)
+        {
+            foreach (AudioClip clip in Resources.FindObjectsOfTypeAll<AudioClip>())
+            {
+                if (clip == null) continue;
+
+                if (!RandomizerValues.audioDict.ContainsKey(clip.name))
+                {
+                    RandomizerValues.audioDict.Add(clip.name, clip);
+                }
+            }
+            RandomizerValues.audioDictLoaded = true;
+
+
+            foreach (KeyValuePair<string, AudioClip> pair in RandomizerValues.audioDict)
+            {
+                RandomizerModBase.mls.LogInfo(pair.Key);
+            }
+
+            RandomizerModBase.mls.LogError("DICT COUNT: " + RandomizerValues.audioDict.Count);
+            RandomizerModBase.mls.LogInfo("Audio dictionary loaded.");
         }
 
         //[HarmonyPatch(nameof(StartOfRound.ChangeLevelServerRpc))]
