@@ -74,6 +74,7 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\..\SteamGames\steamapps\common\Lethal Company\Lethal Company_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
   </ItemGroup>
@@ -92,6 +93,7 @@
     <Compile Include="Patches\FlowerSnakeEnemyPatch.cs" />
     <Compile Include="Patches\ForestGiantAIPatch.cs" />
     <Compile Include="Patches\GameNetworkManagerPatch.cs" />
+    <Compile Include="Patches\GiftBoxItemPatch.cs" />
     <Compile Include="Patches\GrabbableObjectPatch.cs" />
     <Compile Include="Patches\HoarderBugAIPatch.cs" />
     <Compile Include="Patches\JesterAIPatch.cs" />

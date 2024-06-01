@@ -1,6 +1,8 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -46,10 +48,12 @@ namespace LCRandomizerMod.Patches
                         }
                     }
 
+                    NetworkManager.Singleton.StartCoroutine(WaitForDetonationCoroutine(3, __instance));
+
                     //PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
                     //localPlayer.KillPlayer(localPlayer.velocityLastFrame, true, CauseOfDeath.Blast);
 
-                    return true;
+                    return false;
                 }
             }
             else
@@ -92,6 +96,18 @@ namespace LCRandomizerMod.Patches
 
                 landmine.transform.localScale = new Vector3(scale, scale, scale);
             }
+        }
+
+        public static IEnumerator WaitForDetonationCoroutine(float seconds, Landmine __instance)
+        {
+            __instance.hasExploded = true;
+            __instance.mineAnimator.SetTrigger("detonate");
+            __instance.mineAudio.PlayOneShot(__instance.mineTrigger, 1f);
+
+            yield return new WaitForSeconds(seconds);
+
+            RandomizerModBase.mls.LogError("Despawning after " + seconds + " seconds.");
+            NetworkManager.Singleton.SpawnManager.SpawnedObjects[__instance.NetworkObjectId].Despawn(true);
         }
     }
 }

@@ -11,6 +11,8 @@ namespace LCRandomizerMod
 
         public static bool isClientSynced = false;
         public static List<string> keysToLoad = new List<string>();
+        public static Dictionary<string, AudioClip> audioDict = new Dictionary<string, AudioClip>();
+        public static bool audioDictLoaded = false;
 
         //Mod specific
 

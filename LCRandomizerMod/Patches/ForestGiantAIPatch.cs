@@ -1,5 +1,7 @@
 ﻿using HarmonyLib;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -42,7 +44,11 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void GiantSpeedOverride(ForestGiantAI __instance)
         {
-            if (!__instance.isEnemyDead)
+            if (__instance.stunnedByPlayer)
+            {
+                __instance.agent.speed = 0f;
+            }
+            else if (!__instance.isEnemyDead)
             {
                 __instance.agent.speed = RandomizerValues.giantSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
             }

@@ -2,6 +2,8 @@
 using HarmonyLib;
 using BepInEx.Logging;
 using LCRandomizerMod.Patches;
+using System.Collections.Generic;
+using UnityEngine;
 
 namespace LCRandomizerMod
 {
@@ -65,9 +67,11 @@ namespace LCRandomizerMod
             harmony.PatchAll(typeof(WhoopieCushionItemPatch));
             harmony.PatchAll(typeof(BoomboxItemPatch));
             harmony.PatchAll(typeof(SpikeRoofTrapPatch));
-
+            harmony.PatchAll(typeof(GiftBoxItemPatch));
 
             mls.LogInfo("Patched all base classes.");
+
+            mls.LogInfo("Lethal Company Randomizer Mod Initialized!");
         }
     }
 }
