@@ -2,7 +2,6 @@
 using HarmonyLib;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Reflection;
 using Unity.Netcode;
@@ -98,9 +97,14 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpikeData", new CustomMessagingManager.HandleNamedMessageDelegate(SpikeRoofTrapPatch.SetSpikeStats));
                 RandomizerModBase.mls.LogInfo("Registering whoopie cushion handler: " + "ClientReceivesWhoopieCData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesWhoopieCData", new CustomMessagingManager.HandleNamedMessageDelegate(WhoopieCushionItemPatch.SetPitchClientAndExplode));
-                RandomizerModBase.mls.LogInfo("Registering giftbox handlers: " + "ClientReceivesExplodedGiftbox" + " ServerReceivesGiftboxInteraction");
+                RandomizerModBase.mls.LogInfo("Registering giftbox handlers: " + "ClientReceivesExplodedGiftbox" + " ServerReceivesGiftboxInteraction " + "ClientReceivesDoubleDeadline " + "ClientReceivesHalveDeadline " + "ClientReceivesDoubleQuota " + "ClientReceivesHalveQuota " + "ClientReceivesEntranceTP");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesExplodedGiftbox", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.GiftboxHasExplodedClient));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesGiftboxInteraction", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.ServerReceivesGiftboxInteraction));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoubleDeadline", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.DoubleDeadline));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHalveDeadline", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.HalveDeadline));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoubleQuota", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.DoubleQuota));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHalveQuota", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.HalveQuota));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesEntranceTP", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.TeleportPlayerToEntrance));
                 RandomizerModBase.mls.LogInfo("Registering audio dictionary handler: " + "LoadAudioDicts");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "LoadAudioDicts", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.LoadAudioDict));
 
@@ -253,12 +257,18 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSpikeData", new CustomMessagingManager.HandleNamedMessageDelegate(SpikeRoofTrapPatch.SetSpikeStats));
                 RandomizerModBase.mls.LogInfo("Registering whoopie cushion handler: " + "ClientReceivesWhoopieCData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesWhoopieCData", new CustomMessagingManager.HandleNamedMessageDelegate(WhoopieCushionItemPatch.SetPitchClientAndExplode));
-                RandomizerModBase.mls.LogInfo("Registering giftbox handlers: " + "ClientReceivesExplodedGiftbox " + "ClientDespawnGiftbox " + "ClientReceivesPlayedSoundGift " + "ServerReceivesGiftboxInteraction " + "ClientSetTeleportPlayerGift");
+                RandomizerModBase.mls.LogInfo("Registering giftbox handlers: " + "ClientReceivesExplodedGiftbox " + "ClientDespawnGiftbox " + "ClientReceivesPlayedSoundGift " + "ServerReceivesGiftboxInteraction " + "ClientSetTeleportPlayerGift " + "ClientReceivesPlayerTeleport " + "ClientReceivesResetPlayer " + "ClientReceivesDoubleDeadline " + "ClientReceivesHalveDeadline " + "ClientReceivesDoubleQuota " + "ClientReceivesHalveQuota " + "ClientReceivesEntranceTP");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesExplodedGiftbox", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.GiftboxHasExplodedClient));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPlayedSoundGift", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.PlaySoundGiftboxClient));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesGiftboxInteraction", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.ServerReceivesGiftboxInteraction));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientSetTeleportPlayerGift", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.SetTeleportPlayer));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPlayerTeleport", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.ClientTeleportPlayer));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesResetPlayer", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.ClientResetPlayer));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoubleDeadline", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.DoubleDeadline));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHalveDeadline", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.HalveDeadline));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoubleQuota", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.DoubleQuota));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHalveQuota", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.HalveQuota));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesEntranceTP", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.TeleportPlayerToEntrance));
                 RandomizerModBase.mls.LogInfo("Registering audio dictionary handler: " + "LoadAudioDicts");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "LoadAudioDicts", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.LoadAudioDict));
 
