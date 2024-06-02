@@ -4,7 +4,6 @@ using System;
 using UnityEngine;
 using Unity.Netcode;
 using System.Collections.Generic;
-using System.Data;
 
 namespace LCRandomizerMod.Patches
 {
@@ -123,7 +122,6 @@ namespace LCRandomizerMod.Patches
                 for (int i = 0; i < 4; i++)
                 {
                     modelValues[i] = Convert.ToSingle(new System.Random().Next(5, 16)) / 10;
-                    modelValues[i] = 0.5f;
                     fastBufferModelValueWriter.WriteValueSafe<float>(modelValues[i]);
                 }
 

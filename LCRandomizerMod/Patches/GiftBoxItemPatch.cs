@@ -1,15 +1,8 @@
 ﻿using GameNetcodeStuff;
 using HarmonyLib;
-using LethalLib.Modules;
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Diagnostics;
 using System.Linq;
-using System.Net.Http.Headers;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.AI;
@@ -20,8 +13,7 @@ namespace LCRandomizerMod.Patches
     [HarmonyPatch(typeof(GiftBoxItem))]
     internal class GiftBoxItemPatch
     {
-        private protected static Predicate<AudioClip> teleporterBeamUpPredicate = (audioClip) => audioClip.name.Contains("teleporterBeamUpSFX");
-        private protected enum GiftBoxBehaviour { SpawnItem, SpawnEnemy, Explode, None, PlaySound, Teleport, InverseTeleport, SpawnLandmine, GiveGroupCredits, 
+        private protected enum GiftBoxBehaviour { SpawnItem, SpawnEnemy, Explode, None, PlaySound, Teleport, InverseTeleport, SpawnLandmine, GiveGroupCredits, RemoveGroupCredits, 
                                                   ChangeLevelWeather, RandomizePlayerStats, DoubleDeadline, HalveDeadline, DoubleQuota, HalveQuota, TeleportToEntrance, KillEnemiesAround }
 
         [HarmonyPatch(nameof(GiftBoxItem.OpenGiftBoxServerRpc))]
@@ -48,7 +40,7 @@ namespace LCRandomizerMod.Patches
                 return false;
             }
 
-            if (new System.Random().Next(1, 2) == 1)
+            if (new System.Random().Next(0, 2) == 1)
             {
                 PlayerControllerB player = __instance.playerHeldBy;
 
@@ -64,10 +56,10 @@ namespace LCRandomizerMod.Patches
 
                 Traverse.Create(__instance).Field("objectInPresent").SetValue(null);
                 GiftBoxBehaviour[] boxBehaviours = Enum.GetValues(typeof(GiftBoxBehaviour)) as GiftBoxBehaviour[];
-                //boxBehaviours[new System.Random().Next(0, boxBehaviours.Length)]   <--- switch
+
                 Reroll:
 
-                switch (GiftBoxBehaviour.InverseTeleport)
+                switch (boxBehaviours[new System.Random().Next(0, boxBehaviours.Length)])
                 {
                     case GiftBoxBehaviour.SpawnItem:
                         {
@@ -88,6 +80,40 @@ namespace LCRandomizerMod.Patches
                         }
                     case GiftBoxBehaviour.SpawnEnemy:
                         {
+                            if (player.isInsideFactory)
+                            {
+                                RoundManager.Instance.SpawnEnemyOnServer(player.transform.position, 0, new System.Random().Next(0, StartOfRound.Instance.currentLevel.Enemies.Count));
+                            }
+                            else
+                            {
+                                if (new System.Random().Next(0, 2) == 0)
+                                {
+                                    try
+                                    {
+                                        GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(RoundManager.Instance.currentLevel.DaytimeEnemies[new System.Random().Next(0, RoundManager.Instance.currentLevel.DaytimeEnemies.Count)].enemyType.enemyPrefab, player.transform.position, Quaternion.Euler(new Vector3(0f, 0f, 0f)));
+                                        gameObject.GetComponentInChildren<NetworkObject>().Spawn(true);
+                                        RoundManager.Instance.SpawnedEnemies.Add(gameObject.GetComponentInChildren<EnemyAI>());
+                                    } catch (Exception ex)
+                                    {
+                                        RandomizerModBase.mls.LogError("Error occured when spawning random daytime enemy from giftbox. Rerolling... " + ex.Message);
+                                        goto Reroll;
+                                    }
+                                }
+                                else
+                                {
+                                    try
+                                    {
+                                        GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(RoundManager.Instance.currentLevel.OutsideEnemies[new System.Random().Next(0, RoundManager.Instance.currentLevel.OutsideEnemies.Count)].enemyType.enemyPrefab, player.transform.position, Quaternion.Euler(new Vector3(0f, 0f, 0f)));
+                                        gameObject.GetComponentInChildren<NetworkObject>().Spawn(true);
+                                        RoundManager.Instance.SpawnedEnemies.Add(gameObject.GetComponentInChildren<EnemyAI>());
+                                    } catch (Exception ex)
+                                    {
+                                        RandomizerModBase.mls.LogError("Error occured when spawning random outside enemy from giftbox. Rerolling... " + ex.Message);
+                                        goto Reroll;
+                                    }
+                                }
+                            }
+
                             break;
                         }
                     case GiftBoxBehaviour.Explode:
@@ -179,6 +205,10 @@ namespace LCRandomizerMod.Patches
 
                                     Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesPlayerTeleport", writer, NetworkDelivery.Reliable);
                                 }
+                                else
+                                {
+                                    goto Reroll;
+                                }
                             }
                             else
                             {
@@ -202,38 +232,142 @@ namespace LCRandomizerMod.Patches
                         }
                     case GiftBoxBehaviour.GiveGroupCredits:
                         {
+                            int cred = new System.Random().Next(1, 1001);
+                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=green>Your crew has been given {0} credits! </color>", cred), -1);
+
+                            Terminal terminal = GameObject.FindObjectOfType<Terminal>();
+                            terminal.groupCredits += cred;
+                            terminal.SyncGroupCreditsClientRpc(terminal.groupCredits, terminal.numberOfItemsInDropship);
+
+                            break;
+                        }
+                    case GiftBoxBehaviour.RemoveGroupCredits:
+                        {
+                            int cred = new System.Random().Next(1, 1001);
+                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=red>Your crew lost {0} credits! </color>", cred), -1);
+
+                            Terminal terminal = GameObject.FindObjectOfType<Terminal>();
+                            terminal.groupCredits -= cred;
+                            terminal.SyncGroupCreditsClientRpc(terminal.groupCredits, terminal.numberOfItemsInDropship);
+
                             break;
                         }
                     case GiftBoxBehaviour.ChangeLevelWeather:
                         {
-                            break;
+                            goto Reroll;
                         }
                     case GiftBoxBehaviour.RandomizePlayerStats:
                         {
+                            player.sprintTime = Convert.ToSingle(new System.Random().Next(1, 101)) / 10;
+                            player.movementSpeed = new System.Random().Next(30, 101) / 10;
+                            player.sinkingSpeedMultiplier = new System.Random().Next(100, 10000) / 10;
+                            player.health = new System.Random().Next(1, 201);
+
+                            float scale = Convert.ToSingle(new System.Random().Next(5, 16)) / 10;
+
+                            player.transform.localScale = new Vector3(scale, scale, scale);
+                            SoundManager.Instance.SetPlayerPitch(scale <= 1 ? Mathf.Lerp(1f, 13f, 1 - (scale - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1 - (scale - 1f) * 2), (int)player.playerClientId);
+
+                            FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 4 + sizeof(int), Unity.Collections.Allocator.Temp, -1);
+
+                            writer.WriteValueSafe<ulong>(player.playerClientId);
+                            writer.WriteValueSafe<float>(player.sprintTime);
+                            writer.WriteValueSafe<float>(player.movementSpeed);
+                            writer.WriteValueSafe<float>(player.sinkingSpeedMultiplier);
+                            writer.WriteValueSafe<float>(scale);
+                            writer.WriteValueSafe<int>(player.health);
+
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesResetPlayer", writer, NetworkDelivery.Reliable);
+
                             break;
                         }
                     case GiftBoxBehaviour.DoubleDeadline:
                         {
+                            FastBufferWriter writer = new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1);
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesDoubleDeadline", writer, NetworkDelivery.Reliable);
+
                             break;
                         }
                     case GiftBoxBehaviour.HalveDeadline:
                         {
+                            FastBufferWriter writer = new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1);
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesHalveDeadline", writer, NetworkDelivery.Reliable);
+
                             break;
                         }
                     case GiftBoxBehaviour.DoubleQuota:
                         {
+                            FastBufferWriter writer = new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1);
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesDoubleQuota", writer, NetworkDelivery.Reliable);
+
                             break;
                         }
                     case GiftBoxBehaviour.HalveQuota:
                         {
+                            FastBufferWriter writer = new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1);
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesHalveQuota", writer, NetworkDelivery.Reliable);
+
                             break;
                         }
                     case GiftBoxBehaviour.TeleportToEntrance:
                         {
+                            if (!player.isInsideFactory)
+                            {
+                                goto Reroll;
+                            }
+
+                            FastBufferWriter writer = new FastBufferWriter(sizeof(ulong), Unity.Collections.Allocator.Temp, -1);
+                            writer.WriteValueSafe<ulong>(player.playerClientId);
+
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesEntranceTP", writer, NetworkDelivery.Reliable);
+
                             break;
                         }
                     case GiftBoxBehaviour.KillEnemiesAround:
                         {
+                            Collider[] array = Physics.OverlapSphere(player.transform.position, 20f, 2621448, QueryTriggerInteraction.Collide);
+
+                            RandomizerModBase.mls.LogError("COLLIDER COUNT: " + array.Length);
+
+                            int killCounter = 0;
+
+                            foreach (Collider collider in array)
+                            {
+                                EnemyAI enemyAI = collider.gameObject.GetComponentInParent<EnemyAI>();
+                                if ((enemyAI != null && enemyAI.isEnemyDead) || enemyAI == null)
+                                {
+                                    continue;
+                                }
+
+                                if (enemyAI != null && enemyAI.enemyType.isOutsideEnemy)
+                                {
+                                    if (collider.gameObject.GetComponentInParent<RadMechAI>() != null)
+                                    {
+                                        RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITH DESTROY");
+                                        enemyAI.KillEnemyClientRpc(true);
+                                    }
+                                    else
+                                    {
+                                        RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITHOUT DESTROY");
+                                        enemyAI.KillEnemyClientRpc(false);
+                                    }
+                                }
+                                else if (enemyAI != null)
+                                {
+                                    if (collider.gameObject.GetComponentInParent<SpringManAI>() != null || collider.gameObject.GetComponentInParent<PufferAI>() != null || collider.gameObject.GetComponentInParent<BlobAI>() != null || collider.gameObject.GetComponentInParent<JesterAI>() != null || collider.gameObject.GetComponentInParent<DressGirlAI>() != null) 
+                                    {
+                                        RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITH DESTROY");
+                                        enemyAI.KillEnemyClientRpc(true);
+                                    }
+                                    else
+                                    {
+                                        RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITHOUT DESTROY");
+                                        enemyAI.KillEnemyClientRpc(false);
+                                    }
+                                }
+                            }
+                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=green>Your crew has been given {0} credits! </color>", 0), -1);
+
                             break;
                         }
                 }
@@ -357,6 +491,144 @@ namespace LCRandomizerMod.Patches
         {
             yield return new WaitForSeconds(0.5f);
             NetworkManager.Singleton.SpawnManager.SpawnedObjects[__instance.NetworkObjectId].Despawn(true);
+        }
+
+        public static void ClientResetPlayer(ulong _, FastBufferReader reader)
+        {
+            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                ulong id;
+                float sprintTime;
+                float movementSpeed;
+                float sinkingSpeed;
+                float scale;
+                int health;
+
+                reader.ReadValueSafe<ulong>(out id);
+                reader.ReadValueSafe<float>(out sprintTime);
+                reader.ReadValueSafe<float>(out movementSpeed);
+                reader.ReadValueSafe<float>(out sinkingSpeed);
+                reader.ReadValueSafe<float>(out scale);
+                reader.ReadValueSafe<int>(out health);
+
+                PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[id];
+
+                player.sprintTime = sprintTime;
+                player.movementSpeed = movementSpeed;
+                player.sinkingSpeedMultiplier = sinkingSpeed;
+                player.transform.localScale = new Vector3(scale, scale, scale);
+                player.health = health;
+
+                SoundManager.Instance.SetPlayerPitch(scale <= 1 ? Mathf.Lerp(1f, 13f, 1 - (scale - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1 - (scale - 1f) * 2), (int)player.playerClientId);
+            }
+        }
+
+        public static void DoubleDeadline(ulong _, FastBufferReader __)
+        {
+            TimeOfDay.Instance.timeUntilDeadline *= 2;
+
+            int daysUntilDeadline = (int)Mathf.Floor(TimeOfDay.Instance.timeUntilDeadline / TimeOfDay.Instance.totalTime);
+            HUDManager.Instance.DisplayDaysLeft(daysUntilDeadline);
+            StartOfRound.Instance.deadlineMonitorText.text = string.Format("DEADLINE:\n{0} Days", daysUntilDeadline);
+        }
+
+        public static void HalveDeadline(ulong _, FastBufferReader __)
+        {
+            TimeOfDay.Instance.timeUntilDeadline /= 2;
+
+            int daysUntilDeadline = TimeOfDay.Instance.timeUntilDeadline < 1080 ? 0 : (int)Mathf.Floor(TimeOfDay.Instance.timeUntilDeadline / TimeOfDay.Instance.totalTime);
+            TimeOfDay.Instance.daysUntilDeadline = daysUntilDeadline;
+
+            HUDManager.Instance.DisplayDaysLeft(daysUntilDeadline);
+            StartOfRound.Instance.deadlineMonitorText.text = string.Format("DEADLINE:\n{0} Days", daysUntilDeadline);
+        }
+
+        public static void DoubleQuota(ulong _, FastBufferReader __)
+        {
+            TimeOfDay.Instance.profitQuota *= 2;
+
+            NetworkManager.Singleton.StartCoroutine(RackUpQuotaTextCoroutine());
+        }
+
+        public static void HalveQuota(ulong _, FastBufferReader __)
+        {
+            TimeOfDay.Instance.profitQuota /= 2;
+
+            NetworkManager.Singleton.StartCoroutine(LowerQuotaTextCoroutine());
+        }
+
+        private static IEnumerator RackUpQuotaTextCoroutine()
+        {
+            HUDManager.Instance.AddTextToChatOnServer("<color=yellow>Rolling quota...</color>", -1);
+            Vector3 defPos = HUDManager.Instance.reachedProfitQuotaAnimator.transform.position;
+            HUDManager.Instance.reachedProfitQuotaAnimator.transform.position = new Vector3(-1000, -1000, -1000);
+            HUDManager.Instance.reachedProfitQuotaAnimator.SetBool("display", true);
+
+            yield return new WaitForSeconds(3.5f);
+            HUDManager.Instance.reachedProfitQuotaAnimator.transform.position = defPos;
+            int quotaTextAmount = TimeOfDay.Instance.profitQuota / 2;
+            while (quotaTextAmount < TimeOfDay.Instance.profitQuota)
+            {
+                quotaTextAmount = (int)Mathf.Clamp((float)quotaTextAmount + Time.deltaTime * 250f, (float)(quotaTextAmount + 3), (float)(TimeOfDay.Instance.profitQuota + 10));
+                HUDManager.Instance.newProfitQuotaText.text = "$" + quotaTextAmount.ToString();
+                yield return null;
+            }
+            HUDManager.Instance.newProfitQuotaText.text = "$" + TimeOfDay.Instance.profitQuota.ToString();
+            TimeOfDay.Instance.UpdateProfitQuotaCurrentTime();
+            HUDManager.Instance.UIAudio.PlayOneShot(HUDManager.Instance.newProfitQuotaSFX);
+            yield return new WaitForSeconds(1.25f);
+            HUDManager.Instance.displayingNewQuota = false;
+            HUDManager.Instance.reachedProfitQuotaAnimator.SetBool("display", false);
+            yield break;
+        }
+
+        private static IEnumerator LowerQuotaTextCoroutine()
+        {
+            HUDManager.Instance.AddTextToChatOnServer("<color=red>Rolling quota...</color>", -1);
+            Vector3 defPos = HUDManager.Instance.reachedProfitQuotaAnimator.transform.position;
+            HUDManager.Instance.reachedProfitQuotaAnimator.transform.position = new Vector3(-1000, -1000, -1000);
+            HUDManager.Instance.reachedProfitQuotaAnimator.SetBool("display", true);
+
+            yield return new WaitForSeconds(3.5f);
+            HUDManager.Instance.reachedProfitQuotaAnimator.transform.position = defPos;
+            int quotaTextAmount = TimeOfDay.Instance.profitQuota * 2;
+            RandomizerModBase.mls.LogError("quotaTextAmount: " + quotaTextAmount + " TimeOfDay.Instance: " + TimeOfDay.Instance.profitQuota);
+            while (quotaTextAmount > TimeOfDay.Instance.profitQuota)
+            {
+                quotaTextAmount = (int)Mathf.Clamp((float)quotaTextAmount - Time.deltaTime * 250f, (float)(TimeOfDay.Instance.profitQuota - 10), (float)(quotaTextAmount - 3));
+                HUDManager.Instance.newProfitQuotaText.text = "$" + quotaTextAmount.ToString();
+                yield return null;
+            }
+            HUDManager.Instance.newProfitQuotaText.text = "$" + TimeOfDay.Instance.profitQuota.ToString();
+            TimeOfDay.Instance.UpdateProfitQuotaCurrentTime();
+            HUDManager.Instance.UIAudio.PlayOneShot(HUDManager.Instance.newProfitQuotaSFX);
+            yield return new WaitForSeconds(1.25f);
+            HUDManager.Instance.displayingNewQuota = false;
+            HUDManager.Instance.reachedProfitQuotaAnimator.SetBool("display", false);
+            yield break;
+        }
+
+        public static void TeleportPlayerToEntrance(ulong _, FastBufferReader reader)
+        {
+            ulong playerID;
+            reader.ReadValueSafe<ulong>(out playerID);
+
+            if (playerID != GameNetworkManager.Instance.localPlayerController.playerClientId)
+            {
+                return;
+            }
+
+            PlayerControllerB player = GameNetworkManager.Instance.localPlayerController;
+
+            int id = 0;
+            foreach (EntranceTeleport entrance in UnityEngine.Object.FindObjectsByType<EntranceTeleport>(FindObjectsSortMode.None))
+            {
+                if (entrance.entranceId == id && player.isInsideFactory != entrance.isEntranceToBuilding)
+                {
+                    entrance.TeleportPlayer();
+                    break;
+                }
+            }
         }
     }
 }
