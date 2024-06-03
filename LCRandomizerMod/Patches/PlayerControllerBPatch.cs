@@ -269,6 +269,7 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoubleQuota", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.DoubleQuota));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHalveQuota", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.HalveQuota));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesEntranceTP", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.TeleportPlayerToEntrance));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesPlayerRecolor", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.SetPlayerColor));
                 RandomizerModBase.mls.LogInfo("Registering audio dictionary handler: " + "LoadAudioDicts");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "LoadAudioDicts", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.LoadAudioDict));
 

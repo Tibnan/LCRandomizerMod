@@ -1,0 +1,9 @@
+{
+    "name": "Lethal_Company_Randomizer",
+    "version_number": "1.4.9",
+    "website_url": "",
+    "description": "Randomize everything, from players to enemies!",
+    "dependencies": [
+        "BepInEx-BepInExPack-5.4.2100"
+    ]
+}

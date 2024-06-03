@@ -9,7 +9,7 @@ namespace LCRandomizerMod
     public class RandomizerModBase : BaseUnityPlugin
     {
         public const string modName = "Lethal Company Randomizer Mod";
-        public const string modVersion = "1.4.9";
+        public const string modVersion = "1.5.1";
         public const string modGUID = "Tibnan.lcrandomizermod";
 
         private readonly Harmony harmony = new Harmony(modGUID);
@@ -66,6 +66,7 @@ namespace LCRandomizerMod
             harmony.PatchAll(typeof(BoomboxItemPatch));
             harmony.PatchAll(typeof(SpikeRoofTrapPatch));
             harmony.PatchAll(typeof(GiftBoxItemPatch));
+            harmony.PatchAll(typeof(DeadBodyInfoPatch));
 
             mls.LogInfo("Patched all base classes.");
 

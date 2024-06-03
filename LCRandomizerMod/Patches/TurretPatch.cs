@@ -39,16 +39,6 @@ namespace LCRandomizerMod.Patches
             }   
         }
 
-        [HarmonyPatch("Update")]
-        [HarmonyPostfix]
-        public static void Debug(Turret __instance)
-        {
-            if (__instance.targetPlayerWithRotation != null)
-            {
-                RandomizerModBase.mls.LogInfo("My target is: " + __instance.targetPlayerWithRotation.playerUsername);
-            }
-        }
-
         public static void SetTurretStats(ulong _, FastBufferReader reader)
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
