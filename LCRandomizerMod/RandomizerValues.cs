@@ -12,6 +12,7 @@ namespace LCRandomizerMod
         public static List<string> keysToLoad = new List<string>();
         public static Dictionary<string, AudioClip> audioDict = new Dictionary<string, AudioClip>();
         public static bool audioDictLoaded = false;
+        public static Vector3 itemResizeTransit;
 
         //Mod specific
 
@@ -23,6 +24,7 @@ namespace LCRandomizerMod
         public static Vector3 defaultPlayerHeadScale;
         public static Vector3 defaultPlayerBillboardScale;
         public static Vector3 defaultPlayerBillboardPos;
+        public static Color defaultPlayerColor;
 
         public static float sprintRand;
         public static int healthRand;

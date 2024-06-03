@@ -130,6 +130,8 @@ namespace LCRandomizerMod.Patches
                 {
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale * modelValues[i];
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale * modelValues[i];
+
+                    GiftBoxItemPatch.RecolorPlayerSync(StartOfRound.Instance.allPlayerScripts[i]);
                 }
 
                 RandomizerModBase.mls.LogInfo("Sending player model values...");
@@ -202,6 +204,7 @@ namespace LCRandomizerMod.Patches
                 {
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale;
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale;
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.material.color = RandomizerValues.defaultPlayerColor;
                     SoundManager.Instance.SetPlayerPitch(RandomizerValues.defaultPlayerPitch, i);
                 }
             }
@@ -224,11 +227,12 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo(item);
             }
 
-            RandomizerValues.defaultPlayerMaskLayer = __instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask;
+            RandomizerValues.defaultPlayerMaskLayer = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask;
             RandomizerValues.defaultPlayerScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerBody.localScale;
             RandomizerValues.defaultPlayerHeadScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().playerGlobalHead.localScale;
             RandomizerValues.defaultPlayerBillboardScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().usernameBillboard.localScale;
             RandomizerValues.defaultPlayerBillboardPos = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().usernameBillboard.position;
+            RandomizerValues.defaultPlayerColor = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerModel.material.color;
         }
 
         public static void SetValuesSentByServer(ulong _, FastBufferReader reader)

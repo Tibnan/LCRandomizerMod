@@ -106,5 +106,23 @@ namespace LCRandomizerMod.Patches
            //RandomizerModBase.mls.LogInfo("Got weight: " + RandomizerValues.scrapWeight);
             //scrap.itemProperties.weight = RandomizerValues.scrapWeight;
         }
+
+        [HarmonyPatch(nameof(GrabbableObject.GrabItem))]
+        [HarmonyPostfix]
+        public static void ResizeGrabbedItem(GrabbableObject __instance)
+        {
+            if (GameNetworkManager.Instance.localPlayerController.gameObject.transform.localScale.x < 1f)
+            {
+                RandomizerValues.itemResizeTransit = __instance.gameObject.transform.localScale;
+                __instance.gameObject.transform.localScale /= 2.7f;
+            }
+        }
+
+        [HarmonyPatch(nameof(GrabbableObject.DiscardItem))]
+        [HarmonyPostfix]
+        public static void SizeBackToNormal(GrabbableObject __instance)
+        {
+            __instance.gameObject.transform.localScale = RandomizerValues.itemResizeTransit;
+        }
     }
 }

@@ -86,6 +86,7 @@
     <Compile Include="Patches\ButlerAIPatch.cs" />
     <Compile Include="Patches\CentipedeAIPatch.cs" />
     <Compile Include="Patches\CrawlerAIPatch.cs" />
+    <Compile Include="Patches\DeadBodyInfoPatch.cs" />
     <Compile Include="Patches\DoublewingAIPatch.cs" />
     <Compile Include="Patches\DressGirlAIPatch.cs" />
     <Compile Include="Patches\ExtensionLadderItemPatch.cs" />

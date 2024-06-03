@@ -14,7 +14,7 @@ namespace LCRandomizerMod.Patches
     internal class GiftBoxItemPatch
     {
         private protected enum GiftBoxBehaviour { SpawnItem, SpawnEnemy, Explode, None, PlaySound, Teleport, InverseTeleport, SpawnLandmine, GiveGroupCredits, RemoveGroupCredits, 
-                                                  ChangeLevelWeather, RandomizePlayerStats, DoubleDeadline, HalveDeadline, DoubleQuota, HalveQuota, TeleportToEntrance, KillEnemiesAround }
+                                                  ChangeLevelWeather, RandomizePlayerStats, DoubleDeadline, HalveDeadline, DoubleQuota, HalveQuota, TeleportToEntrance, KillEnemiesAround, RecolorPlayer }
 
         [HarmonyPatch(nameof(GiftBoxItem.OpenGiftBoxServerRpc))]
         [HarmonyPrefix]
@@ -58,8 +58,8 @@ namespace LCRandomizerMod.Patches
                 GiftBoxBehaviour[] boxBehaviours = Enum.GetValues(typeof(GiftBoxBehaviour)) as GiftBoxBehaviour[];
 
                 Reroll:
-
-                switch (boxBehaviours[new System.Random().Next(0, boxBehaviours.Length)])
+                //boxBehaviours[new System.Random().Next(0, boxBehaviours.Length)]
+                switch (GiftBoxBehaviour.RecolorPlayer)
                 {
                     case GiftBoxBehaviour.SpawnItem:
                         {
@@ -370,6 +370,12 @@ namespace LCRandomizerMod.Patches
 
                             break;
                         }
+                    case GiftBoxBehaviour.RecolorPlayer:
+                        {
+                            HUDManager.Instance.AddTextToChatOnServer("<color=yellow>You feel as if a bucket of paint has spilled on you.</color>", (int)player.playerClientId);
+                            RecolorPlayerSync(player);
+                            break;
+                        }
                 }
 
                 GameNetworkManager.Instance.StartCoroutine(WaitForGiftToBeDiscarded(__instance));
@@ -628,6 +634,49 @@ namespace LCRandomizerMod.Patches
                     entrance.TeleportPlayer();
                     break;
                 }
+            }
+        }
+
+        public static void RecolorPlayerSync(PlayerControllerB player)
+        {
+            float r = new System.Random().Next(0, 20) / 10f;
+            float g = new System.Random().Next(0, 20) / 10f;
+            float b = new System.Random().Next(0, 20) / 10f;
+
+            player.thisPlayerModel.material.color = new Color(r, g, b);
+            player.thisPlayerModelLOD1.material.color = new Color(r, g, b);
+            player.thisPlayerModelLOD2.material.color = new Color(r, g, b);
+            player.thisPlayerModelArms.material.color = new Color(r, g, b);
+
+            FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
+            writer.WriteValueSafe<ulong>(player.playerClientId);
+            writer.WriteValueSafe<float>(r);
+            writer.WriteValueSafe<float>(g);
+            writer.WriteValueSafe<float>(b);
+
+            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesPlayerRecolor", writer, NetworkDelivery.Reliable);
+        }
+
+        public static void SetPlayerColor(ulong _, FastBufferReader reader)
+        {
+            if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
+            {
+                ulong id;
+                float r;
+                float g;
+                float b;
+
+                reader.ReadValueSafe<ulong>(out id);
+                reader.ReadValueSafe<float>(out r);
+                reader.ReadValueSafe<float>(out g);
+                reader.ReadValueSafe<float>(out b);
+
+                PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[id];
+
+                player.thisPlayerModel.material.color = new Color(r, g, b);
+                player.thisPlayerModelLOD1.material.color = new Color(r, g, b);
+                player.thisPlayerModelLOD2.material.color = new Color(r, g, b);
+                player.thisPlayerModelArms.material.color = new Color(r, g, b);
             }
         }
     }
