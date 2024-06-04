@@ -482,6 +482,20 @@ namespace LCRandomizerMod.Patches
             RandomizerModBase.mls.LogInfo("Audio dictionary loaded.");
         }
 
+        [HarmonyPatch("ResetMiscValues")]
+        [HarmonyPrefix]
+        public static bool RunNeeded(StartOfRound __instance)
+        {
+            if (RandomizerValues.unblockResetRun)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         //[HarmonyPatch(nameof(StartOfRound.ChangeLevelServerRpc))]
         //[HarmonyPrefix]
         //public static bool ChangeLevelOverride(StartOfRound __instance)

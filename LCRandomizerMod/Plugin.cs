@@ -2,6 +2,8 @@
 using HarmonyLib;
 using BepInEx.Logging;
 using LCRandomizerMod.Patches;
+using UnityEngine;
+using UnityEngine.Video;
 
 namespace LCRandomizerMod
 {
@@ -67,8 +69,40 @@ namespace LCRandomizerMod
             harmony.PatchAll(typeof(SpikeRoofTrapPatch));
             harmony.PatchAll(typeof(GiftBoxItemPatch));
             harmony.PatchAll(typeof(DeadBodyInfoPatch));
+            harmony.PatchAll(typeof(PreInitSceneScriptPatch));
 
             mls.LogInfo("Patched all base classes.");
+
+            mls.LogInfo("Loading asset bundle.");
+
+            AssetBundle assetBundle = AssetBundle.LoadFromFile("c:\\Users\\stibn\\AppData\\Roaming\\Thunderstore Mod Manager\\DataFolder\\LethalCompany\\profiles\\Default\\BepInEx\\plugins\\LCRandomizer\\lcrm");
+
+            if (assetBundle != null)
+            {
+                AudioClip clip = assetBundle.LoadAsset<AudioClip>("Assets\\LCRM_Assets\\LCRM_audio.mp3");
+                if (clip == null)
+                {
+                    mls.LogError("Failed to load audio file.");
+                }
+                else
+                {
+                    RandomizerValues.introAudio = clip;
+                }
+
+                VideoClip vClip = assetBundle.LoadAsset<VideoClip>("Assets\\LCRM_Assets\\LCRM_video.mp4");
+                if (vClip == null)
+                {
+                    mls.LogError("Failed to load video file.");
+                }
+                else
+                {
+                    RandomizerValues.introVideo = vClip;
+                }
+            }
+            else
+            {
+                mls.LogError("Failed to load asset bundle.");
+            }
 
             mls.LogInfo("Lethal Company Randomizer Mod Initialized!");
         }

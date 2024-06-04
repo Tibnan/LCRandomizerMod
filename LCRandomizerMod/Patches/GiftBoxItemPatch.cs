@@ -58,8 +58,8 @@ namespace LCRandomizerMod.Patches
                 GiftBoxBehaviour[] boxBehaviours = Enum.GetValues(typeof(GiftBoxBehaviour)) as GiftBoxBehaviour[];
 
                 Reroll:
-                //boxBehaviours[new System.Random().Next(0, boxBehaviours.Length)]
-                switch (GiftBoxBehaviour.RecolorPlayer)
+
+                switch (boxBehaviours[new System.Random().Next(0, boxBehaviours.Length)])
                 {
                     case GiftBoxBehaviour.SpawnItem:
                         {
@@ -258,27 +258,7 @@ namespace LCRandomizerMod.Patches
                         }
                     case GiftBoxBehaviour.RandomizePlayerStats:
                         {
-                            player.sprintTime = Convert.ToSingle(new System.Random().Next(1, 101)) / 10;
-                            player.movementSpeed = new System.Random().Next(30, 101) / 10;
-                            player.sinkingSpeedMultiplier = new System.Random().Next(100, 10000) / 10;
-                            player.health = new System.Random().Next(1, 201);
-
-                            float scale = Convert.ToSingle(new System.Random().Next(5, 16)) / 10;
-
-                            player.transform.localScale = new Vector3(scale, scale, scale);
-                            SoundManager.Instance.SetPlayerPitch(scale <= 1 ? Mathf.Lerp(1f, 13f, 1 - (scale - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1 - (scale - 1f) * 2), (int)player.playerClientId);
-
-                            FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 4 + sizeof(int), Unity.Collections.Allocator.Temp, -1);
-
-                            writer.WriteValueSafe<ulong>(player.playerClientId);
-                            writer.WriteValueSafe<float>(player.sprintTime);
-                            writer.WriteValueSafe<float>(player.movementSpeed);
-                            writer.WriteValueSafe<float>(player.sinkingSpeedMultiplier);
-                            writer.WriteValueSafe<float>(scale);
-                            writer.WriteValueSafe<int>(player.health);
-
-                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesResetPlayer", writer, NetworkDelivery.Reliable);
-
+                            RandomizePlayerStats(player);
                             break;
                         }
                     case GiftBoxBehaviour.DoubleDeadline:
@@ -639,9 +619,9 @@ namespace LCRandomizerMod.Patches
 
         public static void RecolorPlayerSync(PlayerControllerB player)
         {
-            float r = new System.Random().Next(0, 20) / 10f;
-            float g = new System.Random().Next(0, 20) / 10f;
-            float b = new System.Random().Next(0, 20) / 10f;
+            float r = new System.Random().Next(0, 200) / 100f;
+            float g = new System.Random().Next(0, 200) / 100f;
+            float b = new System.Random().Next(0, 200) / 100f;
 
             player.thisPlayerModel.material.color = new Color(r, g, b);
             player.thisPlayerModelLOD1.material.color = new Color(r, g, b);
@@ -678,6 +658,30 @@ namespace LCRandomizerMod.Patches
                 player.thisPlayerModelLOD2.material.color = new Color(r, g, b);
                 player.thisPlayerModelArms.material.color = new Color(r, g, b);
             }
+        }
+
+        public static void RandomizePlayerStats(PlayerControllerB player)
+        {
+            player.sprintTime = Convert.ToSingle(new System.Random().Next(1, 101)) / 10;
+            player.movementSpeed = new System.Random().Next(30, 101) / 10;
+            player.sinkingSpeedMultiplier = new System.Random().Next(100, 10000) / 10;
+            player.health = new System.Random().Next(1, 201);
+
+            float scale = Convert.ToSingle(new System.Random().Next(5, 16)) / 10;
+
+            player.transform.localScale = new Vector3(scale, scale, scale);
+            SoundManager.Instance.SetPlayerPitch(scale <= 1 ? Mathf.Lerp(1f, 13f, 1 - (scale - 0.5f) * 2) : Mathf.Lerp(0.7f, 1f, 1 - (scale - 1f) * 2), (int)player.playerClientId);
+
+            FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 4 + sizeof(int), Unity.Collections.Allocator.Temp, -1);
+
+            writer.WriteValueSafe<ulong>(player.playerClientId);
+            writer.WriteValueSafe<float>(player.sprintTime);
+            writer.WriteValueSafe<float>(player.movementSpeed);
+            writer.WriteValueSafe<float>(player.sinkingSpeedMultiplier);
+            writer.WriteValueSafe<float>(scale);
+            writer.WriteValueSafe<int>(player.health);
+
+            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesResetPlayer", writer, NetworkDelivery.Reliable);
         }
     }
 }

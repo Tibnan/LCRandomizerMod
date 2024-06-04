@@ -75,9 +75,10 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoublewingData", new CustomMessagingManager.HandleNamedMessageDelegate(DoublewingAIPatch.SetDoublewingData));
                 RandomizerModBase.mls.LogInfo("Registering bee handler: " + "ClientReceivesBeeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
-                RandomizerModBase.mls.LogInfo("Registering terminal switch handlers: " + "TerminalRandomizationUsed" + "ServerInvokeTerminalSwitch");
+                RandomizerModBase.mls.LogInfo("Registering terminal switch handlers: " + "TerminalRandomizationUsed" + "ServerInvokeTerminalSwitch " + "ServerReceivesReviveRequest ");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerInvokeTerminalSwitch", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SendTerminalSwitchToClients));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesReviveRequest", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.ServerProcessReviveRequest));
                 RandomizerModBase.mls.LogInfo("Registering mine handlers: " + "ClientReceivesMineData " + "ClientHandlePlayerExploded");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMineData", new CustomMessagingManager.HandleNamedMessageDelegate(LandminePatch.SetMineSizeClient));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientHandlePlayerExploded", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.KillLocalPlayerByExp));
@@ -235,8 +236,9 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDoublewingData", new CustomMessagingManager.HandleNamedMessageDelegate(DoublewingAIPatch.SetDoublewingData));
                 RandomizerModBase.mls.LogInfo("Registering bee handler: " + "ClientReceivesBeeData");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBeeData", new CustomMessagingManager.HandleNamedMessageDelegate(RedLocustBeesPatch.SetBeeStats));
-                RandomizerModBase.mls.LogInfo("Registering terminal switch handler: " + "TerminalRandomizationUsed");
+                RandomizerModBase.mls.LogInfo("Registering terminal switch handler: " + "TerminalRandomizationUsed " + "ReviveSpecificPlayer");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "TerminalRandomizationUsed", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.SwitchTerminalMode));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ReviveSpecificPlayer", new CustomMessagingManager.HandleNamedMessageDelegate(TerminalPatch.ClientProcessReviveRequest));
                 RandomizerModBase.mls.LogInfo("Registering mine handlers: " + "ClientReceivesMineData " + "ClientHandlePlayerExploded");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMineData", new CustomMessagingManager.HandleNamedMessageDelegate(LandminePatch.SetMineSizeClient));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientHandlePlayerExploded", new CustomMessagingManager.HandleNamedMessageDelegate(PlayerControllerBPatch.KillLocalPlayerByExp));

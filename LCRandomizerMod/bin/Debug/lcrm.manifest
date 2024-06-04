@@ -1,0 +1,23 @@
+ManifestFileVersion: 0
+CRC: 995170557
+Hashes:
+  AssetFileHash:
+    serializedVersion: 2
+    Hash: 5435e0b5303d987b59dca08d093f712d
+  TypeTreeHash:
+    serializedVersion: 2
+    Hash: 7b620861513e7f4ae22d585630d01f00
+  IncrementalBuildHash:
+    serializedVersion: 2
+    Hash: 5435e0b5303d987b59dca08d093f712d
+HashAppended: 0
+ClassTypes:
+- Class: 83
+  Script: {instanceID: 0}
+- Class: 329
+  Script: {instanceID: 0}
+SerializeReferenceClassIdentifiers: []
+Assets:
+- Assets/LCRM_Assets/LCRM_audio.mp3
+- Assets/LCRM_Assets/LCRM_video.mp4
+Dependencies: []
