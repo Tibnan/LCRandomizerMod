@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Video;
 
 namespace LCRandomizerMod
 {
@@ -13,6 +14,8 @@ namespace LCRandomizerMod
         public static Dictionary<string, AudioClip> audioDict = new Dictionary<string, AudioClip>();
         public static bool audioDictLoaded = false;
         public static Vector3 itemResizeTransit;
+        public static AudioClip introAudio;
+        public static VideoClip introVideo;
 
         //Mod specific
 
@@ -192,6 +195,7 @@ namespace LCRandomizerMod
 
         public static bool mapRandomizedInTerminal = false;
         public static Vector3 defaultTerminalScale;
+        public static bool unblockResetRun = true;
 
         //TerminalPatch
 
