@@ -18,6 +18,7 @@ namespace LCRandomizerMod.Patches
 
             RandomizerValues.firstTimeShow = TimeOfDay.Instance.profitQuota == 130;
             RandomizerModBase.mls.LogInfo("First time? " + RandomizerValues.firstTimeShow);
+            RandomizerValues.mapRandomizedInTerminal = false;
 
             if (!RandomizerValues.audioDictLoaded)
             {
@@ -205,6 +206,9 @@ namespace LCRandomizerMod.Patches
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale;
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale;
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModel.material.color = RandomizerValues.defaultPlayerColor;
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModelArms.material.color = RandomizerValues.defaultPlayerColor;
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModelLOD1.material.color = RandomizerValues.defaultPlayerColor;
+                    StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerModelLOD2.material.color = RandomizerValues.defaultPlayerColor;
                     SoundManager.Instance.SetPlayerPitch(RandomizerValues.defaultPlayerPitch, i);
                 }
             }
@@ -239,6 +243,8 @@ namespace LCRandomizerMod.Patches
         {
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
+                RandomizerValues.mapRandomizedInTerminal = false;
+
                 RandomizerModBase.mls.LogInfo("MESSAGE RECEIVED FROM SERVER!");
                 float[] randValues = new float[4];
                 reader.ReadValueSafe<float>(out randValues[0], default);

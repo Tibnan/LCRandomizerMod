@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
 using UnityEngine;
@@ -14,7 +15,7 @@ namespace LCRandomizerMod.Patches
     internal class GiftBoxItemPatch
     {
         private protected enum GiftBoxBehaviour { SpawnItem, SpawnEnemy, Explode, None, PlaySound, Teleport, InverseTeleport, SpawnLandmine, GiveGroupCredits, RemoveGroupCredits, 
-                                                  ChangeLevelWeather, RandomizePlayerStats, DoubleDeadline, HalveDeadline, DoubleQuota, HalveQuota, TeleportToEntrance, KillEnemiesAround, RecolorPlayer }
+                                                  ChangeLevelWeather, RandomizePlayerStats, DoubleDeadline, HalveDeadline, DoubleQuota, HalveQuota, TeleportToEntrance, KillEnemiesAround, RecolorPlayer, DoubleHP }
 
         [HarmonyPatch(nameof(GiftBoxItem.OpenGiftBoxServerRpc))]
         [HarmonyPrefix]
@@ -166,10 +167,12 @@ namespace LCRandomizerMod.Patches
                                 if (!teleporters[0].isInverseTeleporter)
                                 {
                                     teleporters[0].PressTeleportButtonClientRpc();
+                                    teleporters[0].cooldownAmount = 0f;
                                 }
                                 else if (!teleporters[1].isInverseTeleporter)
                                 {
                                     teleporters[1].PressTeleportButtonClientRpc();
+                                    teleporters[1].cooldownAmount = 0f;
                                 }
                             }
                             else
@@ -309,7 +312,7 @@ namespace LCRandomizerMod.Patches
 
                             RandomizerModBase.mls.LogError("COLLIDER COUNT: " + array.Length);
 
-                            int killCounter = 0;
+                            List<EnemyAI> killCount = new List<EnemyAI>();
 
                             foreach (Collider collider in array)
                             {
@@ -325,11 +328,21 @@ namespace LCRandomizerMod.Patches
                                     {
                                         RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITH DESTROY");
                                         enemyAI.KillEnemyClientRpc(true);
+
+                                        if (!killCount.Contains(enemyAI))
+                                        {
+                                            killCount.Add(enemyAI);
+                                        }
                                     }
                                     else
                                     {
                                         RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITHOUT DESTROY");
                                         enemyAI.KillEnemyClientRpc(false);
+
+                                        if (!killCount.Contains(enemyAI))
+                                        {
+                                            killCount.Add(enemyAI);
+                                        }
                                     }
                                 }
                                 else if (enemyAI != null)
@@ -338,22 +351,47 @@ namespace LCRandomizerMod.Patches
                                     {
                                         RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITH DESTROY");
                                         enemyAI.KillEnemyClientRpc(true);
+
+                                        if (!killCount.Contains(enemyAI))
+                                        {
+                                            killCount.Add(enemyAI);
+                                        }
                                     }
                                     else
                                     {
                                         RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITHOUT DESTROY");
                                         enemyAI.KillEnemyClientRpc(false);
+
+                                        if (!killCount.Contains(enemyAI))
+                                        {
+                                            killCount.Add(enemyAI);
+                                        }
                                     }
                                 }
+
+                                if (killCount.Count == 0)
+                                {
+                                    RandomizerModBase.mls.LogInfo(String.Format("No enemies around {0}, rerolling.", player.playerUsername));
+                                    goto Reroll;
+                                }
                             }
-                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=green>Your crew has been given {0} credits! </color>", 0), -1);
+                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=white>{0} has been saved by some unknown force. Casualties: {1} {2}.</color>", player.playerUsername, killCount.Count, killCount.Count > 1 ? "enemy" : "enemies"));
 
                             break;
                         }
                     case GiftBoxBehaviour.RecolorPlayer:
                         {
-                            HUDManager.Instance.AddTextToChatOnServer("<color=yellow>You feel as if a bucket of paint has spilled on you.</color>", (int)player.playerClientId);
+                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=yellow>A bucket of paint has spilled on {0}</color>", player.playerUsername));
                             RecolorPlayerSync(player);
+                            break;
+                        }
+                    case GiftBoxBehaviour.DoubleHP:
+                        {
+                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=green>{0} is feeling vitalized.</color>", player.playerUsername));
+
+                            FastBufferWriter writer = new FastBufferWriter(sizeof(ulong), Unity.Collections.Allocator.Temp, -1);
+                            writer.WriteValueSafe<ulong>(player.playerClientId);
+                            Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "PlayerHealthDoubled", writer, NetworkDelivery.Reliable);
                             break;
                         }
                 }
@@ -545,7 +583,7 @@ namespace LCRandomizerMod.Patches
 
         private static IEnumerator RackUpQuotaTextCoroutine()
         {
-            HUDManager.Instance.AddTextToChatOnServer("<color=yellow>Rolling quota...</color>", -1);
+            HUDManager.Instance.AddTextToChatOnServer("<color=red>Rolling quota...</color>", -1);
             Vector3 defPos = HUDManager.Instance.reachedProfitQuotaAnimator.transform.position;
             HUDManager.Instance.reachedProfitQuotaAnimator.transform.position = new Vector3(-1000, -1000, -1000);
             HUDManager.Instance.reachedProfitQuotaAnimator.SetBool("display", true);
@@ -570,7 +608,7 @@ namespace LCRandomizerMod.Patches
 
         private static IEnumerator LowerQuotaTextCoroutine()
         {
-            HUDManager.Instance.AddTextToChatOnServer("<color=red>Rolling quota...</color>", -1);
+            HUDManager.Instance.AddTextToChatOnServer("<color=yellow>Rolling quota...</color>", -1);
             Vector3 defPos = HUDManager.Instance.reachedProfitQuotaAnimator.transform.position;
             HUDManager.Instance.reachedProfitQuotaAnimator.transform.position = new Vector3(-1000, -1000, -1000);
             HUDManager.Instance.reachedProfitQuotaAnimator.SetBool("display", true);
@@ -682,6 +720,16 @@ namespace LCRandomizerMod.Patches
             writer.WriteValueSafe<int>(player.health);
 
             Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesResetPlayer", writer, NetworkDelivery.Reliable);
+        }
+
+        public static void DoublePlayerHP(ulong _, FastBufferReader reader)
+        {
+            ulong id;
+            
+            reader.ReadValueSafe<ulong>(out id);
+
+            PlayerControllerB player = StartOfRound.Instance.allPlayerScripts[id];
+            player.health *= 2;
         }
     }
 }

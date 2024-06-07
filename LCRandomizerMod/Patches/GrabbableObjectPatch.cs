@@ -111,9 +111,12 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void ResizeGrabbedItem(GrabbableObject __instance)
         {
-            if (GameNetworkManager.Instance.localPlayerController.gameObject.transform.localScale.x < 1f)
+            if (__instance.playerHeldBy == GameNetworkManager.Instance.localPlayerController && GameNetworkManager.Instance.localPlayerController.gameObject.transform.localScale.x < 1f)
             {
-                RandomizerValues.itemResizeTransit = __instance.gameObject.transform.localScale;
+                if (!RandomizerValues.itemResizeDict.ContainsKey(__instance.NetworkObjectId)) 
+                {
+                    RandomizerValues.itemResizeDict.Add(__instance.NetworkObjectId, __instance.gameObject.transform.localScale);
+                }
                 __instance.gameObject.transform.localScale /= 2.7f;
             }
         }
@@ -122,7 +125,11 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void SizeBackToNormal(GrabbableObject __instance)
         {
-            __instance.gameObject.transform.localScale = RandomizerValues.itemResizeTransit;
+            if (__instance.playerHeldBy == GameNetworkManager.Instance.localPlayerController && RandomizerValues.itemResizeDict.ContainsKey(__instance.NetworkObjectId))
+            {
+                __instance.gameObject.transform.localScale = RandomizerValues.itemResizeDict.GetValueSafe(__instance.NetworkObjectId);
+                RandomizerValues.itemResizeDict.Remove(__instance.NetworkObjectId);
+            }
         }
     }
 }
