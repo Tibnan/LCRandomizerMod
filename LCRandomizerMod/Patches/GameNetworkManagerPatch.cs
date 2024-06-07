@@ -12,8 +12,9 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void ClearDicts()
         {
-            RandomizerModBase.mls.LogError("Clearing dicts");
+            RandomizerModBase.mls.LogWarning("Clearing dicts");
             RandomizerValues.ClearDicts(true);
+            RandomizerValues.mapRandomizedInTerminal = false;
         }
 
         [HarmonyPatch(nameof(GameNetworkManager.SaveGame))]

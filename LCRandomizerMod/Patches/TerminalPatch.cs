@@ -2,6 +2,7 @@
 using HarmonyLib;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -10,9 +11,12 @@ namespace LCRandomizerMod.Patches
     [HarmonyPatch(typeof(Terminal))]
     internal class TerminalPatch
     {
+        private protected static readonly Regex reviveRegex = new Regex("(?i)r(e)?v(i)?(v)?(e)?|res");
+        private protected static readonly Regex randomRegex = new Regex("(?i)r(a)?n(d)?o(m)?|rand|rnd");
+
         [HarmonyPatch(nameof(Terminal.OnSubmit))]
         [HarmonyPrefix]
-        public static bool CheckForRandom(Terminal __instance)
+        public static bool CheckForModKeyword(Terminal __instance)
         {
             if (!RandomizerValues.mapRandomizedInTerminal && StartOfRound.Instance.inShipPhase)
             {
@@ -20,7 +24,8 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("PARSED SENTENCE:");
                 RandomizerModBase.mls.LogInfo(parsedText);
 
-                if (parsedText.Contains("random"))
+                //parsedText.Contains("random") -> original
+                if (randomRegex.IsMatch(parsedText))
                 {
                     int num = new System.Random().Next(1, 13);
 
@@ -28,7 +33,7 @@ namespace LCRandomizerMod.Patches
                     {
                         num = new System.Random().Next(1, 13);
 
-                        if (TimeOfDay.Instance.daysUntilDeadline < 1 || TimeOfDay.Instance.timeUntilDeadline < 1080)
+                        if (TimeOfDay.Instance.daysUntilDeadline < 1)
                         {
                             num = 3;
                             break;
@@ -65,8 +70,14 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("PARSED SENTENCE:");
                 RandomizerModBase.mls.LogInfo(parsedText);
 
-                if (parsedText.Contains("revive"))
+                //parsedText.Contains("revive") -> original
+                if (reviveRegex.IsMatch(parsedText))
                 {
+                    if (__instance.groupCredits < 2000)
+                    {
+                        return true;
+                    }
+
                     if (Unity.Netcode.NetworkManager.Singleton.IsServer)
                     {
                         ServerProcessReviveRequest(0, new FastBufferReader());
@@ -177,6 +188,10 @@ namespace LCRandomizerMod.Patches
 
             if (revivablePlayer)
             {
+                Terminal terminal = GameObject.FindObjectOfType<Terminal>();
+                terminal.groupCredits -= 2000;
+                terminal.SyncGroupCreditsClientRpc(terminal.groupCredits, terminal.numberOfItemsInDropship);
+
                 PlayerControllerB playerToRevive = deadPlayers.ElementAt(new System.Random().Next(0, deadPlayers.Count));
                 RevivePlayer(playerToRevive.playerClientId);
 
@@ -189,7 +204,7 @@ namespace LCRandomizerMod.Patches
             }
         }
 
-        public static void ClientProcessReviveRequest(ulong _, FastBufferReader reader)
+        public static void ClientProcessReviveMessage(ulong _, FastBufferReader reader)
         {
             ulong playerToRevive;
             reader.ReadValueSafe<ulong>(out playerToRevive);
@@ -251,10 +266,16 @@ namespace LCRandomizerMod.Patches
                 component.health = 100;
                 Debug.Log("Reviving players E");
                 component.mapRadarDotAnimator.SetBool("dead", false);
-                HUDManager.Instance.gasHelmetAnimator.SetBool("gasEmitting", false);
+                if (component.playerClientId == GameNetworkManager.Instance.localPlayerController.playerClientId)
+                {
+                    HUDManager.Instance.gasHelmetAnimator.SetBool("gasEmitting", false);
+                }
                 component.hasBegunSpectating = false;
-                HUDManager.Instance.RemoveSpectateUI();
-                HUDManager.Instance.gameOverAnimator.SetTrigger("revive");
+                if (component.playerClientId == GameNetworkManager.Instance.localPlayerController.playerClientId)
+                {
+                    HUDManager.Instance.RemoveSpectateUI();
+                    HUDManager.Instance.gameOverAnimator.SetTrigger("revive");
+                }
                 component.hinderedMultiplier = 1f;
                 component.isMovementHindered = 0;
                 component.sourcesCausingSinking = 0;
@@ -286,65 +307,19 @@ namespace LCRandomizerMod.Patches
                 }
                 component.currentVoiceChatIngameSettings.voiceAudio.GetComponent<OccludeAudio>().overridingLowPass = false;
             }
-            Debug.Log("Reviving players G");
-            PlayerControllerB localPlayerController = GameNetworkManager.Instance.localPlayerController;
-            localPlayerController.bleedingHeavily = false;
-            localPlayerController.criticallyInjured = false;
-            localPlayerController.playerBodyAnimator.SetBool("Limp", false);
-            localPlayerController.health = 100;
-            if (localPlayerController.playerClientId == id)
-            {
-                HUDManager.Instance.UpdateHealthUI(100, false);
-            }
-            localPlayerController.spectatedPlayerScript = null;
-            if (localPlayerController.playerClientId == id)
-            {
-                HUDManager.Instance.audioListenerLowPass.enabled = false;
-            }
-            Debug.Log("Reviving players H");
-            StartOfRound.Instance.SetSpectateCameraToGameOverMode(false, localPlayerController);
-            RagdollGrabbableObject[] array = Object.FindObjectsOfType<RagdollGrabbableObject>();
-            for (int i = 0; i < array.Length; i++)
-            {
-                bool flag6 = !array[i].isHeld;
-                if (flag6)
-                {
-                    bool isServer = Unity.Netcode.NetworkManager.Singleton.IsServer;
-                    if (isServer)
-                    {
-                        bool isSpawned = array[i].NetworkObject.IsSpawned;
-                        if (isSpawned)
-                        {
-                            array[i].NetworkObject.Despawn(true);
-                        }
-                        else
-                        {
-                            Object.Destroy(array[i].gameObject);
-                        }
-                    }
-                }
-                else
-                {
-                    bool flag7 = array[i].isHeld && array[i].playerHeldBy != null;
-                    if (flag7)
-                    {
-                        array[i].playerHeldBy.DropAllHeldItems(true, false);
-                    }
-                }
-            }
-            DeadBodyInfo[] array2 = Object.FindObjectsOfType<DeadBodyInfo>();
-            for (int j = 0; j < array2.Length; j++)
-            {
-                Object.Destroy(array2[j].gameObject);
-            }
+
             StartOfRound.Instance.livingPlayers++;
             StartOfRound.Instance.allPlayersDead = false;
             StartOfRound.Instance.UpdatePlayerVoiceEffects();
+            if (component.playerClientId == GameNetworkManager.Instance.localPlayerController.playerClientId) 
+            {
+                HUDManager.Instance.HideHUD(false);
+            }
         }
 
         private static Vector3 GetPlayerSpawnPosition(int playerNum, bool simpleTeleport = false)
         {
-            Debug.Log("Get Player Spawn Position");
+            RandomizerModBase.mls.LogInfo("Get Player Spawn Position");
             Vector3 result;
             if (simpleTeleport)
             {

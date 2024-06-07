@@ -4,6 +4,9 @@ using BepInEx.Logging;
 using LCRandomizerMod.Patches;
 using UnityEngine;
 using UnityEngine.Video;
+using System;
+using System.IO;
+using System.Reflection;
 
 namespace LCRandomizerMod
 {
@@ -11,7 +14,7 @@ namespace LCRandomizerMod
     public class RandomizerModBase : BaseUnityPlugin
     {
         public const string modName = "Lethal Company Randomizer Mod";
-        public const string modVersion = "1.5.1";
+        public const string modVersion = "1.6.2";
         public const string modGUID = "Tibnan.lcrandomizermod";
 
         private readonly Harmony harmony = new Harmony(modGUID);
@@ -75,7 +78,7 @@ namespace LCRandomizerMod
 
             mls.LogInfo("Loading asset bundle.");
 
-            AssetBundle assetBundle = AssetBundle.LoadFromFile("c:\\Users\\stibn\\AppData\\Roaming\\Thunderstore Mod Manager\\DataFolder\\LethalCompany\\profiles\\Default\\BepInEx\\plugins\\LCRandomizer\\lcrm");
+            AssetBundle assetBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "lcrm"));
 
             if (assetBundle != null)
             {
@@ -98,6 +101,11 @@ namespace LCRandomizerMod
                 {
                     RandomizerValues.introVideo = vClip;
                 }
+
+                //for (int i = 1; i < 11; i++)
+                //{
+                //    RandomizerValues.modPrefabs.Add(String.Format("Crystal {0}", i), assetBundle.LoadAsset<GameObject>(String.Format(i < 10 ? "Assets\\LCRM_Assets\\Crystalsv0{0}.prefab" : "Assets\\LCRM_Assets\\Crystalsv{0}.prefab", i)));
+                //}
             }
             else
             {

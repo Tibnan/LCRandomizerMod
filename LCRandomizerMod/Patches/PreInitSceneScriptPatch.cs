@@ -44,7 +44,7 @@ namespace LCRandomizerMod.Patches
             yield return new WaitWhile(() => videoPlayer.isPlaying);
 
             videoPlayer.enabled = false;
-            //gameObject = null;
+            gameObject = null;
         }
 
         [HarmonyPatch(nameof(PreInitSceneScript.HoverButton))]

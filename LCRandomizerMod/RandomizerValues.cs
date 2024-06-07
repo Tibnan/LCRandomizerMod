@@ -13,7 +13,7 @@ namespace LCRandomizerMod
         public static List<string> keysToLoad = new List<string>();
         public static Dictionary<string, AudioClip> audioDict = new Dictionary<string, AudioClip>();
         public static bool audioDictLoaded = false;
-        public static Vector3 itemResizeTransit;
+        public static Dictionary<ulong, Vector3> itemResizeDict = new Dictionary<ulong, Vector3>();
         public static AudioClip introAudio;
         public static VideoClip introVideo;
 
@@ -239,6 +239,7 @@ namespace LCRandomizerMod
             doublewingSpeedsDict.Clear();
             redLocustSpeedsDict.Clear();
             spawnedMechScales.Clear();
+            itemResizeDict.Clear();
 
             if (deleteAll)
             {
