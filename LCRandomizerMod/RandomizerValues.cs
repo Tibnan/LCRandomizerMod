@@ -1,4 +1,6 @@
-﻿using System;
+﻿using JetBrains.Annotations;
+using LCRandomizerMod.Patches;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Video;
@@ -17,6 +19,10 @@ namespace LCRandomizerMod
         public static AudioClip introAudio;
         public static VideoClip introVideo;
 
+        public static Dictionary<string, Item> modItemsDict = new Dictionary<string, Item>();
+
+        public static Dictionary<ulong, Light> playerLightsDict = new Dictionary<ulong, Light>();
+
         //Mod specific
 
         //StartOfRoundPatch
@@ -33,6 +39,7 @@ namespace LCRandomizerMod
         public static int healthRand;
         public static float movementSpeedRand;
         public static float sinkMultiplierRand;
+        public static int currentMaxHP;
 
         public static int quotaRand;
         public static int deadlineRand;
@@ -217,7 +224,42 @@ namespace LCRandomizerMod
 
         //BoomboxItemPatch
 
-        public static void ClearDicts(bool deleteAll)
+        //FlashlightItemPatch
+
+        public static Dictionary<ulong, Color> flashlightColorDict = new Dictionary<ulong, Color>();
+
+        //FlashlightItemPatch
+
+        //TetraChemicalItemPatch
+
+        public static Dictionary<ulong, ChemicalEffects> chemicalEffectsDict = new Dictionary<ulong, ChemicalEffects>();
+        public static Dictionary<ulong, object> coroutineStorage = new Dictionary<ulong, object>();
+        public static bool blockAnims = false;
+
+        //TetraChemicalItemPatch
+
+        //KeyItemPatch
+
+        public static List<ulong> superchargedKeys = new List<ulong>();
+        public static bool blockDespawn = false;
+
+        //KeyItemPatch
+
+        //ShipTeleporterPatch
+
+        public static Dictionary<bool, float> teleporterCooldowns = new Dictionary<bool, float>();
+        public static bool connectCoroutinePlaying = false;
+        public static bool blockDrop = false;
+
+        //ShipTeleporterPatch
+
+        //ShipAlarmCordPatch
+
+        public static float cordPitch;
+
+        //ShipAlarmCordPatch
+
+        public static void ReleaseResources(bool deleteAll)
         {
             dogSpeedsDict.Clear();
             spiderSpeedsDict.Clear();
@@ -247,6 +289,16 @@ namespace LCRandomizerMod
                 shovelDamageDict.Clear();
                 jetpackPropertiesDict.Clear();
                 boomboxPitchDict.Clear();
+                flashlightColorDict.Clear();
+                superchargedKeys.Clear();
+                chemicalEffectsDict.Clear();
+                coroutineStorage.Clear();
+                teleporterCooldowns.Clear();
+                blockAnims = false;
+                blockDespawn = false;
+                blockDrop = false;
+                connectCoroutinePlaying = false;
+                spawnedMechCount = 0;
             }
         }
     }

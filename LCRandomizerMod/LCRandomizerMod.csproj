@@ -56,6 +56,10 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Unity.InputSystem, Version=1.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\SteamGames\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Unity.InputSystem.dll</HintPath>
+    </Reference>
     <Reference Include="Unity.Netcode.Runtime">
       <HintPath>..\..\..\SteamGames\steamapps\common\Lethal Company\Lethal Company_Data\Managed\Unity.Netcode.Runtime.dll</HintPath>
     </Reference>
@@ -84,6 +88,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ICustomValue.cs" />
+    <Compile Include="PandorasBoxItem.cs" />
     <Compile Include="Patches\BaboonBirdAIPatch.cs" />
     <Compile Include="Patches\BlobAIPatch.cs" />
     <Compile Include="Patches\BoomboxItemPatch.cs" />
@@ -94,6 +99,7 @@
     <Compile Include="Patches\DoublewingAIPatch.cs" />
     <Compile Include="Patches\DressGirlAIPatch.cs" />
     <Compile Include="Patches\ExtensionLadderItemPatch.cs" />
+    <Compile Include="Patches\FlashlightItemPatch.cs" />
     <Compile Include="Patches\FlowermanAIPatch.cs" />
     <Compile Include="Patches\FlowerSnakeEnemyPatch.cs" />
     <Compile Include="Patches\ForestGiantAIPatch.cs" />
@@ -103,6 +109,7 @@
     <Compile Include="Patches\HoarderBugAIPatch.cs" />
     <Compile Include="Patches\JesterAIPatch.cs" />
     <Compile Include="Patches\JetpackItemPatch.cs" />
+    <Compile Include="Patches\KeyItemPatch.cs" />
     <Compile Include="Patches\KnifeItemPatch.cs" />
     <Compile Include="Patches\LandminePatch.cs" />
     <Compile Include="Patches\MouthDogAIPatch.cs" />
@@ -114,6 +121,8 @@
     <Compile Include="Patches\RedLocustBeesPatch.cs" />
     <Compile Include="Patches\RoundManagerPatch.cs" />
     <Compile Include="Patches\SandSpiderAIPatch.cs" />
+    <Compile Include="Patches\ShipAlarmCordPatch.cs" />
+    <Compile Include="Patches\ShipTeleporterPatch.cs" />
     <Compile Include="Patches\ShotgunItemPatch.cs" />
     <Compile Include="Patches\ShovelPatch.cs" />
     <Compile Include="Patches\SpikeRoofTrapPatch.cs" />

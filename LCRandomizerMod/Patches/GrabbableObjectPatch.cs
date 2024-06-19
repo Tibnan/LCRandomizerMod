@@ -14,9 +14,10 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
+                RandomizerModBase.mls.LogError(__instance.itemProperties.weight);
                 if (!__instance.isInShipRoom)
                 {
-                    //float weight = Convert.ToSingle(new System.Random().Next(50, 151)) / 100;
+                    //float weight = Convert.ToSingle(new System.Random().Next(51, 201)) / 100;
                     int rndVal;
 
                     if (TimeOfDay.Instance.timesFulfilledQuota > 0)
@@ -104,7 +105,7 @@ namespace LCRandomizerMod.Patches
             componentInChildren.scrapValue = RandomizerValues.scrapValue;
 
            //RandomizerModBase.mls.LogInfo("Got weight: " + RandomizerValues.scrapWeight);
-            //scrap.itemProperties.weight = RandomizerValues.scrapWeight;
+           //scrap.itemProperties.weight = RandomizerValues.scrapWeight;
         }
 
         [HarmonyPatch(nameof(GrabbableObject.GrabItem))]

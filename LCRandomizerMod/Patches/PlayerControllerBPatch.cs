@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace LCRandomizerMod.Patches
 {
@@ -110,6 +111,10 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "PlayerHealthDoubled", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.DoublePlayerHP));
                 RandomizerModBase.mls.LogInfo("Registering audio dictionary handler: " + "LoadAudioDicts");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "LoadAudioDicts", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.LoadAudioDict));
+                RandomizerModBase.mls.LogInfo("Registering tzp chemical handler: " + "ClientReceivesChemColor");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesChemColor", new CustomMessagingManager.HandleNamedMessageDelegate(TetraChemicalItemPatch.ClientSetChemColor));
+                RandomizerModBase.mls.LogInfo("Registering ship TP handler: " + "ServerReceivesTPModifyRequest");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesTPModifyRequest", new CustomMessagingManager.HandleNamedMessageDelegate(ShipTeleporterPatch.ServerReceivesTPModifyRequest));
 
                 if (ES3.FileExists(GameNetworkManager.Instance.currentSaveFileName))
                 {
@@ -151,6 +156,26 @@ namespace LCRandomizerMod.Patches
                                         RandomizerValues.boomboxPitchDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, float>;
                                         break;
                                     }
+                                case "flashlightDict":
+                                    {
+                                        RandomizerValues.flashlightColorDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, Color>;
+                                        break;
+                                    }
+                                case "tzpChemDict":
+                                    {
+                                        RandomizerValues.chemicalEffectsDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, ChemicalEffects>;
+                                        break;
+                                    }
+                                case "superKeys":
+                                    {
+                                        RandomizerValues.superchargedKeys = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as List<ulong>;
+                                        break;
+                                    }
+                                case "tpCooldowns":
+                                    {
+                                        RandomizerValues.teleporterCooldowns = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<bool, float>;
+                                        break;
+                                    }
                             }
                         }
                         RandomizerModBase.mls.LogInfo("Loaded dictionaries.");
@@ -176,7 +201,6 @@ namespace LCRandomizerMod.Patches
 
                 ResetAndEnd:
                 StartOfRoundPatch.ResetPlayers();
-                //RandomizerValues.jetpackPropertiesDict.Clear();
             }
             else
             {
@@ -277,16 +301,25 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "PlayerHealthDoubled", new CustomMessagingManager.HandleNamedMessageDelegate(GiftBoxItemPatch.DoublePlayerHP));
                 RandomizerModBase.mls.LogInfo("Registering audio dictionary handler: " + "LoadAudioDicts");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "LoadAudioDicts", new CustomMessagingManager.HandleNamedMessageDelegate(StartOfRoundPatch.LoadAudioDict));
+                RandomizerModBase.mls.LogInfo("Registering flashlight handler: " + "ClientReceivesFlashlightColor");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesFlashlightColor", new CustomMessagingManager.HandleNamedMessageDelegate(FlashlightItemPatch.SetFlashlightColor));
+                RandomizerModBase.mls.LogInfo("Registering tzp chemical handler: " + "ClientReceivesChemColor");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesChemColor", new CustomMessagingManager.HandleNamedMessageDelegate(TetraChemicalItemPatch.ClientSetChemColor));
+                RandomizerModBase.mls.LogInfo("Registering superkey handler:" + "ClientReceivesSuperKey");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSuperKey", new CustomMessagingManager.HandleNamedMessageDelegate(KeyItemPatch.ClientReceivesSuperKey));
+                RandomizerModBase.mls.LogInfo("Registering ship TP handler: " + "ClientsStartTPModCoroutine");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientsStartTPModCoroutine", new CustomMessagingManager.HandleNamedMessageDelegate(ShipTeleporterPatch.StartConnectCoroutineClient));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientSetTPCooldown", new CustomMessagingManager.HandleNamedMessageDelegate(ShipTeleporterPatch.SetTpCooldownClient));
+                RandomizerModBase.mls.LogInfo("Registering ship cord handler: " + "ClientReceivesHornPitch");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHornPitch", new CustomMessagingManager.HandleNamedMessageDelegate(ShipAlarmCordPatch.SetPitch));
 
                 StartOfRoundPatch.ResetPlayers();
 
-                RequestItemDataOnSpawn();
-
-                //RandomizerValues.jetpackPropertiesDict.Clear();
+                RequestSyncDataOnSpawn();
             }
         }
 
-        public static void RequestItemDataOnSpawn()
+        public static void RequestSyncDataOnSpawn()
         {
             Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "ServerReceivesItemDataRequest", 0UL, new FastBufferWriter(4, Unity.Collections.Allocator.Temp, -1), NetworkDelivery.Reliable);
         }
@@ -319,6 +352,61 @@ namespace LCRandomizerMod.Patches
         {
             PlayerControllerB player = GameNetworkManager.Instance.localPlayerController;
             player.KillPlayer(player.velocityLastFrame, true, CauseOfDeath.Blast);
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.PlayQuickSpecialAnimation))]
+        [HarmonyPrefix]
+        public static bool OverrideAnim(PlayerControllerB __instance)
+        {
+            if (RandomizerValues.blockAnims)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.DespawnHeldObject))]
+        [HarmonyPrefix]
+        public static bool OverrideDespawn(PlayerControllerB __instance)
+        {
+            if (RandomizerValues.blockDespawn)
+            {
+                RandomizerValues.blockDespawn = false;
+                //RandomizerModBase.mls.LogError("UNBLOCKING DESPAWN");
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        [HarmonyPatch("OnEnable")]
+        [HarmonyPostfix]
+        public static void SubscribeToEvent(PlayerControllerB __instance)
+        {
+            RandomizerModBase.mls.LogInfo("Subscribing to mod events.");
+            InputActionAsset actions = IngamePlayerSettings.Instance.playerInput.actions;
+            actions.FindAction("Interact").performed += ShipTeleporterPatch.CheckForTeleporterLOS;
+        }
+
+        [HarmonyPatch("OnDisable")]
+        [HarmonyPostfix]
+        public static void UnsubscribeFromEvent(PlayerControllerB __instance)
+        {
+            RandomizerModBase.mls.LogInfo("Unsubscribing from mod events.");
+            InputActionAsset actions = IngamePlayerSettings.Instance.playerInput.actions;
+            actions.FindAction("Interact").performed -= ShipTeleporterPatch.CheckForTeleporterLOS;
+        }
+
+        [HarmonyPatch(nameof(PlayerControllerB.DiscardHeldObject))]
+        [HarmonyPrefix]
+        public static bool BlockItemDrop(PlayerControllerB __instance)
+        {
+            return !RandomizerValues.blockDrop;
         }
     }
 }
