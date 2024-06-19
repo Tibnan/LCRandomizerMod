@@ -19,7 +19,7 @@ namespace LCRandomizerMod.Patches
 
             if (Unity.Netcode.NetworkManager.Singleton.IsServer && !RandomizerValues.boomboxPitchDict.ContainsKey(__instance.NetworkObjectId))
             {
-                __instance.boomboxAudio.pitch = new System.Random().Next(5, 31) / 10f;
+                __instance.boomboxAudio.pitch = new System.Random().Next(50, 301) / 100f;
                 int num = __instance.musicRandomizer.Next(0, __instance.musicAudios.Length);
                 __instance.boomboxAudio.clip = __instance.musicAudios[num];
 

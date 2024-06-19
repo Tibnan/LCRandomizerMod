@@ -18,12 +18,15 @@ namespace LCRandomizerMod.Patches
             if (!RandomizerValues.jetpackPropertiesDict.ContainsKey(__instance.NetworkObjectId) && Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
                 RandomizerModBase.mls.LogInfo("ID: " + __instance.NetworkObjectId);
+                RandomizerModBase.mls.LogError("BATTERY USAGE: " + __instance.itemProperties.batteryUsage);
 
                 float jetpackAccel = Convert.ToSingle(new System.Random().Next(10, 301)) / 10f;
                 float jetpackDecel = Convert.ToSingle(new System.Random().Next(10, 301)) / 10f;
+                //float bUsage = Convert.ToSingle(new System.Random().Next(10, 201)) / 10f;
 
                 __instance.jetpackAcceleration = jetpackAccel;
                 __instance.jetpackDeaccelleration = jetpackDecel;
+                //__instance.itemProperties.batteryUsage = bUsage;
 
                 RandomizerValues.jetpackPropertiesDict.Add(__instance.NetworkObjectId, new Tuple<float, float>(jetpackAccel, jetpackDecel));
 
@@ -68,15 +71,6 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("RECEIVED JETPACK STATS: " + id + ", " + acc + ", " + dec);
             }
         }
-
-        //[HarmonyPatch(nameof(JetpackItem.Update))]
-        //[HarmonyPostfix]
-        //public static void X(JetpackItem __instance)
-        //{
-        //    RandomizerModBase.mls.LogInfo("Stats: " + __instance.jetpackAcceleration + " " + __instance.jetpackDeaccelleration);
-        //    RandomizerModBase.mls.LogInfo("DICT1 Stats: " + RandomizerValues.jetpackPropertiesDict.ElementAt(0).Value.Item1 + " " + RandomizerValues.jetpackPropertiesDict.ElementAt(0).Value.Item2);
-        //    RandomizerModBase.mls.LogInfo("DICT2 Stats: " + RandomizerValues.jetpackPropertiesDict.ElementAt(1).Value.Item1 + " " + RandomizerValues.jetpackPropertiesDict.ElementAt(1).Value.Item2);
-        //}
 
         public void ReloadStats()
         {

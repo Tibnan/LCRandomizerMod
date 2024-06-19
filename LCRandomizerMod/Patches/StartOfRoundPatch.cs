@@ -26,6 +26,17 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "LoadAudioDicts", writer, NetworkDelivery.Reliable);
             }
 
+            if (RandomizerValues.playerLightsDict.Count == 0)
+            {
+                foreach (PlayerControllerB player in __instance.allPlayerScripts)
+                {
+                    Light comp = player.gameObject.AddComponent<Light>();
+                    comp.intensity = 0f;
+                    comp.range = 40f;
+                    RandomizerValues.playerLightsDict.Add(player.playerClientId, comp);
+                }
+            }
+
             if (Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
                 if (RandomizerValues.allItemsListDict.Count == 0)
@@ -192,7 +203,7 @@ namespace LCRandomizerMod.Patches
         [HarmonyPrefix]
         public static void ResetPlayers()
         {
-            RandomizerValues.ClearDicts(false);
+            RandomizerValues.ReleaseResources(false);
             RandomizerValues.spawnedMechCount = 0;
             RandomizerValues.mapRandomizedInTerminal = false;
             RandomizerValues.spawnedMechScales.Clear();
@@ -463,6 +474,58 @@ namespace LCRandomizerMod.Patches
                 RandomizerValues.boomboxPitchDict.Remove(id);
             }
             dictsToRemove.Clear();
+
+            foreach (ulong id in RandomizerValues.flashlightColorDict.Keys)
+            {
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.flashlightColorDict.Remove(id);
+            }
+            dictsToRemove.Clear();
+
+            foreach (ulong id in RandomizerValues.chemicalEffectsDict.Keys)
+            {
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.chemicalEffectsDict.Remove(id);
+            }
+            dictsToRemove.Clear();
+
+            foreach (ulong id in RandomizerValues.superchargedKeys)
+            {
+                if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.superchargedKeys.Remove(id);
+            }
+            dictsToRemove.Clear();
+
+            ShipTeleporter[] teleporters = GameObject.FindObjectsOfType<ShipTeleporter>();
+            if (teleporters.Length <= 0)
+            {
+                RandomizerValues.teleporterCooldowns.Clear();
+            }
+            else if (teleporters.Length < RandomizerValues.teleporterCooldowns.Count)
+            {
+                RandomizerValues.teleporterCooldowns.Remove(!teleporters[0].isInverseTeleporter);
+            }
         }
 
         public static void LoadAudioDict(ulong _, FastBufferReader __)

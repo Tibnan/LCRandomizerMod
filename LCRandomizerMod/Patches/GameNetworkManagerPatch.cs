@@ -13,7 +13,7 @@ namespace LCRandomizerMod.Patches
         public static void ClearDicts()
         {
             RandomizerModBase.mls.LogWarning("Clearing dicts");
-            RandomizerValues.ClearDicts(true);
+            RandomizerValues.ReleaseResources(true);
             RandomizerValues.mapRandomizedInTerminal = false;
         }
 
