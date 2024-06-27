@@ -13,9 +13,7 @@ E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Unity.Animation.Rigging.dl
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Facepunch.Steamworks.Win64.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Unity.InputSystem.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.VFXModule.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Unity.RenderPipelines.HighDefinition.Runtime.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.TerrainModule.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Unity.RenderPipelines.Core.Runtime.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.UIModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\DissonanceVoip.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\Assembly-CSharp-firstpass.dll
@@ -49,7 +47,6 @@ E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.UnityAnalytics
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.PerformanceReportingModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.AssetBundleModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.SharedInternalsModule.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.TextRenderingModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.ClothModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.ClusterInputModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.ClusterRendererModule.dll

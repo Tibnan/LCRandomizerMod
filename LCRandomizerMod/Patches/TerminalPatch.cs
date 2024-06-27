@@ -317,7 +317,7 @@ namespace LCRandomizerMod.Patches
             }
         }
 
-        private static Vector3 GetPlayerSpawnPosition(int playerNum, bool simpleTeleport = false)
+        public static Vector3 GetPlayerSpawnPosition(int playerNum, bool simpleTeleport = false)
         {
             RandomizerModBase.mls.LogInfo("Get Player Spawn Position");
             Vector3 result;

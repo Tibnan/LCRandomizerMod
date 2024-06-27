@@ -115,6 +115,8 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesChemColor", new CustomMessagingManager.HandleNamedMessageDelegate(TetraChemicalItemPatch.ClientSetChemColor));
                 RandomizerModBase.mls.LogInfo("Registering ship TP handler: " + "ServerReceivesTPModifyRequest");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesTPModifyRequest", new CustomMessagingManager.HandleNamedMessageDelegate(ShipTeleporterPatch.ServerReceivesTPModifyRequest));
+                RandomizerModBase.mls.LogInfo("Registering entrance tp handler: " + "ServerBlockExit");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerBlockExit", new CustomMessagingManager.HandleNamedMessageDelegate(EntranceTeleportPatch.ServerBlockExitAndSync));
 
                 if (ES3.FileExists(GameNetworkManager.Instance.currentSaveFileName))
                 {
@@ -312,11 +314,15 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientSetTPCooldown", new CustomMessagingManager.HandleNamedMessageDelegate(ShipTeleporterPatch.SetTpCooldownClient));
                 RandomizerModBase.mls.LogInfo("Registering ship cord handler: " + "ClientReceivesHornPitch");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHornPitch", new CustomMessagingManager.HandleNamedMessageDelegate(ShipAlarmCordPatch.SetPitch));
+                RandomizerModBase.mls.LogInfo("Registering entrance tp handler: " + "ExitHasBeenBlocked");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ExitHasBeenBlocked", new CustomMessagingManager.HandleNamedMessageDelegate(EntranceTeleportPatch.ClientExitIDResolver));
 
                 StartOfRoundPatch.ResetPlayers();
 
                 RequestSyncDataOnSpawn();
             }
+
+            __instance.gameObject.AddComponent<CustomUI>();
         }
 
         public static void RequestSyncDataOnSpawn()

@@ -259,6 +259,13 @@ namespace LCRandomizerMod
 
         //ShipAlarmCordPatch
 
+        //EntranceTeleportPatch
+
+        public static bool entranceTPCoroutinePlaying = false;
+        public static List<EntranceTeleport> blockedFireExits = new List<EntranceTeleport>();
+
+        //EntranceTeleportPatch
+
         public static void ReleaseResources(bool deleteAll)
         {
             dogSpeedsDict.Clear();
@@ -282,6 +289,7 @@ namespace LCRandomizerMod
             redLocustSpeedsDict.Clear();
             spawnedMechScales.Clear();
             itemResizeDict.Clear();
+            blockedFireExits.Clear();
 
             if (deleteAll)
             {
@@ -294,11 +302,13 @@ namespace LCRandomizerMod
                 chemicalEffectsDict.Clear();
                 coroutineStorage.Clear();
                 teleporterCooldowns.Clear();
+                playerLightsDict.Clear();
                 blockAnims = false;
                 blockDespawn = false;
                 blockDrop = false;
                 connectCoroutinePlaying = false;
                 spawnedMechCount = 0;
+                entranceTPCoroutinePlaying = false;
             }
         }
     }
