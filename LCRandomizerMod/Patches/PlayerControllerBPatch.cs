@@ -117,6 +117,7 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesTPModifyRequest", new CustomMessagingManager.HandleNamedMessageDelegate(ShipTeleporterPatch.ServerReceivesTPModifyRequest));
                 RandomizerModBase.mls.LogInfo("Registering entrance tp handler: " + "ServerBlockExit");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerBlockExit", new CustomMessagingManager.HandleNamedMessageDelegate(EntranceTeleportPatch.ServerBlockExitAndSync));
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesPlayerExit", new CustomMessagingManager.HandleNamedMessageDelegate(VehicleControllerPatch.ServerHandlePlayerExit));
 
                 if (ES3.FileExists(GameNetworkManager.Instance.currentSaveFileName))
                 {
@@ -140,42 +141,48 @@ namespace LCRandomizerMod.Patches
                             {
                                 case "knifeStatsDict":
                                     {
-                                        RandomizerValues.knifeDamageDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
+                                        RandomizerValues.knifeDamageDict = ES3.Load<Dictionary<ulong, int>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "jetpackDict":
                                     {
-                                        RandomizerValues.jetpackPropertiesDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, Tuple<float, float>>;
+                                        RandomizerValues.jetpackPropertiesDict = ES3.Load<Dictionary<ulong, Tuple<float, float>>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "shovelStatsDict":
                                     {
-                                        RandomizerValues.shovelDamageDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, int>;
+                                        RandomizerValues.shovelDamageDict = ES3.Load<Dictionary<ulong, int>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "boomboxStatsDict":
                                     {
-                                        RandomizerValues.boomboxPitchDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, float>;
+                                        RandomizerValues.boomboxPitchDict = ES3.Load<Dictionary<ulong, float>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "flashlightDict":
                                     {
-                                        RandomizerValues.flashlightColorDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, Color>;
+                                        RandomizerValues.flashlightColorDict = ES3.Load<Dictionary<ulong, Color>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "tzpChemDict":
                                     {
-                                        RandomizerValues.chemicalEffectsDict = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<ulong, ChemicalEffects>;
+                                        RandomizerValues.chemicalEffectsDict = ES3.Load<Dictionary<ulong, ChemicalEffects>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "superKeys":
                                     {
-                                        RandomizerValues.superchargedKeys = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as List<ulong>;
+                                        RandomizerValues.superchargedKeys = ES3.Load<List<ulong>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "tpCooldowns":
                                     {
-                                        RandomizerValues.teleporterCooldowns = ES3.Load(key, GameNetworkManager.Instance.currentSaveFileName) as Dictionary<bool, float>;
+                                        RandomizerValues.teleporterCooldowns = ES3.Load<Dictionary<bool, float>>(key, GameNetworkManager.Instance.currentSaveFileName);
+                                        break;
+                                    }
+                                case "randomCarProps":
+                                    {
+                                        RandomizerValues.randomCarProperties = ES3.Load<RandomCarProperties>(key, GameNetworkManager.Instance.currentSaveFileName);
+                                        RandomizerValues.randomizedCar = true;
                                         break;
                                     }
                             }
@@ -316,6 +323,17 @@ namespace LCRandomizerMod.Patches
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesHornPitch", new CustomMessagingManager.HandleNamedMessageDelegate(ShipAlarmCordPatch.SetPitch));
                 RandomizerModBase.mls.LogInfo("Registering entrance tp handler: " + "ExitHasBeenBlocked");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ExitHasBeenBlocked", new CustomMessagingManager.HandleNamedMessageDelegate(EntranceTeleportPatch.ClientExitIDResolver));
+                RandomizerModBase.mls.LogInfo("Registering custom UI handler: " + "ClientReceivesBroadcastMsg");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBroadcastMsg", new CustomMessagingManager.HandleNamedMessageDelegate(CustomUI.ProcessBroadcastMessage));
+                RandomizerModBase.mls.LogInfo("Registering radmech missile handler: " + "ClientReceivesMissileScale");
+                Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesMissileScale", new CustomMessagingManager.HandleNamedMessageDelegate(RadMechMissilePatch.SetMissileSize));
+                RandomizerModBase.mls.LogInfo("Registering car handlers: " + "ClientReceivesCarScale " + "ClientHasBeenResized");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesCarData", new CustomMessagingManager.HandleNamedMessageDelegate(VehicleControllerPatch.ClientSetCarProperties));
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesDriverExit", new CustomMessagingManager.HandleNamedMessageDelegate(VehicleControllerPatch.HandlePlayerExit));
+                RandomizerModBase.mls.LogInfo("Registering bush wolf handler: " + "ClientReceivesWolfStats");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesWolfStats", new CustomMessagingManager.HandleNamedMessageDelegate(BushWolfEnemyPatch.ClientSetWolfStats));
+                RandomizerModBase.mls.LogInfo("Tibnan.lcrandomizermod_" + "ClientReceivesSurgeonData");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSurgeonData", new CustomMessagingManager.HandleNamedMessageDelegate(ClaySurgeonAIPatch.SetSurgeonData));
 
                 StartOfRoundPatch.ResetPlayers();
 

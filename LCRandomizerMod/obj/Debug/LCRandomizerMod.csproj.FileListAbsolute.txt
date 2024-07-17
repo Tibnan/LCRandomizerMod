@@ -69,7 +69,6 @@ E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.GameCenterModu
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.SpriteMaskModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.StreamingModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.TerrainPhysicsModule.dll
-E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.TextCoreFontEngineModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.TextCoreTextEngineModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.SpriteShapeModule.dll
 E:\Projects\LCRandomizerMod\LCRandomizerMod\bin\Debug\UnityEngine.UIElementsModule.dll

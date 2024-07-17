@@ -4,18 +4,16 @@ using BepInEx.Logging;
 using LCRandomizerMod.Patches;
 using UnityEngine;
 using UnityEngine.Video;
-using System;
 using System.IO;
 using System.Reflection;
 
 namespace LCRandomizerMod
 {
     [BepInPlugin(modGUID, modName, modVersion)]
-    [BepInDependency(LethalLib.Plugin.ModGUID)]
     public class RandomizerModBase : BaseUnityPlugin
     {
         public const string modName = "Lethal Company Randomizer Mod";
-        public const string modVersion = "1.8.5";
+        public const string modVersion = "1.9.4";
         public const string modGUID = "Tibnan.lcrandomizermod";
 
         private readonly Harmony harmony = new Harmony(modGUID);
@@ -23,6 +21,8 @@ namespace LCRandomizerMod
         public static ManualLogSource mls;
         
         private static RandomizerModBase Instance;
+
+        public static Font modFont;
 
         void Awake()
         {
@@ -79,6 +79,11 @@ namespace LCRandomizerMod
             harmony.PatchAll(typeof(ShipTeleporterPatch));
             harmony.PatchAll(typeof(ShipAlarmCordPatch));
             harmony.PatchAll(typeof(EntranceTeleportPatch));
+            harmony.PatchAll(typeof(RadMechMissilePatch));
+            harmony.PatchAll(typeof(VehicleControllerPatch));
+            harmony.PatchAll(typeof(ClaySurgeonAIPatch));
+            harmony.PatchAll(typeof(BushWolfEnemyPatch));
+            harmony.PatchAll(typeof(SprayPaintItemPatch));
 
             mls.LogInfo("Patched all base classes.");
 
@@ -88,7 +93,7 @@ namespace LCRandomizerMod
 
             if (assetBundle != null)
             {
-                AudioClip clip = assetBundle.LoadAsset<AudioClip>("Assets\\LCRM_Assets\\LCRM_audio.mp3");
+                AudioClip clip = assetBundle.LoadAsset<AudioClip>("Assets\\lcrm\\LCRM_audio.mp3");
                 if (clip == null)
                 {
                     mls.LogError("Failed to load audio file.");
@@ -98,7 +103,7 @@ namespace LCRandomizerMod
                     RandomizerValues.introAudio = clip;
                 }
 
-                VideoClip vClip = assetBundle.LoadAsset<VideoClip>("Assets\\LCRM_Assets\\LCRM_video.mp4");
+                VideoClip vClip = assetBundle.LoadAsset<VideoClip>("Assets\\lcrm\\LCRM_video.mp4");
                 if (vClip == null)
                 {
                     mls.LogError("Failed to load video file.");
@@ -107,25 +112,27 @@ namespace LCRandomizerMod
                 {
                     RandomizerValues.introVideo = vClip;
                 }
+
+                modFont = assetBundle.LoadAsset<Font>("Assets\\lcrm\\PerfectDOSVGA437.ttf");
             }
             else
             {
                 mls.LogError("Failed to load asset bundle.");
             }
 
-            AssetBundle itemBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "lcrm_itembundle"));
+            //AssetBundle itemBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), "lcrm_itembundle"));
 
-            Item pandorasBox = itemBundle.LoadAsset<Item>("Assets\\Unity\\Native\\PandorasBoxItem.asset");
-            RandomizerValues.modItemsDict.Add(pandorasBox.name, pandorasBox);
+            //Item pandorasBox = itemBundle.LoadAsset<Item>("Assets\\Unity\\Native\\PandorasBoxItem.asset");
+            //RandomizerValues.modItemsDict.Add(pandorasBox.name, pandorasBox);
 
-            PandorasBoxItem boxItem = pandorasBox.spawnPrefab.AddComponent<PandorasBoxItem>();
-            //boxItem.fallTime = 0f;
-            ////boxItem.itemProperties = pandorasBox;
+            //PandorasBoxItem boxItem = pandorasBox.spawnPrefab.AddComponent<PandorasBoxItem>();
+            ////boxItem.fallTime = 0f;
+            //////boxItem.itemProperties = pandorasBox;
 
-            int rarity = 100;
-            LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(pandorasBox.spawnPrefab);
-            LethalLib.Modules.Items.RegisterScrap(pandorasBox, rarity, LethalLib.Modules.Levels.LevelTypes.All);
-            //LethalLib.Modules.Items.RegisterItem(pandorasBox);
+            //int rarity = 100;
+            //LethalLib.Modules.NetworkPrefabs.RegisterNetworkPrefab(pandorasBox.spawnPrefab);
+            //LethalLib.Modules.Items.RegisterScrap(pandorasBox, rarity, LethalLib.Modules.Levels.LevelTypes.All);
+            ////LethalLib.Modules.Items.RegisterItem(pandorasBox);
 
             mls.LogInfo("Lethal Company Randomizer Mod Initialized!");
         }

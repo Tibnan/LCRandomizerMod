@@ -50,7 +50,13 @@ namespace LCRandomizerMod.Patches
         {
             if (!__instance.isEnemyDead)
             {
-                __instance.agent.speed = RandomizerValues.flowermanSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+                float speed = RandomizerValues.flowermanSpeedsDict.GetValueSafe(__instance.NetworkObjectId);
+                if (RandomizerValues.slowedFlowermen.ContainsKey(__instance))
+                {
+                    speed /= 10f;
+                }
+
+                __instance.agent.speed = speed;
             }
         }
 

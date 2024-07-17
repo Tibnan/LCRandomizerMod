@@ -135,8 +135,8 @@ namespace LCRandomizerMod.Patches
                 {
                     modelValues[i] = Convert.ToSingle(new System.Random().Next(5, 16)) / 10;
                     fastBufferModelValueWriter.WriteValueSafe<float>(modelValues[i]);
+                    RandomizerValues.playerScaleDict.Add((ulong)i, new Vector3(modelValues[i], modelValues[i], modelValues[i]));
                 }
-
 
                 for (int i = 0; i < Unity.Netcode.NetworkManager.Singleton.ConnectedClientsList.Count; i++)
                 {
@@ -203,7 +203,7 @@ namespace LCRandomizerMod.Patches
         [HarmonyPrefix]
         public static void ResetPlayers()
         {
-            RandomizerValues.ReleaseResources(false);
+            RandomizerValues.ReleaseResources(deleteAll: false);
             RandomizerValues.spawnedMechCount = 0;
             RandomizerValues.mapRandomizedInTerminal = false;
             RandomizerValues.spawnedMechScales.Clear();
@@ -233,17 +233,8 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void AwakePatch(StartOfRound __instance)
         {
-            RandomizerModBase.mls.LogInfo("allPlayerObjects length: " + __instance.allPlayerObjects.Length);
-            UnityEngine.Component[] components = __instance.allPlayerObjects[0].GetComponents(typeof(UnityEngine.Component));
-
-            RandomizerModBase.mls.LogInfo("Components in list:");
-            foreach (var item in components)
-            {
-                RandomizerModBase.mls.LogInfo(item);
-            }
-
             RandomizerValues.defaultPlayerMaskLayer = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerModel.renderingLayerMask;
-            RandomizerValues.defaultPlayerScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerBody.localScale;
+            //RandomizerValues.defaultPlayerScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().thisPlayerBody.localScale;
             RandomizerValues.defaultPlayerHeadScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().playerGlobalHead.localScale;
             RandomizerValues.defaultPlayerBillboardScale = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().usernameBillboard.localScale;
             RandomizerValues.defaultPlayerBillboardPos = StartOfRound.Instance.allPlayerObjects[0].GetComponent<PlayerControllerB>().usernameBillboard.position;
@@ -296,6 +287,8 @@ namespace LCRandomizerMod.Patches
                 {
                     reader.ReadValueSafe<float>(out modelValues[i]);
                     RandomizerModBase.mls.LogInfo("Read out info: " + modelValues[i]);
+
+                    RandomizerValues.playerScaleDict.Add((ulong)i, new Vector3(modelValues[i], modelValues[i], modelValues[i]));
 
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().thisPlayerBody.localScale = RandomizerValues.defaultPlayerScale * modelValues[i];
                     StartOfRound.Instance.allPlayerObjects[i].GetComponent<PlayerControllerB>().playerGlobalHead.localScale = RandomizerValues.defaultPlayerHeadScale * modelValues[i];
@@ -564,49 +557,5 @@ namespace LCRandomizerMod.Patches
                 return false;
             }
         }
-
-        //[HarmonyPatch(nameof(StartOfRound.ChangeLevelServerRpc))]
-        //[HarmonyPrefix]
-        //public static bool ChangeLevelOverride(StartOfRound __instance)
-        //{
-        //    if (RandomizerValues.mapRandomizedInTerminal && StartOfRound.Instance.inShipPhase)
-        //    {
-        //        HUDManager.Instance.AddTextToChatOnServer("<color=red>You have already randomized the map, you can't route to a new planet until you go down.</color>", -1);
-        //        RandomizerModBase.mls.LogInfo("RANDOMIZED STATE: " + RandomizerValues.mapRandomizedInTerminal);
-        //    }
-        //    return !RandomizerValues.mapRandomizedInTerminal;
-        //}
-
-        //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
-
-        //public static void SetPitchDataSentByServer(ulong _, FastBufferReader reader)
-        //{
-        //    if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
-        //    {
-        //        for (int i = 0; i < 4; i++)
-        //        {
-        //            float pitch;
-        //            reader.ReadValueSafe<float>(out pitch);
-        //            SoundManager.Instance.SetPlayerPitch(pitch, i);
-        //        }
-        //    }
-        //}
-
-        //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
-
-        //TBD IF INCLUDED IN FINAL VERSION
-
-        //[HarmonyPatch("Update")]
-        //[HarmonyPostfix]
-        //public static void PowerSurgeShipRandomly(StartOfRound __instance)
-        //{
-        //    if (!StartOfRound.Instance.inShipPhase && RoundManager.Instance.currentLevel.currentWeather != LevelWeatherType.Stormy)
-        //    {
-        //        if (new System.Random().Next(1, 10001) == 10000)
-        //        {
-        //            StartOfRound.Instance.PowerSurgeShip();
-        //        }
-        //    }
-        //}
     }
 }

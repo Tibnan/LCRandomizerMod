@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Unity.Netcode;
+using HarmonyLib;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -23,6 +24,11 @@ namespace LCRandomizerMod.Patches
         {
             if (Unity.Netcode.NetworkManager.Singleton.IsServer && StartOfRound.Instance.inShipPhase && __instance != null)
             {
+                RandomizerModBase.mls.LogWarning("Beginning custom data saving...");
+                CustomUI playerUI = GameNetworkManager.Instance.localPlayerController.gameObject.GetComponent<CustomUI>();
+                playerUI.SetText("<color=yellow>Saving...</color>");
+                playerUI.Show(true);
+
                 try
                 {
                     var runnableTypes = Assembly.GetExecutingAssembly().GetTypes().Where(t => typeof(ICustomValue).IsAssignableFrom(t) && !t.IsInterface);
@@ -35,12 +41,15 @@ namespace LCRandomizerMod.Patches
                     ES3.Save("keysToLoad", RandomizerValues.keysToLoad, GameNetworkManager.Instance.currentSaveFileName);
 
                     RandomizerModBase.mls.LogInfo("Saved dicts.");
+                    playerUI.SetText("<color=green>Saved game!</color>");
                 }
                 catch (Exception ex)
                 {
                     RandomizerModBase.mls.LogError("Exception caught during custom value serialization. " + ex.Message);
+                    playerUI.SetText("<color=red>Failed to save game!</color>");
                     return;
                 }
+                playerUI.FadeOut(1);
             }
             else
             {

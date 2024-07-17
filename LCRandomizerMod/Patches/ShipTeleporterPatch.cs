@@ -17,8 +17,8 @@ namespace LCRandomizerMod.Patches
 
             RaycastHit hit;
             ShipTeleporter teleporter;
-            LungProp lungProp = GameNetworkManager.Instance.localPlayerController.currentlyHeldObjectServer.gameObject.GetComponent<LungProp>();
-            if (lungProp != null && Physics.Raycast(GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position + new Vector3(0f, 0f, 0.4f), Vector3.forward, out hit, 5f))
+            LungProp lungProp = GameNetworkManager.Instance.localPlayerController.currentlyHeldObjectServer.gameObject?.GetComponent<LungProp>();
+            if (lungProp != null && Physics.Raycast(GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.position + new Vector3(0f, 0f, 0.4f), GameNetworkManager.Instance.localPlayerController.gameplayCamera.transform.forward, out hit, 3f))
             {
                 RandomizerModBase.mls.LogError("Raycast hit " + hit.collider.name);
                 teleporter = hit.collider.GetComponentInParent<ShipTeleporter>();
@@ -125,8 +125,12 @@ namespace LCRandomizerMod.Patches
             {
                 teleporter.cooldownAmount -= 1;
             }
+
             RandomizerValues.connectCoroutinePlaying = false;
             RandomizerValues.blockDrop = false;
+
+            string msg = String.Format("<color=green>An apparatus was inserted into the {0}. Current cooldown: {1} seconds.</color>", teleporter.isInverseTeleporter ? "inverse teleporter" : "teleporter", teleporter.cooldownAmount);
+            CustomUI.BroadcastMessage(msg, 3);
         }
 
         public void SaveOnExit()

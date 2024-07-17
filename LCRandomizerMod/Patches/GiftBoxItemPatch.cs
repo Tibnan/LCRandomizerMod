@@ -59,7 +59,6 @@ namespace LCRandomizerMod.Patches
                 GiftBoxBehaviour[] boxBehaviours = Enum.GetValues(typeof(GiftBoxBehaviour)) as GiftBoxBehaviour[];
 
                 Reroll:
-
                 switch (boxBehaviours[new System.Random().Next(0, boxBehaviours.Length)])
                 {
                     case GiftBoxBehaviour.SpawnItem:
@@ -236,7 +235,10 @@ namespace LCRandomizerMod.Patches
                     case GiftBoxBehaviour.GiveGroupCredits:
                         {
                             int cred = new System.Random().Next(1, 1001);
-                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=green>Your crew has been given {0} credits! </color>", cred), -1);
+                            string msg = String.Format("<color=green>Your crew has been given {0} credits! </color>", cred);
+                            CustomUI.BroadcastMessage(msg, 2);
+
+                            //HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=green>Your crew has been given {0} credits! </color>", cred), -1);
 
                             Terminal terminal = GameObject.FindObjectOfType<Terminal>();
                             terminal.groupCredits += cred;
@@ -247,7 +249,8 @@ namespace LCRandomizerMod.Patches
                     case GiftBoxBehaviour.RemoveGroupCredits:
                         {
                             int cred = new System.Random().Next(1, 1001);
-                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=red>Your crew lost {0} credits! </color>", cred), -1);
+                            CustomUI.BroadcastMessage(String.Format("<color=red>Your crew lost {0} credits! </color>", cred), 2);
+                            //HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=red>Your crew lost {0} credits! </color>", cred), -1);
 
                             Terminal terminal = GameObject.FindObjectOfType<Terminal>();
                             terminal.groupCredits -= cred;
@@ -347,7 +350,7 @@ namespace LCRandomizerMod.Patches
                                 }
                                 else if (enemyAI != null)
                                 {
-                                    if (collider.gameObject.GetComponentInParent<SpringManAI>() != null || collider.gameObject.GetComponentInParent<PufferAI>() != null || collider.gameObject.GetComponentInParent<BlobAI>() != null || collider.gameObject.GetComponentInParent<JesterAI>() != null || collider.gameObject.GetComponentInParent<DressGirlAI>() != null) 
+                                    if (collider.gameObject.GetComponentInParent<SpringManAI>() != null || collider.gameObject.GetComponentInParent<PufferAI>() != null || collider.gameObject.GetComponentInParent<BlobAI>() != null || collider.gameObject.GetComponentInParent<JesterAI>() != null || collider.gameObject.GetComponentInParent<DressGirlAI>() != null || collider.gameObject.GetComponentInParent<ClaySurgeonAI>() != null) 
                                     {
                                         RandomizerModBase.mls.LogError("Killing enemy ai " + enemyAI.name + " WITH DESTROY");
                                         enemyAI.KillEnemyClientRpc(true);
@@ -375,20 +378,20 @@ namespace LCRandomizerMod.Patches
                                     goto Reroll;
                                 }
                             }
-                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=white>{0} has been saved by some unknown force. Casualties: {1} {2}.</color>", player.playerUsername, killCount.Count, killCount.Count > 1 ? "enemy" : "enemies"));
+                            CustomUI.BroadcastMessage(String.Format("<color=white>{0} has been saved by some unknown force. Casualties: {1} {2}.</color>", player.playerUsername, killCount.Count, killCount.Count > 1 ? "enemy" : "enemies"), 2);
+                            //HUDManager.Instance.AddTextToChatOnServer();
 
                             break;
                         }
                     case GiftBoxBehaviour.RecolorPlayer:
                         {
-                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=yellow>A bucket of paint has spilled on {0}</color>", player.playerUsername));
+                            CustomUI.BroadcastMessage(String.Format("<color=yellow>A bucket of paint has spilled on {0}</color>", player.playerUsername), 2);
                             RecolorPlayerSync(player);
                             break;
                         }
                     case GiftBoxBehaviour.DoubleHP:
                         {
-                            HUDManager.Instance.AddTextToChatOnServer(String.Format("<color=green>{0} is feeling vitalized.</color>", player.playerUsername));
-
+                            CustomUI.BroadcastMessage(String.Format("<color=green>{0} is feeling vitalized.</color>", player.playerUsername), 2);
                             FastBufferWriter writer = new FastBufferWriter(sizeof(ulong), Unity.Collections.Allocator.Temp, -1);
                             writer.WriteValueSafe<ulong>(player.playerClientId);
                             Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "PlayerHealthDoubled", writer, NetworkDelivery.Reliable);

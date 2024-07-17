@@ -4,19 +4,16 @@ using System;
 using System.Collections;
 using Unity.Netcode;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
-using System.Threading;
-using System.Data;
 
 namespace LCRandomizerMod.Patches
 {
     [HarmonyPatch(typeof(EntranceTeleport))]
     internal class EntranceTeleportPatch
     {
-        private enum FireExitBehaviour { ShowShipSafetyStatus, TeleportPlayerToShip, TempStaminaBoost, DropAllHeldItems, PermanentlyBlockExit, ReceiveCrewData, KillPlayer, TempBlindness  }
+        private enum FireExitBehaviour { ShowShipSafetyStatus, TeleportPlayerToShip, TempStaminaBoost, DropAllHeldItems, PermanentlyBlockExit, ReceiveCrewData, KillPlayer, TempBlindness }
+        private enum ShipSafetyState { Safe, Dangerous, Caution }
 
         [HarmonyPatch(nameof(EntranceTeleport.TeleportPlayer))]
         [HarmonyPrefix]
@@ -40,12 +37,15 @@ namespace LCRandomizerMod.Patches
             {
                 FireExitBehaviour[] behaviours = Enum.GetValues(typeof(FireExitBehaviour)) as FireExitBehaviour[];
 
-                //behaviours[new System.Random().Next(0, behaviours.Length)]
-                switch (FireExitBehaviour.ReceiveCrewData)
+                switch (behaviours[new System.Random().Next(0, behaviours.Length)])
                 {
                     case FireExitBehaviour.ShowShipSafetyStatus:
                         {
-                            GameNetworkManager.Instance.StartCoroutine(HighlightShipCoroutine());
+                            if (!RandomizerValues.entranceTPCoroutinePlaying)
+                            {
+                                RandomizerValues.entranceTPCoroutinePlaying = true;
+                                GameNetworkManager.Instance.StartCoroutine(ShowShipSafetyStatusCoroutine());
+                            }
                             break;
                         }
                     case FireExitBehaviour.TeleportPlayerToShip:
@@ -84,7 +84,7 @@ namespace LCRandomizerMod.Patches
                             break;
                         }
                     case FireExitBehaviour.ReceiveCrewData:
-                        { //TODO: ADD PLAYER IN DANGER INFO
+                        {
                             if (!RandomizerValues.entranceTPCoroutinePlaying)
                             {
                                 RandomizerValues.entranceTPCoroutinePlaying = true;
@@ -95,6 +95,7 @@ namespace LCRandomizerMod.Patches
                     case FireExitBehaviour.KillPlayer:
                         {
                             GameNetworkManager.Instance.localPlayerController.KillPlayer(GameNetworkManager.Instance.localPlayerController.velocityLastFrame, true, CauseOfDeath.Unknown);
+                            break;
                         }
                     case FireExitBehaviour.TempBlindness:
                         {
@@ -123,9 +124,72 @@ namespace LCRandomizerMod.Patches
         //    else return true;
         //}
 
-        public static IEnumerator HighlightShipCoroutine()
+        public static IEnumerator ShowShipSafetyStatusCoroutine()
         {
-            yield break;
+            CustomUI playerUI = GameNetworkManager.Instance.localPlayerController.gameObject.GetComponent<CustomUI>();
+
+            switch (GetShipSafety())
+            {
+                case ShipSafetyState.Safe:
+                    {
+                        playerUI.ShowLocalMessage("<color=blue>Ship Status</color>\n<color=green>Safe</color>", 3);
+                        RandomizerValues.entranceTPCoroutinePlaying = false;
+                        yield break;
+                    }
+                case ShipSafetyState.Caution:
+                    {
+                        playerUI.ShowLocalMessage("<color=blue>Ship Status</color>\n<color=yellow>Excercise caution</color>", 3);
+                        RandomizerValues.entranceTPCoroutinePlaying = false;
+                        yield break;
+                    }
+                case ShipSafetyState.Dangerous:
+                    {
+                        playerUI.ShowLocalMessage("<color=blue>Ship Status</color>\n<color=red>Dangerous</color>", 3);
+                        //playerUI.SetText();
+                        //playerUI.Show(true);
+                        //playerUI.FadeOut(3);
+                        RandomizerValues.entranceTPCoroutinePlaying = false;
+                        yield break;
+                    }
+            }
+        }
+
+        private static ShipSafetyState GetShipSafety()
+        {
+            Collider[] colliders = Physics.OverlapSphere(GameObject.FindObjectOfType<Terminal>().transform.position, 50f, 2621448, QueryTriggerInteraction.Collide);
+            List<EnemyAI> enemies = new List<EnemyAI>();
+            if (colliders.Length > 0)
+            {
+                foreach (Collider collider in colliders)
+                {
+                    EnemyAI enemyAI = collider.gameObject.GetComponentInParent<EnemyAI>();
+                    if (enemyAI != null && !enemyAI.isEnemyDead && !enemyAI.enemyType.isDaytimeEnemy)
+                    {
+                        RandomizerModBase.mls.LogError(enemyAI.enemyType.enemyName);
+                        if (!enemies.Contains(enemyAI))
+                        {
+                            enemies.Add(enemyAI);
+                        }
+                    }
+                }
+
+                if (enemies.Count == 1)
+                {
+                    return ShipSafetyState.Caution;
+                }
+                else if (enemies.Count > 1)
+                {
+                    return ShipSafetyState.Dangerous;
+                }
+                else
+                {
+                    return ShipSafetyState.Safe;
+                }
+            }
+            else
+            {
+                return ShipSafetyState.Safe;
+            }
         }
 
         public static IEnumerator GiveTemporaryStaminaBoost()
@@ -213,19 +277,21 @@ namespace LCRandomizerMod.Patches
             PlayerControllerB localPlayer = GameNetworkManager.Instance.localPlayerController;
             CustomUI playerUI = localPlayer.gameObject.GetComponent<CustomUI>();
 
-            Dictionary<string, bool[]> crewInfo = CollectCrewInfo();
+            //Dictionary<string, bool[]> crewInfo = CollectCrewInfo();
+            List<CrewInfo> crewInfo = CollectCrewInfo();
 
             StringBuilder sb = new StringBuilder();
 
-            foreach (KeyValuePair<string, bool[]> kvp in crewInfo)
+            foreach (CrewInfo member in crewInfo)
             {
-                RandomizerModBase.mls.LogError(kvp.Key + " " + kvp.Value[0] + " " + kvp.Value[1]);
+                //RandomizerModBase.mls.LogError(kvp.Key + " " + kvp.Value[0] + " " + kvp.Value[1]);
 
-                sb.Append(kvp.Key);
+                sb.Append(member.Name);
                 sb.Append(": ");
-                sb.Append(kvp.Value[0] ? "<color=red>DECEASED</color>" : "<color=green>ALIVE</color>");
+                sb.Append(member.IsDead ? "<color=red>DECEASED</color>" : "<color=green>ALIVE</color>");
                 sb.Append(", ");
-                sb.Append(kvp.Value[1] ? "IN BUILDING" : "OUTSIDE");
+                sb.Append(member.IsInsideFactory ? "IN BUILDING, " : "OUTSIDE, ");
+                sb.Append(member.EnemyCount > 1 ? "<color=red>IN DANGER</color>" : "<color=green>SAFE</color>");
                 sb.Append("\n");
             }
 
@@ -245,9 +311,9 @@ namespace LCRandomizerMod.Patches
             yield break;
         }
 
-        private static Dictionary<string, bool[]> CollectCrewInfo()
+        private static List<CrewInfo> CollectCrewInfo()
         {
-            Dictionary<string, bool[]> crewInfo = new Dictionary<string, bool[]>();
+            List<CrewInfo> crewInfo = new List<CrewInfo>();
 
             RandomizerModBase.mls.LogInfo("ALL PLAYER SCRIPTS: " + StartOfRound.Instance.allPlayerScripts.Length);
 
@@ -255,8 +321,7 @@ namespace LCRandomizerMod.Patches
             {
                 if (!crewmate.isPlayerControlled && !crewmate.isPlayerDead) continue;
 
-                bool[] boolData = { crewmate.isPlayerDead, crewmate.isInsideFactory };
-                crewInfo.Add(crewmate.playerUsername, boolData);
+                crewInfo.Add(new CrewInfo(crewmate.playerUsername, crewmate.isPlayerDead, crewmate.isInsideFactory, crewmate.transform.position));
             }
             RandomizerModBase.mls.LogInfo("Returning dict with " + crewInfo.Count + " entries");
             return crewInfo;
@@ -275,10 +340,6 @@ namespace LCRandomizerMod.Patches
             TimeOfDay.Instance.sunDirect.color = Color.black;
             float origPlaneValue = GameNetworkManager.Instance.localPlayerController.gameplayCamera.farClipPlane;
             GameNetworkManager.Instance.localPlayerController.gameplayCamera.farClipPlane = 60f;
-            //float origMeanFreePath = TimeOfDay.Instance.foggyWeather.parameters.meanFreePath;
-            //Color origMaterialMask = TimeOfDay.Instance.foggyWeather.parameters.materialMask.color;
-            //TimeOfDay.Instance.foggyWeather.parameters.meanFreePath = 10f;
-            //TimeOfDay.Instance.foggyWeather.parameters.materialMask.color = Color.black;
 
             int timer = 10;
             playerUI.SetText("Blindness: " + timer);
@@ -293,8 +354,6 @@ namespace LCRandomizerMod.Patches
             TimeOfDay.Instance.sunIndirect.color = origIndirectColor;
             TimeOfDay.Instance.sunDirect.color = origDirectColor;
             GameNetworkManager.Instance.localPlayerController.gameplayCamera.farClipPlane = origPlaneValue;
-            //TimeOfDay.Instance.foggyWeather.parameters.meanFreePath = origMeanFreePath;
-            //TimeOfDay.Instance.foggyWeather.parameters.materialMask.color = origMaterialMask;
 
             playerUI.FadeOut();
             RandomizerValues.entranceTPCoroutinePlaying = false;

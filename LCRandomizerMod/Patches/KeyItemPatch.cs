@@ -4,8 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Unity.Netcode;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace LCRandomizerMod.Patches
 {

@@ -74,7 +74,6 @@ namespace LCRandomizerMod.Patches
                     {
                         RandomizerValues.keysToLoad.Add("flashlightDict");
                     }
-
                 }
                 catch (Exception ex)
                 {

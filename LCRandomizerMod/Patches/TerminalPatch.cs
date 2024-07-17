@@ -32,12 +32,11 @@ namespace LCRandomizerMod.Patches
                     while (num == 11 || num == 3)
                     {
                         num = new System.Random().Next(1, 13);
+                    }
 
-                        if (TimeOfDay.Instance.daysUntilDeadline < 1)
-                        {
-                            num = 3;
-                            break;
-                        }
+                    if (TimeOfDay.Instance.daysUntilDeadline < 1) //--> inside while
+                    {
+                        num = 3;
                     }
 
                     RandomizerModBase.mls.LogError("TIME UNTIL DEADLINE: " + TimeOfDay.Instance.timeUntilDeadline + " DAYS UNTIL DEADLINE: " + TimeOfDay.Instance.daysUntilDeadline + " switching to level: " + (num == 3 ? "company" : num.ToString()));
@@ -112,7 +111,10 @@ namespace LCRandomizerMod.Patches
             //&& StartOfRound.Instance.inShipPhase && GameNetworkManager.Instance.localPlayerController.inTerminalMenu
             if (RandomizerValues.mapRandomizedInTerminal && __instance.terminalInUse)
             {
-                HUDManager.Instance.AddTextToChatOnServer("<color=red>Terminal locked due to level randomization. It will unlock once you land.</color>", -1);
+                CustomUI playerUI = GameNetworkManager.Instance.localPlayerController.gameObject.GetComponent<CustomUI>();
+                playerUI.ShowLocalMessage("<color=red>The terminal needs to recalculate moon routes. This process takes 1 workday.</color>");
+
+                //HUDManager.Instance.AddTextToChatOnServer("<color=red>Terminal locked due to level randomization. It will unlock once you land.</color>", -1);
                 GameNetworkManager.Instance.localPlayerController.inTerminalMenu = false;
                 __instance.QuitTerminal();
             }
@@ -235,7 +237,7 @@ namespace LCRandomizerMod.Patches
                 component.isInElevator = true;
                 component.isInHangarShipRoom = true;
                 component.isInsideFactory = false;
-                component.wasInElevatorLastFrame = false;
+                component.parentedToElevatorLastFrame = false;
                 StartOfRound.Instance.SetPlayerObjectExtrapolate(false);
                 component.TeleportPlayer(GetPlayerSpawnPosition((int)component.playerClientId, true), false, 0f, false, true);
                 component.setPositionOfDeadPlayer = false;
