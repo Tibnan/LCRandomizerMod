@@ -27,7 +27,7 @@ namespace LCRandomizerMod
 
         //StartOfRoundPatch
 
-        public static Vector3 defaultPlayerScale;
+        public static Vector3 defaultPlayerScale = new Vector3(1f, 1f, 1f);
         public static uint defaultPlayerMaskLayer;
         public const float defaultPlayerPitch = 1f;
         public static Vector3 defaultPlayerHeadScale;
@@ -40,6 +40,7 @@ namespace LCRandomizerMod
         public static float movementSpeedRand;
         public static float sinkMultiplierRand;
         public static int currentMaxHP;
+        public static Dictionary<ulong, Vector3> playerScaleDict = new Dictionary<ulong, Vector3>();
 
         public static int quotaRand;
         public static int deadlineRand;
@@ -153,6 +154,7 @@ namespace LCRandomizerMod
         //FlowermanAIPatch
 
         public static Dictionary<ulong, float> flowermanSpeedsDict = new Dictionary<ulong, float>();
+        public static Dictionary<FlowermanAI, Coroutine> slowedFlowermen = new Dictionary<FlowermanAI, Coroutine>();
 
         //FlowermanAIPatch
 
@@ -266,6 +268,25 @@ namespace LCRandomizerMod
 
         //EntranceTeleportPatch
 
+        //VehicleControllerPatch
+
+        public static RandomCarProperties randomCarProperties;
+        public static bool randomizedCar = false;
+
+        //VehicleControllerPatch
+
+        //BushWolfEnemyPatch
+
+        public static Dictionary<ulong, float> wolfSpeedDict = new Dictionary<ulong, float>();
+
+        //BushWolfEnemyPatch
+
+        //ClaySurgeonAIPatch
+
+        public static Dictionary<ulong, float> surgeonSpeedDict = new Dictionary<ulong, float>();
+
+        //ClaySurgeonAIPatch
+
         public static void ReleaseResources(bool deleteAll)
         {
             dogSpeedsDict.Clear();
@@ -290,6 +311,10 @@ namespace LCRandomizerMod
             spawnedMechScales.Clear();
             itemResizeDict.Clear();
             blockedFireExits.Clear();
+            playerScaleDict.Clear();
+            slowedFlowermen.Clear();
+            wolfSpeedDict.Clear();
+            surgeonSpeedDict.Clear();
 
             if (deleteAll)
             {
@@ -309,6 +334,8 @@ namespace LCRandomizerMod
                 connectCoroutinePlaying = false;
                 spawnedMechCount = 0;
                 entranceTPCoroutinePlaying = false;
+                randomizedCar = false;
+                randomCarProperties = null;
             }
         }
     }

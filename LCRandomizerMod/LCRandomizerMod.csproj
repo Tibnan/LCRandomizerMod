@@ -82,6 +82,7 @@
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="UnityEngine.TextCoreFontEngineModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.UIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
@@ -94,14 +95,17 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CrewInfo.cs" />
     <Compile Include="CustomUI.cs" />
     <Compile Include="ICustomValue.cs" />
     <Compile Include="PandorasBoxItem.cs" />
     <Compile Include="Patches\BaboonBirdAIPatch.cs" />
     <Compile Include="Patches\BlobAIPatch.cs" />
     <Compile Include="Patches\BoomboxItemPatch.cs" />
+    <Compile Include="Patches\BushWolfEnemyPatch.cs" />
     <Compile Include="Patches\ButlerAIPatch.cs" />
     <Compile Include="Patches\CentipedeAIPatch.cs" />
+    <Compile Include="Patches\ClaySurgeonAIPatch.cs" />
     <Compile Include="Patches\CrawlerAIPatch.cs" />
     <Compile Include="Patches\DeadBodyInfoPatch.cs" />
     <Compile Include="Patches\DoublewingAIPatch.cs" />
@@ -127,6 +131,7 @@
     <Compile Include="Patches\PreInitSceneScriptPatch.cs" />
     <Compile Include="Patches\PufferAIPatch.cs" />
     <Compile Include="Patches\RadMechAIPatch.cs" />
+    <Compile Include="Patches\RadMechMissilePatch.cs" />
     <Compile Include="Patches\RedLocustBeesPatch.cs" />
     <Compile Include="Patches\RoundManagerPatch.cs" />
     <Compile Include="Patches\SandSpiderAIPatch.cs" />
@@ -135,16 +140,20 @@
     <Compile Include="Patches\ShotgunItemPatch.cs" />
     <Compile Include="Patches\ShovelPatch.cs" />
     <Compile Include="Patches\SpikeRoofTrapPatch.cs" />
+    <Compile Include="Patches\SprayPaintItemPatch.cs" />
     <Compile Include="Patches\SpringManAIPatch.cs" />
     <Compile Include="Patches\StartOfRoundPatch.cs" />
     <Compile Include="Patches\TerminalPatch.cs" />
     <Compile Include="Patches\TetraChemicalItemPatch.cs" />
     <Compile Include="Patches\TimeOfDayPatch.cs" />
     <Compile Include="Patches\TurretPatch.cs" />
+    <Compile Include="Patches\VehicleControllerPatch.cs" />
     <Compile Include="Patches\WhoopieCushionItemPatch.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RandomCarProperties.cs" />
     <Compile Include="RandomizerValues.cs" />
+    <Compile Include="WeedKillerFlowermanInteract.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
