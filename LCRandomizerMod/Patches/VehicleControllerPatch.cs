@@ -4,6 +4,7 @@ using System;
 using UnityEngine;
 using GameNetcodeStuff;
 using System.Collections;
+using LethalLib.Modules;
 
 namespace LCRandomizerMod.Patches
 {
@@ -149,9 +150,33 @@ namespace LCRandomizerMod.Patches
             }
         }
 
+        [HarmonyPatch(nameof(VehicleController.OnPassengerExit))]
+        [HarmonyPrefix]
+        public static void PassengerExitResizeHandler(VehicleController __instance)
+        {
+            if (!__instance.localPlayerInPassengerSeat) return;
+
+            PlayerControllerB player = GameNetworkManager.Instance.localPlayerController;
+            if (NetworkManager.Singleton.IsServer)
+            {
+                RandomizerModBase.mls.LogWarning("Running server side logic...");
+                SendPlayerExitToClients(player);
+                GameNetworkManager.Instance.StartCoroutine(ResizeCoroutine(player, RandomizerValues.playerScaleDict.GetValueSafe((ulong)player.playerClientId)));
+            }
+            else
+            {
+                RandomizerModBase.mls.LogWarning("Running client side logic...");
+                FastBufferWriter writer = new FastBufferWriter(sizeof(ulong), Unity.Collections.Allocator.Temp, -1);
+
+                writer.WriteValueSafe<ulong>((ulong)player.playerClientId);
+
+                NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "ServerReceivesPlayerExit", 0UL, writer, NetworkDelivery.Reliable);
+            }
+        } 
+
         private static IEnumerator ResizeCoroutine(PlayerControllerB player, Vector3 scale)
         {
-            yield return new WaitForSeconds(3f); //0.3f
+            yield return new WaitForSeconds(0.3f); //0.3f
             RandomizerModBase.mls.LogError("PLAYER CLIENT ID!!! " + player.playerClientId);
             player.transform.localScale = scale;
             RandomizerModBase.mls.LogError("Resized to: " + player.transform.localScale);

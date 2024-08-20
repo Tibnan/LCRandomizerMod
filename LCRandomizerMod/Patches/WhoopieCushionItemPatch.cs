@@ -7,7 +7,7 @@ namespace LCRandomizerMod.Patches
     [HarmonyPatch(typeof(WhoopieCushionItem))]
     internal class WhoopieCushionItemPatch
     {
-        [HarmonyPatch(nameof(WhoopieCushionItem.FartWithDebounce))]
+        [HarmonyPatch(nameof(WhoopieCushionItem.Fart))]
         [HarmonyPrefix]
         public static void PitchOverride(WhoopieCushionItem __instance)
         {

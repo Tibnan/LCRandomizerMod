@@ -8,6 +8,8 @@ namespace LCRandomizerMod.Patches
     [HarmonyPatch(typeof(BushWolfEnemy))]
     internal class BushWolfEnemyPatch
     {
+        //DONT FORGET TO UNCOMMENT LINES WHEN THIS GETS REIMPLEMENTED
+
         [HarmonyPatch(nameof(BushWolfEnemy.Start))]
         [HarmonyPostfix]
         public static void RandomizeWolf(BushWolfEnemy __instance)
@@ -21,7 +23,7 @@ namespace LCRandomizerMod.Patches
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
                 __instance.enemyHP = health;
 
-                RandomizerValues.wolfSpeedDict.Add(__instance.NetworkObjectId, speed);
+                //RandomizerValues.wolfSpeedDict.Add(__instance.NetworkObjectId, speed);
 
                 FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 2 + sizeof(int), Unity.Collections.Allocator.Temp, -1);
 
@@ -40,7 +42,7 @@ namespace LCRandomizerMod.Patches
         {
             if (!__instance.isEnemyDead && !__instance.inSpecialAnimation)
             {
-                __instance.agent.speed = RandomizerValues.wolfSpeedDict.GetValueSafe(__instance.NetworkObjectId);
+                //__instance.agent.speed = RandomizerValues.wolfSpeedDict.GetValueSafe(__instance.NetworkObjectId);
             }
         }
 
@@ -58,7 +60,7 @@ namespace LCRandomizerMod.Patches
                 reader.ReadValueSafe<float>(out speed);
                 reader.ReadValueSafe<int>(out health);
 
-                RandomizerValues.wolfSpeedDict.Add(id, speed);
+                //RandomizerValues.wolfSpeedDict.Add(id, speed);
 
                 NetworkObject networkObject = NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
                 BushWolfEnemy wolf = networkObject.gameObject.GetComponentInChildren<BushWolfEnemy>();

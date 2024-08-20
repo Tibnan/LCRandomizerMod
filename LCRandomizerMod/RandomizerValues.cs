@@ -1,4 +1,4 @@
-﻿using JetBrains.Annotations;
+﻿using Unity.Netcode;
 using LCRandomizerMod.Patches;
 using System;
 using System.Collections.Generic;
@@ -228,7 +228,7 @@ namespace LCRandomizerMod
 
         //FlashlightItemPatch
 
-        public static Dictionary<ulong, Color> flashlightColorDict = new Dictionary<ulong, Color>();
+        public static Dictionary<ulong, RFlashlightProperties> flashlightPropertyDict = new Dictionary<ulong, RFlashlightProperties>();
 
         //FlashlightItemPatch
 
@@ -277,7 +277,7 @@ namespace LCRandomizerMod
 
         //BushWolfEnemyPatch
 
-        public static Dictionary<ulong, float> wolfSpeedDict = new Dictionary<ulong, float>();
+        //public static Dictionary<ulong, float> wolfSpeedDict = new Dictionary<ulong, float>();
 
         //BushWolfEnemyPatch
 
@@ -286,6 +286,24 @@ namespace LCRandomizerMod
         public static Dictionary<ulong, float> surgeonSpeedDict = new Dictionary<ulong, float>();
 
         //ClaySurgeonAIPatch
+
+        //CaveDwellerAIPatch
+
+        public static Dictionary<ulong, float> babySpeedDict = new Dictionary<ulong, float>();
+
+        //CaveDwellerAIPatch
+
+        //MineshaftElevatorControllerPatch
+
+        public static bool elevatorMalfunctioned = false;
+
+        //MineshaftElevatorControllerPatch
+
+        //ClockPropPatch
+
+        public static Dictionary<ulong, int> clockSecondsToAdd = new Dictionary<ulong, int>();
+
+        //ClockPropPatch
 
         public static void ReleaseResources(bool deleteAll)
         {
@@ -313,8 +331,9 @@ namespace LCRandomizerMod
             blockedFireExits.Clear();
             playerScaleDict.Clear();
             slowedFlowermen.Clear();
-            wolfSpeedDict.Clear();
+            //wolfSpeedDict.Clear();
             surgeonSpeedDict.Clear();
+            babySpeedDict.Clear();
 
             if (deleteAll)
             {
@@ -322,7 +341,7 @@ namespace LCRandomizerMod
                 shovelDamageDict.Clear();
                 jetpackPropertiesDict.Clear();
                 boomboxPitchDict.Clear();
-                flashlightColorDict.Clear();
+                flashlightPropertyDict.Clear();
                 superchargedKeys.Clear();
                 chemicalEffectsDict.Clear();
                 coroutineStorage.Clear();
@@ -336,6 +355,7 @@ namespace LCRandomizerMod
                 entranceTPCoroutinePlaying = false;
                 randomizedCar = false;
                 randomCarProperties = null;
+                elevatorMalfunctioned = false;
             }
         }
     }

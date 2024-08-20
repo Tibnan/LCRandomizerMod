@@ -7,6 +7,7 @@ using System.Reflection;
 using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.HID;
 
 namespace LCRandomizerMod.Patches
 {
@@ -161,7 +162,7 @@ namespace LCRandomizerMod.Patches
                                     }
                                 case "flashlightDict":
                                     {
-                                        RandomizerValues.flashlightColorDict = ES3.Load<Dictionary<ulong, Color>>(key, GameNetworkManager.Instance.currentSaveFileName);
+                                        RandomizerValues.flashlightPropertyDict = ES3.Load<Dictionary<ulong, RFlashlightProperties>>(key, GameNetworkManager.Instance.currentSaveFileName);
                                         break;
                                     }
                                 case "tzpChemDict":
@@ -334,6 +335,8 @@ namespace LCRandomizerMod.Patches
                 NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesWolfStats", new CustomMessagingManager.HandleNamedMessageDelegate(BushWolfEnemyPatch.ClientSetWolfStats));
                 RandomizerModBase.mls.LogInfo("Tibnan.lcrandomizermod_" + "ClientReceivesSurgeonData");
                 NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSurgeonData", new CustomMessagingManager.HandleNamedMessageDelegate(ClaySurgeonAIPatch.SetSurgeonData));
+                RandomizerModBase.mls.LogInfo("Registering baby handler: " + "ClientReceivesBabyStat");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBabyStat", new CustomMessagingManager.HandleNamedMessageDelegate(CaveDwellerAIPatch.ClientSetBabyStats));
 
                 StartOfRoundPatch.ResetPlayers();
 
@@ -399,7 +402,6 @@ namespace LCRandomizerMod.Patches
             if (RandomizerValues.blockDespawn)
             {
                 RandomizerValues.blockDespawn = false;
-                //RandomizerModBase.mls.LogError("UNBLOCKING DESPAWN");
                 return false;
             }
             else
@@ -415,6 +417,7 @@ namespace LCRandomizerMod.Patches
             RandomizerModBase.mls.LogInfo("Subscribing to mod events.");
             InputActionAsset actions = IngamePlayerSettings.Instance.playerInput.actions;
             actions.FindAction("Interact").performed += ShipTeleporterPatch.CheckForTeleporterLOS;
+            actions.FindAction("Jump", false).performed += MineshaftElevatorControllerPatch.ResetElevatorSpeedOnJump;
         }
 
         [HarmonyPatch("OnDisable")]
@@ -424,6 +427,7 @@ namespace LCRandomizerMod.Patches
             RandomizerModBase.mls.LogInfo("Unsubscribing from mod events.");
             InputActionAsset actions = IngamePlayerSettings.Instance.playerInput.actions;
             actions.FindAction("Interact").performed -= ShipTeleporterPatch.CheckForTeleporterLOS;
+            actions.FindAction("Jump", false).performed -= MineshaftElevatorControllerPatch.ResetElevatorSpeedOnJump;
         }
 
         [HarmonyPatch(nameof(PlayerControllerB.DiscardHeldObject))]

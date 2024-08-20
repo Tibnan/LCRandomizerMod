@@ -100,13 +100,13 @@ namespace LCRandomizerMod
                 if (hit.transform.GetComponent<Terminal>() != null)
                 {
                     this.context = LookContext.InTerminalMenu;
-                    this.SetText("<color=white>Available Commands\nRandom\nRevive</color>", false);
+                    this.SetText(RandomizerValues.mapRandomizedInTerminal ? "<color=red>Terminal Recalculating...</color>" : "<color=white>Available Commands\nRandom\nRevive</color>", overrideUpdate: false);
                     this.Show(true);
                 }
                 else if (hit.transform.GetComponentInParent<ShipTeleporter>() != null && this.ownerPlayer.currentlyHeldObjectServer?.gameObject?.GetComponent<LungProp>() != null)
                 {
                     this.context = LookContext.InteractShipTP;
-                    this.SetText("<color=white>Insert Apparatus</color>", false);
+                    this.SetText("<color=white>Insert Apparatus</color>", overrideUpdate: false);
                     this.Show(true);
                 }
             }

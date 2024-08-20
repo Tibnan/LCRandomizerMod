@@ -112,7 +112,7 @@ namespace LCRandomizerMod.Patches
             if (RandomizerValues.mapRandomizedInTerminal && __instance.terminalInUse)
             {
                 CustomUI playerUI = GameNetworkManager.Instance.localPlayerController.gameObject.GetComponent<CustomUI>();
-                playerUI.ShowLocalMessage("<color=red>The terminal needs to recalculate moon routes. This process takes 1 workday.</color>");
+                playerUI.ShowLocalMessage("<color=red>The terminal needs to recalculate moon routes. This process takes 1 workday.</color>", 3);
 
                 //HUDManager.Instance.AddTextToChatOnServer("<color=red>Terminal locked due to level randomization. It will unlock once you land.</color>", -1);
                 GameNetworkManager.Instance.localPlayerController.inTerminalMenu = false;
