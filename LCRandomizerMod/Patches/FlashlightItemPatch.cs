@@ -3,8 +3,6 @@ using UnityEngine;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Unity.Netcode;
 
 namespace LCRandomizerMod.Patches
@@ -16,21 +14,25 @@ namespace LCRandomizerMod.Patches
         [HarmonyPostfix]
         public static void ChangeFlashlightColor(FlashlightItem __instance)
         {
-            if (!RandomizerValues.flashlightColorDict.ContainsKey(__instance.NetworkObjectId) && Unity.Netcode.NetworkManager.Singleton.IsServer)
+            if (!RandomizerValues.flashlightPropertyDict.ContainsKey(__instance.NetworkObjectId) && Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
-                float r = new System.Random().Next(0, 200) / 100f;
-                float g = new System.Random().Next(0, 200) / 100f;
-                float b = new System.Random().Next(0, 200) / 100f;
+                RFlashlightProperties properties = new RFlashlightProperties();
 
-                __instance.flashlightBulb.color = new Color(r, g, b);
+                RandomizerValues.flashlightPropertyDict.Add(__instance.NetworkObjectId, properties);
 
-                RandomizerValues.flashlightColorDict.Add(__instance.NetworkObjectId, __instance.flashlightBulb.color);
+                __instance.flashlightBulb.color = properties.BulbColor;
+                __instance.flashlightBulb.intensity = properties.Intensity;
+                __instance.mainObjectRenderer.material.color = properties.FlashlightBodyColor;
 
-                FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
+                FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 7, Unity.Collections.Allocator.Temp, -1);
                 writer.WriteValueSafe<ulong>(__instance.NetworkObjectId);
-                writer.WriteValueSafe<float>(r);
-                writer.WriteValueSafe<float>(g);
-                writer.WriteValueSafe<float>(b);
+                writer.WriteValueSafe<float>(properties.BulbColor.r);
+                writer.WriteValueSafe<float>(properties.BulbColor.g);
+                writer.WriteValueSafe<float>(properties.BulbColor.b);
+                writer.WriteValueSafe<float>(properties.Intensity);
+                writer.WriteValueSafe<float>(properties.FlashlightBodyColor.r);
+                writer.WriteValueSafe<float>(properties.FlashlightBodyColor.g);
+                writer.WriteValueSafe<float>(properties.FlashlightBodyColor.b);
 
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesFlashlightColor", writer, NetworkDelivery.Reliable);
             }
@@ -41,35 +43,41 @@ namespace LCRandomizerMod.Patches
             if (!Unity.Netcode.NetworkManager.Singleton.IsServer)
             {
                 ulong id;
-                float r;
-                float g;
-                float b;
 
                 reader.ReadValueSafe<ulong>(out id);
 
-                if (RandomizerValues.flashlightColorDict.ContainsKey(id)) return;
+                if (RandomizerValues.flashlightPropertyDict.ContainsKey(id)) return;
 
-                reader.ReadValueSafe<float>(out r);
-                reader.ReadValueSafe<float>(out g);
-                reader.ReadValueSafe<float>(out b);
+                float bR, bG, bB, intensity, fR, fG, fB;
+
+                reader.ReadValueSafe<float>(out bR);
+                reader.ReadValueSafe<float>(out bG);
+                reader.ReadValueSafe<float>(out bB);
+                reader.ReadValueSafe<float>(out intensity);
+                reader.ReadValueSafe<float>(out fR);
+                reader.ReadValueSafe<float>(out fB);
+                reader.ReadValueSafe<float>(out fG);
 
                 NetworkObject networkObject = Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id];
                 FlashlightItem flashlight = networkObject.gameObject.GetComponentInChildren<FlashlightItem>();
+                RFlashlightProperties properties = new RFlashlightProperties(new Color(bR, bG, bB), new Color (fR, fG, fB), intensity);
 
-                flashlight.flashlightBulb.color = new Color(r, g, b);
+                RandomizerValues.flashlightPropertyDict.Add(id, properties);
 
-                RandomizerValues.flashlightColorDict.Add(id, flashlight.flashlightBulb.color);
+                flashlight.flashlightBulb.color = properties.BulbColor;
+                flashlight.flashlightBulb.intensity = properties.Intensity;
+                flashlight.mainObjectRenderer.material.color = properties.FlashlightBodyColor;
             }
         }
 
         public void SaveOnExit()
         {
-            if (RandomizerValues.flashlightColorDict.Count > 0)
+            if (RandomizerValues.flashlightPropertyDict.Count > 0)
             {
-                RandomizerModBase.mls.LogWarning(String.Format("Saving {0} flashlight entries", RandomizerValues.flashlightColorDict.Count));
+                RandomizerModBase.mls.LogWarning(String.Format("Saving {0} flashlight entries", RandomizerValues.flashlightPropertyDict.Count));
                 try
                 {
-                    ES3.Save("flashlightDict", RandomizerValues.flashlightColorDict, GameNetworkManager.Instance.currentSaveFileName);
+                    ES3.Save("flashlightDict", RandomizerValues.flashlightPropertyDict, GameNetworkManager.Instance.currentSaveFileName);
                     if (!RandomizerValues.keysToLoad.Contains("flashlightDict"))
                     {
                         RandomizerValues.keysToLoad.Add("flashlightDict");
@@ -88,14 +96,15 @@ namespace LCRandomizerMod.Patches
 
         public void ReloadStats()
         {
-            if (RandomizerValues.flashlightColorDict.Count > 0)
+            if (RandomizerValues.flashlightPropertyDict.Count > 0)
             {
                 int idx = 0;
-                RandomizerModBase.mls.LogInfo(String.Format("Reloading {0} flashlight color from dictionary. ", RandomizerValues.flashlightColorDict.Count));
-                List<Color> temp = RandomizerValues.flashlightColorDict.Values.ToList();
-                RandomizerValues.flashlightColorDict.Clear();
+                RandomizerModBase.mls.LogInfo(String.Format("Reloading {0} flashlight color from dictionary. ", RandomizerValues.flashlightPropertyDict.Count));
+                List<RFlashlightProperties> temp = RandomizerValues.flashlightPropertyDict.Values.ToList();
+                RandomizerValues.flashlightPropertyDict.Clear();
 
                 List<UnityEngine.Object> flashlightsInLevel = GameObject.FindObjectsByType(typeof(FlashlightItem), FindObjectsSortMode.None).ToList();
+                RandomizerModBase.mls.LogError(flashlightsInLevel.Count);
 
                 foreach (UnityEngine.Object obj in flashlightsInLevel)
                 {
@@ -105,9 +114,12 @@ namespace LCRandomizerMod.Patches
 
                     if (idx >= temp.Count) break;
 
-                    flashlight.flashlightBulb.color = temp.ElementAt(idx);
+                    RFlashlightProperties properties = temp.ElementAt(idx);
+                    flashlight.flashlightBulb.color = properties.BulbColor;
+                    flashlight.flashlightBulb.intensity = properties.Intensity;
+                    flashlight.mainObjectRenderer.material.color = properties.FlashlightBodyColor;
 
-                    RandomizerValues.flashlightColorDict.Add(flashlight.NetworkObjectId, flashlight.flashlightBulb.color);
+                    RandomizerValues.flashlightPropertyDict.Add(flashlight.NetworkObjectId, properties);
                     idx++;
                 }
 
@@ -121,13 +133,17 @@ namespace LCRandomizerMod.Patches
         
         public void SyncStatsWithClients()
         {
-            foreach (KeyValuePair<ulong, Color> pair in RandomizerValues.flashlightColorDict)
+            foreach (KeyValuePair<ulong, RFlashlightProperties> pair in RandomizerValues.flashlightPropertyDict)
             {
-                FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 3, Unity.Collections.Allocator.Temp, -1);
+                FastBufferWriter writer = new FastBufferWriter(sizeof(ulong) + sizeof(float) * 7, Unity.Collections.Allocator.Temp, -1);
                 writer.WriteValueSafe<ulong>(pair.Key);
-                writer.WriteValueSafe<float>(pair.Value.r);
-                writer.WriteValueSafe<float>(pair.Value.g);
-                writer.WriteValueSafe<float>(pair.Value.b);
+                writer.WriteValueSafe<float>(pair.Value.BulbColor.r);
+                writer.WriteValueSafe<float>(pair.Value.BulbColor.g);
+                writer.WriteValueSafe<float>(pair.Value.BulbColor.b);
+                writer.WriteValueSafe<float>(pair.Value.Intensity);
+                writer.WriteValueSafe<float>(pair.Value.FlashlightBodyColor.r);
+                writer.WriteValueSafe<float>(pair.Value.FlashlightBodyColor.g);
+                writer.WriteValueSafe<float>(pair.Value.FlashlightBodyColor.b);
 
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesFlashlightColor", writer, NetworkDelivery.Reliable);
             }

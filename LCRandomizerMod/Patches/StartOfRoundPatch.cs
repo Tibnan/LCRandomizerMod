@@ -468,7 +468,7 @@ namespace LCRandomizerMod.Patches
             }
             dictsToRemove.Clear();
 
-            foreach (ulong id in RandomizerValues.flashlightColorDict.Keys)
+            foreach (ulong id in RandomizerValues.flashlightPropertyDict.Keys)
             {
                 if (!Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || !Unity.Netcode.NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
                 {
@@ -478,7 +478,7 @@ namespace LCRandomizerMod.Patches
 
             foreach (ulong id in dictsToRemove)
             {
-                RandomizerValues.flashlightColorDict.Remove(id);
+                RandomizerValues.flashlightPropertyDict.Remove(id);
             }
             dictsToRemove.Clear();
 
@@ -519,6 +519,20 @@ namespace LCRandomizerMod.Patches
             {
                 RandomizerValues.teleporterCooldowns.Remove(!teleporters[0].isInverseTeleporter);
             }
+
+            foreach (ulong id in RandomizerValues.clockSecondsToAdd.Keys)
+            {
+                if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.clockSecondsToAdd.Remove(id);
+            }
+            dictsToRemove.Clear();
         }
 
         public static void LoadAudioDict(ulong _, FastBufferReader __)
