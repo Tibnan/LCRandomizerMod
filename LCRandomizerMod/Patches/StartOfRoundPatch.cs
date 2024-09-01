@@ -155,22 +155,6 @@ namespace LCRandomizerMod.Patches
                     GameNetworkManager.Instance.localPlayerController.DamagePlayer(0, true, false, CauseOfDeath.Unknown, 0, false);
                 }
 
-                //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
-
-                //FastBufferWriter fastBufferPitchWriter = new FastBufferWriter(sizeof(float) * 4, Unity.Collections.Allocator.Temp, -1);
-                //float[] pitchValues = new float[4];
-                //for (int i = 0; i < 4; i++)
-                //{
-                //    pitchValues[i] = Convert.ToSingle(new System.Random().Next(5, 30)) / 10;
-                //    fastBufferPitchWriter.WriteValueSafe<float>(pitchValues[i]);
-                //    SoundManager.Instance.SetPlayerPitch(pitchValues[i], i);
-                //}
-
-                //Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesPitchData", fastBufferPitchWriter, NetworkDelivery.Reliable);
-                //fastBufferPitchWriter.Dispose();
-
-                //SET PLAYER PITCH W/ NETWORKING, DONT TOUCH IT CUZ IT WORKS
-
                 for (int i = 0; i < Unity.Netcode.NetworkManager.Singleton.ConnectedClientsList.Count; i++)
                 {
 
@@ -204,7 +188,6 @@ namespace LCRandomizerMod.Patches
         public static void ResetPlayers()
         {
             RandomizerValues.ReleaseResources(deleteAll: false);
-            RandomizerValues.spawnedMechCount = 0;
             RandomizerValues.mapRandomizedInTerminal = false;
             RandomizerValues.spawnedMechScales.Clear();
 
@@ -531,6 +514,20 @@ namespace LCRandomizerMod.Patches
             foreach (ulong id in dictsToRemove)
             {
                 RandomizerValues.clockSecondsToAdd.Remove(id);
+            }
+            dictsToRemove.Clear();
+
+            foreach (ulong id in RandomizerValues.customGLids.Keys)
+            {
+                if (!NetworkManager.Singleton.SpawnManager.SpawnedObjects.ContainsKey(id) || NetworkManager.Singleton.SpawnManager.SpawnedObjects[id].GetComponentInChildren<GrabbableObject>().isInShipRoom)
+                {
+                    dictsToRemove.Add(id);
+                }
+            }
+
+            foreach (ulong id in dictsToRemove)
+            {
+                RandomizerValues.customGLids.Remove(id);
             }
             dictsToRemove.Clear();
         }

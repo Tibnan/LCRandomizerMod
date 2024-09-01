@@ -119,6 +119,10 @@ namespace LCRandomizerMod.Patches
                 RandomizerModBase.mls.LogInfo("Registering entrance tp handler: " + "ServerBlockExit");
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerBlockExit", new CustomMessagingManager.HandleNamedMessageDelegate(EntranceTeleportPatch.ServerBlockExitAndSync));
                 Unity.Netcode.NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesPlayerExit", new CustomMessagingManager.HandleNamedMessageDelegate(VehicleControllerPatch.ServerHandlePlayerExit));
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerUnstuckElevator", new CustomMessagingManager.HandleNamedMessageDelegate(MineshaftElevatorControllerPatch.ServerUnstuckElevator));
+                RandomizerModBase.mls.LogInfo("Registering garbage lid handlers: " + "ServerReceivesLidHPSyncRQ");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesLidHPSyncRQ", new CustomMessagingManager.HandleNamedMessageDelegate(LidBehaviorCustom.SendReceivedHPToClients));
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ServerReceivesLidBrokenSyncRQ", new CustomMessagingManager.HandleNamedMessageDelegate(LidBehaviorCustom.ServerHandleLidBroken));
 
                 if (ES3.FileExists(GameNetworkManager.Instance.currentSaveFileName))
                 {
@@ -136,6 +140,7 @@ namespace LCRandomizerMod.Patches
                             goto ResetAndEnd;
                         }
 
+                        RandomizerValues.startupInitializing = true;
                         foreach (string key in RandomizerValues.keysToLoad)
                         {
                             switch (key)
@@ -186,6 +191,11 @@ namespace LCRandomizerMod.Patches
                                         RandomizerValues.randomizedCar = true;
                                         break;
                                     }
+                                case "glidCustom":
+                                    {
+                                        RandomizerValues.customGLids = ES3.Load<Dictionary<ulong, LidSaveData>>(key, GameNetworkManager.Instance.currentSaveFileName);
+                                        break;
+                                    }
                             }
                         }
                         RandomizerModBase.mls.LogInfo("Loaded dictionaries.");
@@ -211,6 +221,7 @@ namespace LCRandomizerMod.Patches
 
                 ResetAndEnd:
                 StartOfRoundPatch.ResetPlayers();
+                RandomizerValues.startupInitializing = false;
             }
             else
             {
@@ -337,6 +348,15 @@ namespace LCRandomizerMod.Patches
                 NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSurgeonData", new CustomMessagingManager.HandleNamedMessageDelegate(ClaySurgeonAIPatch.SetSurgeonData));
                 RandomizerModBase.mls.LogInfo("Registering baby handler: " + "ClientReceivesBabyStat");
                 NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesBabyStat", new CustomMessagingManager.HandleNamedMessageDelegate(CaveDwellerAIPatch.ClientSetBabyStats));
+                RandomizerModBase.mls.LogInfo("Registering elevator handlers: " + "ElevatorHasMalfunctioned");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ElevatorHasMalfunctioned", new CustomMessagingManager.HandleNamedMessageDelegate(MineshaftElevatorControllerPatch.ClientStopElevatorOnServerMsg));
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ElevatorHasBeenUnstuck", new CustomMessagingManager.HandleNamedMessageDelegate(MineshaftElevatorControllerPatch.ClientUnstuckElevator));
+                RandomizerModBase.mls.LogInfo("Registering garbage lid handlers: " + "ClientReceivesLidHPSync");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesLidHPSync", new CustomMessagingManager.HandleNamedMessageDelegate(LidBehaviorCustom.SetReceivedHPClient));
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesLidBrokenSync", new CustomMessagingManager.HandleNamedMessageDelegate(LidBehaviorCustom.SetLidBrokenSync));
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesLidLoginSync", new CustomMessagingManager.HandleNamedMessageDelegate(LidBehaviorCustom.PostLoginSyncClient));
+                RandomizerModBase.mls.LogInfo("Registering soccerball handler: " + "ClientReceivesSoccerStats");
+                NetworkManager.Singleton.CustomMessagingManager.RegisterNamedMessageHandler("Tibnan.lcrandomizermod_" + "ClientReceivesSoccerStats", new CustomMessagingManager.HandleNamedMessageDelegate(SoccerBallPropPatch.ClientSetSoccerStats));
 
                 StartOfRoundPatch.ResetPlayers();
 
@@ -436,5 +456,61 @@ namespace LCRandomizerMod.Patches
         {
             return !RandomizerValues.blockDrop;
         }
+
+        [HarmonyPatch(nameof(PlayerControllerB.DamagePlayer))]
+        [HarmonyPrefix]
+        public static bool NegateDamage(PlayerControllerB __instance)
+        {
+            if (RandomizerValues.guardedByLid)
+            {
+                var enemies = GetEnemiesAtPlayerPosition(__instance);
+
+                foreach (EnemyAI enemy in enemies)
+                {
+                    float distance = Vector3.Distance(__instance.transform.position, enemy.transform.position);
+
+                    Vector3 playerToEnemy = enemy.transform.position - __instance.transform.position;
+                    Vector3 playerForward = __instance.transform.forward;
+
+                    float angle = Vector3.Angle(playerForward, playerToEnemy);
+                    if (distance < 10f && angle < 31f)
+                    {
+                        RandomizerModBase.mls.LogWarning(String.Format("{0} guarded by lid, enemy distance: {1}, angle towards enemy: {2}, deflecting dmg..", __instance.playerUsername, distance, angle));
+
+                        GameObject.FindObjectsOfType<LidBehaviorCustom>().FirstOrDefault(x => x.PreviousGuardedPlayer == GameNetworkManager.Instance.localPlayerController).NegateDamage();
+                        return false;
+                    }
+                }
+                RandomizerModBase.mls.LogWarning("No enemies around player, or conditions not met, not deflecting dmg");
+                return true;
+            }
+            else
+            {
+                RandomizerModBase.mls.LogWarning("Player was not guarded by lid. Not deflecting dmg");
+                return true;
+            }
+        }
+
+        private static List<EnemyAI> GetEnemiesAtPlayerPosition(PlayerControllerB player)
+        {
+            Collider[] colliders = Physics.OverlapSphere(player.transform.position, 20f, 2621448, QueryTriggerInteraction.Collide);
+            List<EnemyAI> enemies = new List<EnemyAI>();
+            if (colliders.Length > 0)
+            {
+                foreach (Collider collider in colliders)
+                {
+                    EnemyAI enemyAI = collider.gameObject.GetComponentInParent<EnemyAI>();
+                    if (enemyAI != null && !enemyAI.isEnemyDead)
+                    {
+                        if (!enemies.Contains(enemyAI))
+                        {
+                            enemies.Add(enemyAI);
+                        }
+                    }
+                }
+                RandomizerModBase.mls.LogError("ENEMY COUNT: " + enemies.Count);
+            }
+            return enemies;
+        } 
     }
 }

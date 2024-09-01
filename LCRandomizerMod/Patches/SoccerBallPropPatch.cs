@@ -15,7 +15,7 @@ namespace LCRandomizerMod.Patches
             if (NetworkManager.Singleton.IsServer)
             {
                 float hitUpwardAmount = Convert.ToSingle(new System.Random().Next(1, 35) / 10);
-                float scale = Convert.ToSingle(new System.Random().Next(1, 71) / 10);
+                float scale = Convert.ToSingle(new System.Random().Next(50, 701) / 100);
 
                 __instance.transform.localScale = new Vector3(scale, scale, scale);
                 __instance.ballHitUpwardAmount = hitUpwardAmount;

@@ -33,7 +33,7 @@ namespace LCRandomizerMod.Patches
             RandomizerModBase.mls.LogWarning("entrance id: " + __instance.entranceId);
             RandomizerModBase.mls.LogWarning("player in factory? " + GameNetworkManager.Instance.localPlayerController.isInsideFactory);
 
-            if (__instance.entranceId != 0 && GameNetworkManager.Instance.localPlayerController.isInsideFactory && new System.Random().Next(1, 2) == 1)
+            if (__instance.entranceId != 0 && GameNetworkManager.Instance.localPlayerController.isInsideFactory && new System.Random().Next(1, 6) == 1)
             {
                 FireExitBehaviour[] behaviours = Enum.GetValues(typeof(FireExitBehaviour)) as FireExitBehaviour[];
 

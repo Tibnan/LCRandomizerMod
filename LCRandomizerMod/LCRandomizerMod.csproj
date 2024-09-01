@@ -95,9 +95,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClockDataContainer.cs" />
     <Compile Include="CrewInfo.cs" />
     <Compile Include="CustomUI.cs" />
+    <Compile Include="LidBehaviorCustom.cs" />
     <Compile Include="ICustomValue.cs" />
+    <Compile Include="LidSaveData.cs" />
     <Compile Include="PandorasBoxItem.cs" />
     <Compile Include="Patches\BaboonBirdAIPatch.cs" />
     <Compile Include="Patches\BlobAIPatch.cs" />

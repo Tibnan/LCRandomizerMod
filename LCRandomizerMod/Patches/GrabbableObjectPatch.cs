@@ -1,13 +1,22 @@
 ﻿using HarmonyLib;
 using UnityEngine;
 using Unity.Netcode;
-using System;
 
 namespace LCRandomizerMod.Patches
 {
     [HarmonyPatch(typeof(GrabbableObject))]
     internal class GrabbableObjectPatch
     {
+        [HarmonyPatch(nameof(GrabbableObject.Start))]
+        [HarmonyPostfix]
+        public static void FilterObjects(GrabbableObject __instance)
+        {
+            if (__instance.name.Contains("GarbageLid") && __instance.gameObject.GetComponent<LidBehaviorCustom>() == null)
+            {
+                __instance.gameObject.AddComponent<LidBehaviorCustom>();
+            }
+        }
+
         [HarmonyPatch(nameof(GrabbableObject.SetScrapValue))]
         [HarmonyPrefix]
         public static bool SetScrapValue(GrabbableObject __instance, int setValueTo)
