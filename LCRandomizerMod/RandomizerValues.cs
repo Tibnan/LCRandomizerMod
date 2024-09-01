@@ -1,5 +1,4 @@
-﻿using Unity.Netcode;
-using LCRandomizerMod.Patches;
+﻿using LCRandomizerMod.Patches;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,6 +11,7 @@ namespace LCRandomizerMod
         //Mod specific
 
         public static bool isClientSynced = false;
+        public static bool startupInitializing;
         public static List<string> keysToLoad = new List<string>();
         public static Dictionary<string, AudioClip> audioDict = new Dictionary<string, AudioClip>();
         public static bool audioDictLoaded = false;
@@ -296,6 +296,8 @@ namespace LCRandomizerMod
         //MineshaftElevatorControllerPatch
 
         public static bool elevatorMalfunctioned = false;
+        public static Coroutine waitJumpCoroutine = null;
+        public static Coroutine waitJumpLandCoroutine = null;
 
         //MineshaftElevatorControllerPatch
 
@@ -304,6 +306,14 @@ namespace LCRandomizerMod
         public static Dictionary<ulong, int> clockSecondsToAdd = new Dictionary<ulong, int>();
 
         //ClockPropPatch
+
+        //LidBehaviorCustom
+
+        public static bool guardedByLid = false;
+
+        public static Dictionary<ulong, LidSaveData> customGLids = new Dictionary<ulong, LidSaveData>();
+
+        //LidBehaviorCustom
 
         public static void ReleaseResources(bool deleteAll)
         {
@@ -347,6 +357,7 @@ namespace LCRandomizerMod
                 coroutineStorage.Clear();
                 teleporterCooldowns.Clear();
                 playerLightsDict.Clear();
+                customGLids.Clear();
                 blockAnims = false;
                 blockDespawn = false;
                 blockDrop = false;
@@ -356,6 +367,7 @@ namespace LCRandomizerMod
                 randomizedCar = false;
                 randomCarProperties = null;
                 elevatorMalfunctioned = false;
+                guardedByLid = false;
             }
         }
     }

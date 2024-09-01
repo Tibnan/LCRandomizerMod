@@ -45,9 +45,9 @@ namespace LCRandomizerMod
             this.ownerPlayer = GameNetworkManager.Instance.localPlayerController;
         }
 
-        public static void BroadcastMessage(string msg, int fadeDuration = 0)
+        public static void BroadcastMessage(string msg, int fadeDuration = 0, bool includeServer = true)
         {
-            if (GameNetworkManager.Instance.localPlayerController.IsServer)
+            if (NetworkManager.Singleton.IsServer)
             {
                 char[] chars = msg.ToCharArray();
 
@@ -63,8 +63,40 @@ namespace LCRandomizerMod
 
                 NetworkManager.Singleton.CustomMessagingManager.SendNamedMessageToAll("Tibnan.lcrandomizermod_" + "ClientReceivesBroadcastMsg", fastBufferWriter, NetworkDelivery.Reliable);
 
-                CustomUI playerUI = GameNetworkManager.Instance.localPlayerController.gameObject.GetComponent<CustomUI>();
-                playerUI.ShowLocalMessage(msg, fadeDuration);
+                if (includeServer)
+                {
+                    CustomUI playerUI = GameNetworkManager.Instance.localPlayerController.gameObject.GetComponent<CustomUI>();
+                    playerUI.ShowLocalMessage(msg, fadeDuration);
+                }
+            }
+        }
+
+        public static void BroadcastMessage(string msg, int fadeDuration = 0, bool includeServer = true, params ulong[] clients)
+        {
+            if (NetworkManager.Singleton.IsServer)
+            {
+                char[] chars = msg.ToCharArray();
+
+                FastBufferWriter fastBufferWriter = new FastBufferWriter(sizeof(int) + sizeof(char) * chars.Length + sizeof(int), Unity.Collections.Allocator.Temp, -1);
+                fastBufferWriter.WriteValueSafe<int>(chars.Length);
+
+                for (int i = 0; i < chars.Length; i++)
+                {
+                    fastBufferWriter.WriteValueSafe<char>(chars[i]);
+                }
+
+                fastBufferWriter.WriteValueSafe<int>(fadeDuration);
+
+                foreach (ulong client in clients)
+                {
+                    NetworkManager.Singleton.CustomMessagingManager.SendNamedMessage("Tibnan.lcrandomizermod_" + "ClientReceivesBroadcastMsg", client, fastBufferWriter, NetworkDelivery.Reliable);
+                }
+
+                if (includeServer)
+                {
+                    CustomUI playerUI = GameNetworkManager.Instance.localPlayerController.gameObject.GetComponent<CustomUI>();
+                    playerUI.ShowLocalMessage(msg, fadeDuration);
+                }
             }
         }
 
@@ -146,8 +178,9 @@ namespace LCRandomizerMod
 
         private IEnumerator FadeTextOutCoroutine(int duration)
         {
-            yield return new WaitForSeconds(duration);
             float alpha = 1f;
+            this.canvasText.canvasRenderer.SetAlpha(alpha);
+            yield return new WaitForSeconds(duration);
             while(alpha > 0f)
             {
                 alpha -= 0.01f;
